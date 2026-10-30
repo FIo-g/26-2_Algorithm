@@ -1,3 +1,5 @@
+import pickle
+
 import pytest
 
 from routing.graph import Graph, haversine_m, largest_scc, load_graph, save_graph
@@ -62,6 +64,21 @@ def test_subgraph_preserves_osm_ids():
     g = grid_graph(3, 3)
     sub = g.subgraph([4, 5, 7, 8])
     assert sub.n == 4 and sub.osm_ids == [g.osm_ids[i] for i in (4, 5, 7, 8)]
+
+
+class _F(float):  # stands in for numpy.float64 coming from OSMnx
+    pass
+
+
+class _I(int):  # stands in for numpy.int64
+    pass
+
+
+def test_graph_stores_only_builtin_types():
+    g = Graph(coords=[(_F(37.5), _F(127.0)), (_F(37.5), _F(127.001))], osm_ids=[_I(1), _I(2)],
+              tail=[_I(0)], head=[_I(1)], length=[_F(88.0)], time=[_F(8.8)], hwy=["primary"])
+    assert type(g.time[0]) is float and type(g.coords[0][0]) is float and type(g.osm_ids[0]) is int
+    assert __name__.encode() not in pickle.dumps(g)  # loading must not need the source types' module
 
 
 def test_save_load_roundtrip(tmp_path):

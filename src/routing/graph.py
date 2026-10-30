@@ -53,6 +53,16 @@ class Graph:
     _index: dict[int, int] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
+        # Normalize to built-in types: numpy scalars from OSMnx would make pickles need numpy
+        # (the SUMO PC has none) and slow down the pure-Python search loops.
+        self.coords = [(float(lat), float(lon)) for lat, lon in self.coords]
+        self.osm_ids = [int(x) for x in self.osm_ids]
+        self.tail = [int(x) for x in self.tail]
+        self.head = [int(x) for x in self.head]
+        self.length = [float(x) for x in self.length]
+        self.time = [float(x) for x in self.time]
+        self.hwy = [str(x) for x in self.hwy]
+        self.name = str(self.name)
         n, m = len(self.coords), len(self.tail)
         if len(self.osm_ids) != n:
             raise ValueError("coords and osm_ids must have the same length")
@@ -107,7 +117,7 @@ class Graph:
         return min(range(self.n), key=lambda i: haversine_m(self.coords[i], (lat, lon)))
 
     def reweighted(self, times: Sequence[float]) -> Graph:
-        """Same topology with new edge times. Input lists are shared, not copied."""
+        """Same topology with new edge times (lists are copied while normalizing types)."""
         if len(times) != self.m:
             raise ValueError(f"expected {self.m} times, got {len(times)}")
         return Graph(self.coords, self.osm_ids, self.tail, self.head, self.length,

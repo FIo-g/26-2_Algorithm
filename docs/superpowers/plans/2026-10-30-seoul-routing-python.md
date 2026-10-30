@@ -146,7 +146,7 @@ results/, figures/ (커밋: README·발표용)
   - `EARTH_RADIUS_M = 6_371_009.0`
   - `haversine_m(a: tuple[float, float], b: tuple[float, float]) -> float`: 인자는 `(lat, lon)`
   - `@dataclass class Graph`의 필드: `coords: list[tuple[float, float]]`, `osm_ids: list[int]`, `tail: list[int]`, `head: list[int]`, `length: list[float]`(m), `time: list[float]`(s), `hwy: list[str]`, `name: str = ""`
-    - `__post_init__`에서 `fwd`, `bwd`, osm_id → index 사전, `vmax`를 **한 번** 만든다.
+    - `__post_init__`에서 모든 값을 내장 타입(`float`, `int`, `str`)으로 바꾼 뒤 `fwd`, `bwd`, osm_id → index 사전, `vmax`를 **한 번** 만든다. OSMnx의 numpy 실수형이 pickle에 들어가면 numpy가 없는 윈도우 PC에서 그래프 파일을 읽지 못하기 때문이다(최종 리뷰에서 발견).
     - `time`이 음수·NaN이거나 (u, v)가 중복되면 `ValueError`
     - `n`, `m` (property), `vmax` (속성, m/s)
     - `index_of(osm_id) -> int`, `weight(u, v) -> float | None`, `nearest(lat, lon) -> int`
@@ -239,7 +239,7 @@ def test_save_load_roundtrip(tmp_path):
 
 - [ ] **Step 3: 실패 확인**: `pytest tests/test_graph.py -v` → `ImportError`(FAIL)
 - [ ] **Step 4: `graph.py`, `synthetic.py` 구현**
-- [ ] **Step 5: 통과 확인**: `pytest tests/test_graph.py -v` → 12 passed
+- [ ] **Step 5: 통과 확인**: `pytest tests/test_graph.py -v` → 13 passed (리뷰 후 `test_graph_stores_only_builtin_types` 추가)
 - [ ] **Step 6: 커밋, 병합, 알림**: 레포의 첫 커밋이다. spec, 이 계획, `CLAUDE.md`, `docs/team/`을 함께 넣는다. 병합 후 팀에 "Task 1 병합"을 알린다.
 
 ```bash
