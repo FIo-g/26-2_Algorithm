@@ -81,6 +81,7 @@
   - `from_edge_list`, `random_geo_graph`, `from_osmnx`는 중복이 있으면 시간이 가장 작은 것만 남긴다(spec 4-1 "평행 간선은 가장 빠른 것만").
 - **vmax:** 그래프에서 계산한다(`max(length / time)`, m/s). 생성할 때 **한 번만** 계산해 속성으로 저장하고, 질의마다 다시 계산하지 않는다.
 - **그래프는 불변:** 간선 시간을 바꾸려면 `g.reweighted(times)`로 새 그래프를 만든다. `time`·`length`는 유한한 0 이상 값만 허용한다(통행 불가 도로를 inf로 표현하지 않는다).
+- **질의 상태는 dict·set으로:** 점대점 탐색(Dijkstra, A*, 양방향, ALT)은 거리·부모·확정 여부를 정점 수 크기의 배열로 만들지 않는다. 질의마다 O(n) 배열을 만들면 짧은 질의(재탐색) 시간이 그래프 크기에 좌우되어 가속비가 왜곡된다(최종 리뷰: 5만 정점에서 양방향이 Dijkstra보다 느리게 측정됨). `sssp`(일대다)는 배열을 쓴다.
 - **정확 알고리즘 시그니처:** `name(g, s, t, ..., *, stats=None) -> tuple[float, list[int], int]`. 반환값은 (거리, 경로, 확정 노드 수)다.
   - 도달할 수 없으면 `(math.inf, [], settled)`
   - `s == t`이면 `(0.0, [s], 0)`
@@ -345,7 +346,7 @@ caffeinate -i nohup .venv/bin/python -m routing.speeds.collect --interval 300 --
     - `relaxed`: 확정된 정점에서 검사한 간선 수
     - Bidirectional은 양쪽을 하나의 Stats에 합산한다.
     - `trace`가 리스트이면 확정되는 정점을 순서대로 append한다(그림 (f)용).
-  - `class CountingHeap(stats)`: `push(key, v)`, `pop() -> (key, v)`, `drop_stale(done: list[bool])`(top의 오래된 항목을 pop하고 pops에 셈), `top_key() -> float`(비면 `inf`), `__len__`
+  - `class CountingHeap(stats)`: `push(key, v)`, `pop() -> (key, v)`, `drop_stale(done: set[int])`(top의 오래된 항목을 pop하고 pops에 셈), `top_key() -> float`(비면 `inf`), `__len__`
   - `dijkstra(g, s, t, *, stats=None) -> tuple[float, list[int], int]`: t를 확정하면 멈춘다. `stats=None`이면 내부에서 버릴 Stats를 만든다(측정 오버헤드가 모든 알고리즘에 똑같이 들도록). `shortest_path = dijkstra` (spec 이름)
   - `sssp(adj, s) -> list[float]`: 일대다, 카운터 없음 (ALT·midpoint용)
 
@@ -518,6 +519,7 @@ nohup python scripts/extract_graph.py seoul --version 1 > data/graphs/seoul.log 
 
 통과 기준:
 - `.meta.json` 3개가 생긴다.
+- 모든 간선에서 `length >= haversine(끝점) * (1 - 1e-9)`인지 확인해 meta에 위반 수를 기록한다(0이어야 함). A* 하한과 재열기 없는 탐색이 이 전제에 기댄다.
 - 강남구 예상치(검토 시제품 실측): SCC 정리 후 n ≈ 3,144, m ≈ 8,420, vmax ≈ 80 km/h, 약 87초.
 - **maxspeed 결측 ≈ 94%**. 자유류 속도 대부분이 도로 등급 평균으로 채워진 값이라는 뜻이므로, 데이터 슬라이드와 README에 반드시 밝힌다.
 - `.pkl`과 `.graphml`은 팀 공유 드라이브에 올린다. 팀원은 다시 다운로드하지 않는다(spec 5장).
@@ -650,7 +652,7 @@ def test_bidirectional_one_way_uses_bwd():
     - `prep_s`는 선택과 SSSP를 모두 포함한 `perf_counter` 시간
   - `alt_heuristic(lm, v, t) -> float`: `H_SCALE * max(0, max_L max(d_from[L][t] - d_from[L][v], d_to[L][v] - d_to[L][t]))`
     - 피연산자 중 하나라도 `inf`인 항은 계산하지 않고 건너뛴다(Review Focus 2).
-  - `alt(g, s, t, lm, *, stats=None) -> tuple[float, list[int], int]`: `lm`은 기준 그래프에서 만들고, `g`는 혼잡 그래프여도 된다(재전처리 없음).
+  - `alt(g, s, t, lm, *, stats=None) -> tuple[float, list[int], int]`: 상태는 dict·set으로 둔다(Global Constraints, `tests/test_bench.py::test_short_query_cost_does_not_scale_with_graph`에 `alt`도 추가). `lm`은 기준 그래프에서 만들고, `g`는 혼잡 그래프여도 된다(재전처리 없음).
   - 테스트용 랜드마크 캐시: `(g, lm)` 쌍을 저장하고 `cached_g is g`일 때만 재사용한다. `id(g)`를 키로 쓰지 않는다(id가 재사용되어 엉뚱한 랜드마크를 받음).
 
 - [ ] **Step 1: 실패하는 테스트 작성**

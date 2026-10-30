@@ -1,7 +1,7 @@
 """Figures for the video and README (matplotlib; not a core module).
 
 Uses matplotlib.figure.Figure directly (no pyplot), so no GUI backend is needed.
-CLI: python scripts/make_figures.py {f|all} [--graph PATH] [--out-dir DIR]
+CLI: python scripts/make_figures.py NAME [NAME ...] [--graph PATH] [--out-dir DIR]   (NAME: f, ..., all)
 """
 from __future__ import annotations
 
@@ -71,9 +71,9 @@ FIGURES = {"f": _make_f}  # Task 13/14/16/18 add "a", "b", "c", "d", "g"
 
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="Make project figures.")
-    p.add_argument("which", choices=[*FIGURES, "all"])
+    p.add_argument("which", nargs="+", choices=[*FIGURES, "all"])
     p.add_argument("--graph", default="data/graphs/gangnam_graph_v1.pkl")
     p.add_argument("--out-dir", default="figures")
     args = p.parse_args(argv)
-    for name in (FIGURES if args.which == "all" else [args.which]):
+    for name in (list(FIGURES) if "all" in args.which else args.which):
         print(FIGURES[name](args))

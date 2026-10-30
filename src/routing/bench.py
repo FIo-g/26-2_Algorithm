@@ -77,7 +77,8 @@ def _timed(algo: Algo, g: Graph, s: int, t: int) -> tuple[float, tuple, Stats]:
 def time_all(g: Graph, queries, algos: dict[str, Algo], *, graph: str, scenario: str = "free",
              kind: str = "full", warmup: int = 5, repeats: int = 3) -> list[Row]:
     """Time every query x algorithm. Warm-up runs (first `warmup` queries) are extra and discarded."""
-    for q in list(queries)[:warmup]:
+    queries = list(queries)  # may be a generator; it is iterated twice
+    for q in queries[:warmup]:
         for algo in algos.values():
             algo(g, q.s, q.t)
     rows: list[Row] = []

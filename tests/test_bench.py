@@ -1,11 +1,14 @@
 import os
 import subprocess
 import sys
+import tracemalloc
 from pathlib import Path
 
 import pytest
 
+from routing.astar import astar
 from routing.bench import ExactnessError, Row, standard_algos, summarize, time_all, write_csv
+from routing.bidirectional import bidirectional_dijkstra
 from routing.dijkstra import dijkstra
 from routing.queries import make_queries
 from routing.synthetic import grid_graph
@@ -68,6 +71,29 @@ def test_exactness_error_is_an_exception():
     assert issubclass(ExactnessError, Exception)
 
 
+def test_time_all_accepts_a_generator():
+    g = grid_graph(6, 6)
+    qs = make_queries(g, per_bin=5, bins=BIN)
+    assert len(time_all(g, (q for q in qs), {"dijkstra": dijkstra}, graph="grid")) == len(qs)
+
+
+@pytest.fixture(scope="module")
+def big_grid():
+    return grid_graph(150, 150)  # 22,500 vertices: one per-vertex list is ~180 KB
+
+
+@pytest.mark.parametrize("algo", [dijkstra, astar, bidirectional_dijkstra], ids=["dijkstra", "astar", "bidir"])
+def test_short_query_cost_does_not_scale_with_graph(big_grid, algo):
+    # Per-query arrays of size n would dominate short (reroute) query times and skew speedups.
+    tracemalloc.start()
+    try:
+        algo(big_grid, 0, 1)
+        peak = tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+    assert peak < 50_000
+
+
 # --- Task 22: scripts/run_all.sh (dry-run and guards only; the real run is on 11/5) ---
 REPO = Path(__file__).resolve().parents[1]
 
@@ -104,6 +130,12 @@ def test_run_all_stops_when_collector_runs(tmp_path):
         fake.wait()
     assert r.returncode == 2 and "collector" in r.stderr
     assert _run_all(tmp_path, "--dry-run", COLLECTOR_PATTERN=marker).returncode == 0  # gone -> runs
+
+
+@pytest.mark.parametrize("first", ["**ADOPT**", "adopt", "# ADOPT", "maybe", ""])
+def test_run_all_rejects_malformed_decision(tmp_path, first):
+    r = _run_all(tmp_path, "--dry-run", "--allow-collector", decision=first + "\n")
+    assert r.returncode != 0 and "match_decision" in r.stderr  # never silently drop the real-speed run
 
 
 def test_run_all_rejects_unknown_option(tmp_path):

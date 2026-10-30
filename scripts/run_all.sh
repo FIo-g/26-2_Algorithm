@@ -29,10 +29,17 @@ if [[ $collector_running == yes && $allow_collector -eq 0 ]]; then
 fi
 
 # Real speeds are added only when Task 20 adopted them, and only for gss (collection covers 3 districts).
+# The first line must be exactly ADOPT or REJECT; anything else (e.g. **ADOPT**) stops the run
+# instead of silently dropping the real-speed scenarios.
 real=""
 decision="$RESULTS_DIR/match_decision.md"
-if [[ -f "$decision" && "$(head -n 1 "$decision" | tr -d '[:space:]')" == "ADOPT" ]]; then
-  real=" --real"
+if [[ -f "$decision" ]]; then
+  first="$(head -n 1 "$decision" | tr -d '[:space:]')"
+  case "$first" in
+    ADOPT) real=" --real" ;;
+    REJECT) ;;
+    *) echo "first line of $decision must be exactly ADOPT or REJECT (got '$first')" >&2; exit 65 ;;
+  esac
 fi
 
 cmds=(

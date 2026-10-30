@@ -1,5 +1,6 @@
 import pytest
 
+from routing import figures
 from routing.bench import standard_algos
 from routing.figures import collect_trace, fig_f, main
 from routing.graph import save_graph
@@ -21,6 +22,14 @@ def test_fig_f_writes_png(tmp_path):
     algos, _ = standard_algos(g, ks=())
     fig_f(g, 0, 99, algos, tmp_path / "f.png")
     assert (tmp_path / "f.png").read_bytes()[:8] == PNG
+
+
+def test_make_figures_accepts_several_names(monkeypatch):  # plan Task 16 runs `make_figures.py c d`
+    calls = []
+    monkeypatch.setitem(figures.FIGURES, "x", lambda args: calls.append("x") or "x.png")
+    monkeypatch.setitem(figures.FIGURES, "y", lambda args: calls.append("y") or "y.png")
+    main(["x", "y"])
+    assert calls == ["x", "y"]
 
 
 def test_make_figures_f(tmp_path):

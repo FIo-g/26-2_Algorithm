@@ -34,10 +34,10 @@ class CountingHeap:
         self._stats.pops += 1
         return heapq.heappop(self._h)
 
-    def drop_stale(self, done: list[bool]) -> None:
+    def drop_stale(self, done: set[int]) -> None:
         """Pop entries of settled vertices off the top, so top_key() is a fresh key."""
         h = self._h
-        while h and done[h[0][1]]:
+        while h and h[0][1] in done:
             heapq.heappop(h)
             self._stats.pops += 1
 
