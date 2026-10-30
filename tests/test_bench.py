@@ -1,3 +1,8 @@
+import os
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 
 from routing.bench import ExactnessError, Row, standard_algos, summarize, time_all, write_csv
@@ -61,3 +66,45 @@ def test_write_csv_accepts_dicts_and_rows(tmp_path):
 
 def test_exactness_error_is_an_exception():
     assert issubclass(ExactnessError, Exception)
+
+
+# --- Task 22: scripts/run_all.sh (dry-run and guards only; the real run is on 11/5) ---
+REPO = Path(__file__).resolve().parents[1]
+
+
+def _run_all(tmp_path, *args, decision=None, **env):
+    if decision is not None:
+        (tmp_path / "match_decision.md").write_text(decision)
+    return subprocess.run(["bash", "scripts/run_all.sh", *args], cwd=REPO, capture_output=True, text=True,
+                          env={**os.environ, "RESULTS_DIR": str(tmp_path), **env})
+
+
+def test_run_all_dry_run_real_only_for_gss(tmp_path):
+    out = _run_all(tmp_path, "--dry-run", "--allow-collector", decision="ADOPT\ncoverage 78%\n").stdout
+    assert "run_e3.py gss --real" in out and "run_e3.py seoul --real" not in out
+
+
+def test_run_all_dry_run_order_without_adoption(tmp_path):
+    r = _run_all(tmp_path, "--dry-run", "--allow-collector", decision="REJECT\n")
+    out = r.stdout
+    assert r.returncode == 0 and "--real" not in out
+    assert (out.index("tests/test_correctness.py") < out.index("check_exact.py") < out.index("run_e1.py")
+            < out.index("run_e2.py") < out.index("run_e3.py") < out.index("make_figures.py all"))
+    assert not (tmp_path / "machine.txt").exists()  # dry run writes nothing
+
+
+def test_run_all_stops_when_collector_runs(tmp_path):
+    marker = f"fake-collector-{os.getpid()}"
+    # stands in for the speed collector; the marker stays in argv (sh -c would exec sleep and drop it)
+    fake = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", marker])
+    try:
+        r = _run_all(tmp_path, "--dry-run", COLLECTOR_PATTERN=marker)
+    finally:
+        fake.kill()
+        fake.wait()
+    assert r.returncode == 2 and "collector" in r.stderr
+    assert _run_all(tmp_path, "--dry-run", COLLECTOR_PATTERN=marker).returncode == 0  # gone -> runs
+
+
+def test_run_all_rejects_unknown_option(tmp_path):
+    assert _run_all(tmp_path, "--nope").returncode == 64
