@@ -15,3 +15,4 @@
 | 2026-10-30 | 김태형 | 17 (그림 함수까지) | Claude Code (Claude Opus 5.5) | `figures.py`(collect_trace, fig_f, CLI), `scripts/make_figures.py`, `tests/test_figures.py` 구현 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 22 (스크립트·dry-run까지) | Claude Code (Claude Opus 5.5) | `scripts/run_all.sh`(일괄 실행, 수집기 감지, ADOPT 시 gss만 --real), dry-run 테스트 구현 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 3·6·7·11·17·22 (리뷰 수정) | Claude Code (Claude Opus 5.5) | 최종 리뷰 반영: 질의 상태 dict·set 전환(측정 왜곡 제거), time_all generator, run_all 결정 파일 엄격 검사, make_figures 여러 이름 | (작성자 기입) |
+| 2026-10-30 | 정의종 (본인 검토 대기) | 8 | OpenAI Codex (GPT-6.1) | ALT·랜드마크·테스트 초안 및 자동 검증, 최신 팀 Dijkstra 연동, dict/set 질의 상태·근거리 메모리 회귀 | (본인이 손 추적·코드 확인 후 직접 기입) |
