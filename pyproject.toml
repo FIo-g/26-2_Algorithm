@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seoul-routing"
+version = "0.1.0"
+description = "Shortest-path algorithms on the Seoul road network (DCCS309 Team C2)"
+requires-python = ">=3.10"
+dependencies = [
+    "osmnx>=2.1,<3",
+    "networkx>=3.4",
+    "matplotlib>=3.9",
+    "requests>=2.32",
+    "pytest>=8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
