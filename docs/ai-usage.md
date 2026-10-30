@@ -8,3 +8,4 @@
 | 2026-10-30 | 김태형 | 1 | Claude Code (Claude Opus 5.5) | `graph.py`, `synthetic.py`, `tests/test_graph.py`, 프로젝트 설정 구현 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 1 (리뷰 수정) | Claude Code (Claude Opus 5.5) | 최종 리뷰의 numpy 타입 문제와 사소한 항목(입력 검증, repr, subgraph·from_edge_list 검사) 수정 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 3 | Claude Code (Claude Opus 5.5) | `heap.py`(Stats, CountingHeap), `dijkstra.py`(dijkstra, sssp), `tests/test_dijkstra.py` 구현 | (작성자 기입) |
+| 2026-10-30 | 김태형 | 6 | Claude Code (Claude Opus 5.5) | `astar.py`(A*, Weighted A*, astar_heuristic), `tests/helpers.py`, `tests/test_astar.py` 구현 | (작성자 기입) |
