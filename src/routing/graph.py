@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import math
 import pickle
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Sequence
 
@@ -39,6 +39,12 @@ def _max_speed(length: Sequence[float], time: Sequence[float]) -> float:
 # eq=False: graphs compare and hash by identity (they are large; compare fields explicitly).
 @dataclass(eq=False)
 class Graph:
+    """Directed road graph. Treat it as immutable.
+
+    fwd, bwd and vmax are built from the edge lists once. Editing a list in place
+    (e.g. g.time[e] *= 2) leaves them stale; build a new graph with reweighted().
+    """
+
     coords: list[tuple[float, float]]  # (lat, lon)
     osm_ids: list[int]
     tail: list[int]
@@ -71,14 +77,19 @@ class Graph:
         self._index = {osm: i for i, osm in enumerate(self.osm_ids)}
         if len(self._index) != n:
             raise ValueError("osm_ids must be unique")
+        for lat, lon in self.coords:
+            if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+                raise ValueError(f"coordinate ({lat}, {lon}) is not (lat, lon); swapped?")
         fwd: list[list[tuple[int, float]]] = [[] for _ in range(n)]
         bwd: list[list[tuple[int, float]]] = [[] for _ in range(n)]
         seen: set[tuple[int, int]] = set()
-        for u, v, t in zip(self.tail, self.head, self.time):
+        for u, v, t, ln in zip(self.tail, self.head, self.time, self.length):
             if not (0 <= u < n and 0 <= v < n):
                 raise ValueError(f"edge ({u}, {v}) has an endpoint outside 0..{n - 1}")
-            if math.isnan(t) or t < 0:
+            if not math.isfinite(t) or t < 0:
                 raise ValueError(f"edge ({u}, {v}) has invalid time {t}")
+            if not math.isfinite(ln) or ln < 0:
+                raise ValueError(f"edge ({u}, {v}) has invalid length {ln}")
             if (u, v) in seen:
                 raise ValueError(f"duplicate edge ({u}, {v}); keep only the fastest")
             seen.add((u, v))
@@ -89,12 +100,14 @@ class Graph:
 
     def __getstate__(self) -> dict:
         # Pickle only the input fields; derived structures are rebuilt on load.
-        return {k: getattr(self, k) for k in
-                ("coords", "osm_ids", "tail", "head", "length", "time", "hwy", "name")}
+        return {f.name: getattr(self, f.name) for f in fields(self) if f.init}
 
     def __setstate__(self, state: dict) -> None:
         self.__dict__.update(state)
         self.__post_init__()
+
+    def __repr__(self) -> str:
+        return f"Graph(name={self.name!r}, n={self.n}, m={self.m}, vmax={self.vmax:.4g} m/s)"
 
     @property
     def n(self) -> int:
@@ -126,6 +139,8 @@ class Graph:
     def subgraph(self, vertices: Sequence[int]) -> Graph:
         """Induced subgraph on `vertices`, renumbered in the given order."""
         new = {v: i for i, v in enumerate(vertices)}
+        if len(new) != len(vertices) or any(not 0 <= v < self.n for v in new):
+            raise ValueError("vertices must be distinct indices in 0..n-1")
         keep = [e for e in range(self.m) if self.tail[e] in new and self.head[e] in new]
         return Graph(
             coords=[self.coords[v] for v in vertices],

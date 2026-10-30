@@ -80,6 +80,7 @@
   - `Graph`는 중복 (u, v)를 받으면 `ValueError`를 낸다.
   - `from_edge_list`, `random_geo_graph`, `from_osmnx`는 중복이 있으면 시간이 가장 작은 것만 남긴다(spec 4-1 "평행 간선은 가장 빠른 것만").
 - **vmax:** 그래프에서 계산한다(`max(length / time)`, m/s). 생성할 때 **한 번만** 계산해 속성으로 저장하고, 질의마다 다시 계산하지 않는다.
+- **그래프는 불변:** 간선 시간을 바꾸려면 `g.reweighted(times)`로 새 그래프를 만든다. `time`·`length`는 유한한 0 이상 값만 허용한다(통행 불가 도로를 inf로 표현하지 않는다).
 - **정확 알고리즘 시그니처:** `name(g, s, t, ..., *, stats=None) -> tuple[float, list[int], int]`. 반환값은 (거리, 경로, 확정 노드 수)다.
   - 도달할 수 없으면 `(math.inf, [], settled)`
   - `s == t`이면 `(0.0, [s], 0)`
@@ -147,11 +148,16 @@ results/, figures/ (커밋: README·발표용)
   - `haversine_m(a: tuple[float, float], b: tuple[float, float]) -> float`: 인자는 `(lat, lon)`
   - `@dataclass class Graph`의 필드: `coords: list[tuple[float, float]]`, `osm_ids: list[int]`, `tail: list[int]`, `head: list[int]`, `length: list[float]`(m), `time: list[float]`(s), `hwy: list[str]`, `name: str = ""`
     - `__post_init__`에서 모든 값을 내장 타입(`float`, `int`, `str`)으로 바꾼 뒤 `fwd`, `bwd`, osm_id → index 사전, `vmax`를 **한 번** 만든다. OSMnx의 numpy 실수형이 pickle에 들어가면 numpy가 없는 윈도우 PC에서 그래프 파일을 읽지 못하기 때문이다(최종 리뷰에서 발견).
-    - `time`이 음수·NaN이거나 (u, v)가 중복되면 `ValueError`
+    - 다음 경우 `ValueError`
+      - `time`이나 `length`가 음수·NaN·inf
+      - 좌표가 (위도 ±90, 경도 ±180) 범위를 벗어남. (경도, 위도)로 뒤바뀐 좌표를 잡기 위해서다.
+      - (u, v)가 중복됨
     - `n`, `m` (property), `vmax` (속성, m/s)
+    - `repr`은 `Graph(name=..., n=..., m=..., vmax=... m/s)` 한 줄이다.
+    - 불변으로 다룬다. 리스트를 직접 고치면 `fwd`·`bwd`·`vmax`가 옛값으로 남으므로 `reweighted()`로 새 그래프를 만든다.
     - `index_of(osm_id) -> int`, `weight(u, v) -> float | None`, `nearest(lat, lon) -> int`
     - `reweighted(times: Sequence[float]) -> Graph`: 위상은 그대로, 시간만 교체
-    - `subgraph(vertices: Sequence[int]) -> Graph`: 유도 부분 그래프, 번호를 다시 매기고 osm_id 보존
+    - `subgraph(vertices: Sequence[int]) -> Graph`: 유도 부분 그래프, 번호를 다시 매기고 osm_id 보존. 정점이 중복되거나 범위 밖이면 `ValueError`
   - `largest_scc(g) -> list[int]`: 반복형 구현(재귀 금지, 서울 규모)
   - `save_graph(g, path)`, `load_graph(path) -> Graph` (pickle)
   - `vmax` 규칙
@@ -160,8 +166,9 @@ results/, figures/ (커밋: README·발표용)
     - 양수 길이 간선이 없으면 `1.0`
 - Produces (`synthetic.py`). 모든 합성 그래프는 `osm_ids = [1000 + i for i in range(n)]`를 쓴다. 인덱스와 일부러 다르게 두어 둘을 혼동하는 버그가 드러나게 한다.
   - `from_edge_list(n, edges: list[tuple[int, int, float]], coords=None) -> Graph`
-    - 중복 (u, v)는 최솟값만 남긴다.
-    - coords를 주지 않으면 전부 (37.5, 127.0), length = time(1 m/s), hwy = `"residential"`
+    - 중복 (u, v)는 최솟값만 남긴다. hwy = `"residential"`
+    - coords를 주지 않으면 전부 (37.5, 127.0)이고 length = time(1 m/s)
+    - coords를 주면 length = 두 끝점의 haversine이다(A* 하한 유지). coords 개수가 n과 다르면 `ValueError`
   - `grid_graph(rows, cols, *, spacing_m=100.0, speed_mps=10.0, hwy="residential") -> Graph`: 행 우선 번호, 4방향 양방향, length = 좌표 haversine
   - `random_geo_graph(n, extra_edges, *, seed, one_way_ratio=0.3) -> Graph`
     - 약 2 km 상자 안에 무작위 점을 찍는다.
@@ -239,7 +246,7 @@ def test_save_load_roundtrip(tmp_path):
 
 - [ ] **Step 3: 실패 확인**: `pytest tests/test_graph.py -v` → `ImportError`(FAIL)
 - [ ] **Step 4: `graph.py`, `synthetic.py` 구현**
-- [ ] **Step 5: 통과 확인**: `pytest tests/test_graph.py -v` → 13 passed (리뷰 후 `test_graph_stores_only_builtin_types` 추가)
+- [ ] **Step 5: 통과 확인**: `pytest tests/test_graph.py -v` → 22 passed (최종 리뷰 후 내장 타입·검증·repr 테스트 추가)
 - [ ] **Step 6: 커밋, 병합, 알림**: 레포의 첫 커밋이다. spec, 이 계획, `CLAUDE.md`, `docs/team/`을 함께 넣는다. 병합 후 팀에 "Task 1 병합"을 알린다.
 
 ```bash

@@ -33,13 +33,22 @@ def _build(coords, edges: dict[tuple[int, int], tuple[float, float]], hwy: str) 
 
 
 def from_edge_list(n: int, edges: list[tuple[int, int, float]], coords=None) -> Graph:
-    """Hand-made graph from (u, v, time). Duplicate pairs keep the smallest time; length = time (1 m/s)."""
+    """Hand-made graph from (u, v, time). Duplicate pairs keep the smallest time.
+
+    Without coords every vertex sits at ORIGIN and length = time (1 m/s).
+    With coords, length = haversine of the endpoints, so the A* bound stays admissible.
+    """
     best: dict[tuple[int, int], float] = {}
     for u, v, t in edges:
         if (u, v) not in best or t < best[(u, v)]:
             best[(u, v)] = float(t)
-    coords = list(coords) if coords is not None else [ORIGIN] * n
-    return _build(coords, {p: (t, t) for p, t in best.items()}, "residential")
+    if coords is None:
+        return _build([ORIGIN] * n, {p: (t, t) for p, t in best.items()}, "residential")
+    coords = list(coords)
+    if len(coords) != n:
+        raise ValueError(f"expected {n} coords, got {len(coords)}")
+    return _build(coords, {(u, v): (haversine_m(coords[u], coords[v]), t)
+                           for (u, v), t in best.items()}, "residential")
 
 
 def _offset(lat0: float, north_m: float, east_m: float) -> tuple[float, float]:

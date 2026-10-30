@@ -1,3 +1,4 @@
+import math
 import pickle
 
 import pytest
@@ -83,6 +84,58 @@ def test_graph_stores_only_builtin_types():
 
 def test_save_load_roundtrip(tmp_path):
     g = random_geo_graph(20, 30, seed=3)
+    g.name = "rand"
     save_graph(g, tmp_path / "g.pkl")
     h = load_graph(tmp_path / "g.pkl")
-    assert (h.tail, h.time, h.coords) == (g.tail, g.time, g.coords)
+    assert (h.tail, h.time, h.coords, h.name) == (g.tail, g.time, g.coords, g.name)
+    assert (h.fwd, h.bwd, h.vmax) == (g.fwd, g.bwd, g.vmax)  # derived fields rebuilt on load
+    assert h.index_of(g.osm_ids[7]) == 7
+
+
+def _two_vertex(**over):
+    kw = dict(coords=[(37.5, 127.0)] * 2, osm_ids=[1, 2], tail=[0], head=[1],
+              length=[1.0], time=[1.0], hwy=["residential"])
+    kw.update(over)
+    return Graph(**kw)
+
+
+def test_vmax_special_cases():
+    assert _two_vertex(length=[5.0], time=[0.0]).vmax == math.inf  # positive length in 0 s
+    assert from_edge_list(2, [(0, 1, 0.0)]).vmax == 1.0  # no positive-length edge
+
+
+def test_rejects_non_finite_time():
+    with pytest.raises(ValueError):
+        from_edge_list(2, [(0, 1, math.inf)])
+
+
+@pytest.mark.parametrize("bad", [math.nan, -1.0, math.inf])
+def test_rejects_invalid_length(bad):
+    with pytest.raises(ValueError):
+        _two_vertex(length=[bad])
+
+
+def test_rejects_swapped_coords():  # (lon, lat) by mistake: Seoul's lon ~127 is not a latitude
+    with pytest.raises(ValueError):
+        _two_vertex(coords=[(127.0, 37.5)] * 2)
+
+
+def test_repr_is_compact():
+    r = repr(grid_graph(30, 30))
+    assert len(r) < 200 and "n=900" in r
+
+
+def test_subgraph_rejects_bad_vertices():
+    g = grid_graph(3, 3)
+    with pytest.raises(ValueError):
+        g.subgraph([-1])
+    with pytest.raises(ValueError):
+        g.subgraph([0, 0])
+
+
+def test_from_edge_list_checks_coords_and_uses_haversine():
+    coords = [(37.5, 127.0), (37.5, 127.0113)]
+    g = from_edge_list(2, [(0, 1, 10.0)], coords=coords)
+    assert g.length[0] == pytest.approx(haversine_m(*coords))  # keeps A* admissible
+    with pytest.raises(ValueError):
+        from_edge_list(3, [(0, 1, 1.0)], coords=coords)
