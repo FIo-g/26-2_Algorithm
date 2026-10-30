@@ -10,3 +10,4 @@
 | 2026-10-30 | 김태형 | 3 | Claude Code (Claude Opus 5.5) | `heap.py`(Stats, CountingHeap), `dijkstra.py`(dijkstra, sssp), `tests/test_dijkstra.py` 구현 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 6 | Claude Code (Claude Opus 5.5) | `astar.py`(A*, Weighted A*, astar_heuristic), `tests/helpers.py`, `tests/test_astar.py` 구현 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 7 | Claude Code (Claude Opus 5.5) | `bidirectional.py`, `tests/test_bidirectional.py` 구현 | (작성자 기입) |
+| 2026-10-30 | 김태형 | 10 | Claude Code (Claude Opus 5.5) | `queries.py`(거리 구간별 질의 생성·저장·로드), `tests/test_queries.py` 구현 | (작성자 기입) |
