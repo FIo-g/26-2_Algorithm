@@ -209,6 +209,27 @@ class E3IsolatedTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Ambiguous"):
                 module.resolve_graph(folder, "gss")
 
+    def test_server_ratio_csv_keeps_other_graphs(self):
+        script = Path(__file__).resolve().parents[1] / "scripts" / "run_e3.py"
+        spec = importlib.util.spec_from_file_location("e3_cli_test", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        def row(graph):
+            return {"graph": graph, "scenario": "s", "algo": "dijkstra", "median_reroute_s": 1.0, "ratio": 1.0}
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "server_ratio.csv"
+            module.write_server_ratio(path, [row("seoul")], ["seoul"])
+            module.write_server_ratio(path, [row("gss")], ["gss"])
+            self.assertEqual({r["graph"] for r in module._read_server_ratio(path)}, {"seoul", "gss"})
+            with self.assertRaises(ValueError):
+                module.write_server_ratio(path, [row("gss")], ["gss"])
+            module.write_server_ratio(path, [row("gss")], ["gss"], overwrite=True)
+            rows = module._read_server_ratio(path)
+            self.assertEqual(len(rows), 2)
+            self.assertEqual({r["graph"] for r in rows}, {"seoul", "gss"})
+
     def test_cli_check_only_reports_missing_inputs_without_creating_results(self):
         script = Path(__file__).resolve().parents[1] / "scripts" / "run_e3.py"
         spec = importlib.util.spec_from_file_location("e3_cli_test", script)

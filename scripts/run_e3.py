@@ -26,6 +26,7 @@ HEADERS = {
     "wastar": ("graph", "scenario", "eps", "median_s", "speedup_vs_astar", "mean_ratio",
                "max_ratio", "n", "n_ratio", "n_unreachable"),
 }
+SERVER_RATIO_FIELDS = ("graph", "scenario", "algo", "median_reroute_s", "ratio")
 
 
 def resolve_graph(directory, name, version=None):
@@ -59,6 +60,26 @@ def _write_csv(path, rows, fieldnames):
         writer = csv.DictWriter(stream, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(row if isinstance(row, dict) else row._asdict() for row in rows)
+
+
+def _read_server_ratio(path):
+    if not Path(path).exists():
+        return []
+    with Path(path).open(newline="", encoding="utf-8") as stream:
+        return list(csv.DictReader(stream))
+
+
+def write_server_ratio(path, new_rows, graphs, overwrite=False):
+    """Merge this run's rows into the shared server_ratio.csv.
+
+    run_all.sh runs E3 once per graph (only gss may take --real), so rows of
+    graphs outside this run are kept instead of being dropped.
+    """
+    existing = _read_server_ratio(path)
+    if not overwrite and any(row["graph"] in graphs for row in existing):
+        raise ValueError(f"{path} already has rows for {', '.join(graphs)}; use --overwrite")
+    kept = [row for row in existing if row["graph"] not in graphs]
+    _write_csv(path, kept + list(new_rows), SERVER_RATIO_FIELDS)
 
 
 def main(argv=None):
@@ -103,8 +124,10 @@ def main(argv=None):
         destinations = [args.results_dir / f"e3_{name}_{kind}.csv"
                         for name in args.graphs for kind in HEADERS]
         destinations += [args.results_dir / f"e3_{name}_manifest.json" for name in args.graphs]
-        destinations.append(args.results_dir / "server_ratio.csv")
         existing = [str(path) for path in destinations if path.exists()]
+        ratio_path = args.results_dir / "server_ratio.csv"
+        if any(row["graph"] in args.graphs for row in _read_server_ratio(ratio_path)):
+            existing.append(f"{ratio_path} (rows for {', '.join(args.graphs)})")
         if existing and not args.overwrite:
             raise ValueError("Outputs already exist; preserve the frozen results or explicitly use --overwrite: " + ", ".join(existing))
         outputs, manifests, ratios = {}, {}, []
@@ -134,10 +157,10 @@ def main(argv=None):
                 _write_csv(args.results_dir / f"e3_{name}_{kind}.csv", rows, HEADERS[kind])
             (args.results_dir / f"e3_{name}_manifest.json").write_text(
                 json.dumps(manifests[name], indent=2), encoding="utf-8")
-        _write_csv(args.results_dir / "server_ratio.csv", ratios,
-                   ("graph", "scenario", "algo", "median_reroute_s", "ratio"))
+        write_server_ratio(ratio_path, ratios, args.graphs, overwrite=args.overwrite)
         for path in destinations:
             print(path)
+        print(ratio_path)
         return 0
     except (OSError, ValueError, RuntimeError) as exc:
         parser.error(str(exc))
