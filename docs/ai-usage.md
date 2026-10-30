@@ -12,3 +12,4 @@
 | 2026-10-30 | 김태형 | 7 | Claude Code (Claude Opus 5.5) | `bidirectional.py`, `tests/test_bidirectional.py` 구현 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 10 | Claude Code (Claude Opus 5.5) | `queries.py`(거리 구간별 질의 생성·저장·로드), `tests/test_queries.py` 구현 | (작성자 기입) |
 | 2026-10-30 | 김태형 | 11 (ALT 연결 제외) | Claude Code (Claude Opus 5.5) | `bench.py`(standard_algos, time_all, summarize, write_csv), `tests/test_bench.py` 구현 | (작성자 기입) |
+| 2026-10-30 | 김태형 | 17 (그림 함수까지) | Claude Code (Claude Opus 5.5) | `figures.py`(collect_trace, fig_f, CLI), `scripts/make_figures.py`, `tests/test_figures.py` 구현 | (작성자 기입) |

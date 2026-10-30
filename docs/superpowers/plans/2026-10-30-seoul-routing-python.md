@@ -911,7 +911,8 @@ def test_gate_fails_on_wrong_algo(tmp_path):
 ### Task 13: E1 실행 + 그림 (a) — 담당 세현 · 리뷰 태형
 
 **Files:**
-- Create: `src/routing/experiments/__init__.py`, `src/routing/experiments/e1.py`, `scripts/run_e1.py`, `src/routing/figures.py` (`fig_a`), `scripts/make_figures.py`
+- Create: `src/routing/experiments/__init__.py`, `src/routing/experiments/e1.py`, `scripts/run_e1.py`
+- Modify: `src/routing/figures.py`(`fig_a` 추가, `FIGURES` 사전에 `"a"` 등록), `scripts/make_figures.py`. 두 파일은 Task 17이 먼저 만들었다(10/30).
 - Test: `tests/test_experiments.py`
 
 **Interfaces:**
