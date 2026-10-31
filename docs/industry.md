@@ -1,16 +1,16 @@
 # 현업·문헌 조사와 공정성 — Task 19
 
-작성일: 2026-10-30. 이 문서는 원문을 대조한 **조사 초안**이다. Task 19의 담당 확정, 김태형의 원문 리뷰, 우리 E2 실험값 대조는 아직 남아 있다. 아래의 `리뷰 대기`를 실제 확인 없이 이니셜로 바꾸지 않는다.
+작성일: 2026-10-30. 이 문서는 원문을 대조한 **조사 초안**이다. Task 19의 담당 확정과 우리 E2 실험값 대조는 아직 남아 있다. 김태형의 원문 리뷰는 2026-10-31에 마쳤다. 아래의 `리뷰 대기`를 실제 확인 없이 이니셜로 바꾸지 않는다.
 
 ## 1. 누가 무엇을 최적화하는가
 
 | 분야·서비스 | 최적화 대상과 이유 | 공개된 알고리즘·설계 | 원문 근거·위치 | 사람 확인자 |
 |---|---|---|---|---|
-| OSRM 공개 라우팅 엔진 | 도로 경로 질의를 빠르게 처리하고 전처리 방식을 용도에 맞게 선택 | CH와 MLD의 두 파이프라인. 공식 README는 기본 용도로 MLD를 권장하며, 큰 거리 행렬 등을 CH의 예외 용도로 든다. | [공식 README](https://github.com/Project-OSRM/osrm-backend/blob/master/README.md), `Quick Start`: CH/MLD 및 `osrm-partition`, `osrm-customize`, `osrm-contract` 설명 | 김태형: 리뷰 대기 |
-| GraphHopper 공개 Java 엔진 | 전처리·질의 속도·질의별 유연성의 균형 | Speed mode=CH, Hybrid mode=LM, Flexible mode=Dijkstra/A*. 모드마다 지원 기능과 전처리 필요 여부가 다르다. | [공식 routing.md](https://github.com/graphhopper/graphhopper/blob/master/docs/core/routing.md), `Speed mode vs. Hybrid mode vs. Flexible mode` | 김태형: 리뷰 대기 |
-| Bing Maps의 공개된 과거 도입 사례 | 질의 지연과 비용 변경 처리 | 2012년 공식 글은 수정 Dijkstra에서 CRP로 전환했다고 보고한다. CRP 논문은 위상 전처리·가중치 customization·질의를 구분한다. | [Bing 공식 글, 2012-01-05](https://blogs.bing.com/maps/2012/1/Bing-Maps-New-Routing-Engine/), 도입 설명; [CRP 원문](https://www.microsoft.com/en-us/research/wp-content/uploads/2011/05/crp-sea.pdf), PDF pp.1–2, §1 | 김태형: 리뷰 대기 |
-| ALT 연구 | 정확한 최단경로 질의의 탐색량 감소 | 랜드마크 거리와 삼각부등식으로 A* 하한을 만든다. 정·역방향 거리를 사용하여 유향 그래프를 다룬다. | [Goldberg & Harrelson, SODA 2005](https://www.microsoft.com/en-us/research/wp-content/uploads/2005/01/soda05.pdf), PDF pp.1–4, §§1–5 | 김태형: 리뷰 대기 |
-| 도로망 알고리즘 서베이 | 질의 시간뿐 아니라 전처리 시간·공간·비용 변경 유연성 비교 | CH, CRP, ALT 등 서로 다른 접근의 절충을 비교한다. | [Bast 외, arXiv:1504.05140v1](https://arxiv.org/pdf/1504.05140v1), PDF pp.21–26, §3.1, Figure 7, Tables 1–2 | 김태형: 리뷰 대기 |
+| OSRM 공개 라우팅 엔진 | 도로 경로 질의를 빠르게 처리하고 전처리 방식을 용도에 맞게 선택 | CH와 MLD의 두 파이프라인. 공식 README는 기본 용도로 MLD를 권장하며, 큰 거리 행렬 등을 CH의 예외 용도로 든다. | [공식 README](https://github.com/Project-OSRM/osrm-backend/blob/master/README.md), `Quick Start`: CH/MLD 및 `osrm-partition`, `osrm-customize`, `osrm-contract` 설명 | 김태형: 확인완료 (2026-10-31) |
+| GraphHopper 공개 Java 엔진 | 전처리·질의 속도·질의별 유연성의 균형 | Speed mode=CH, Hybrid mode=LM, Flexible mode=Dijkstra/A*. 모드마다 지원 기능과 전처리 필요 여부가 다르다. | [공식 routing.md](https://github.com/graphhopper/graphhopper/blob/master/docs/core/routing.md), `Speed mode vs. Hybrid mode vs. Flexible mode` | 김태형: 확인완료 (2026-10-31) |
+| Bing Maps의 공개된 과거 도입 사례 | 질의 지연과 비용 변경 처리 | 2012년 공식 글은 수정 Dijkstra에서 CRP로 전환했다고 보고한다. CRP 논문은 위상 전처리·가중치 customization·질의를 구분한다. | [Bing 공식 글, 2012-01-05](https://blogs.bing.com/maps/2012/1/Bing-Maps-New-Routing-Engine/), 도입 설명; [CRP 원문](https://www.microsoft.com/en-us/research/wp-content/uploads/2011/05/crp-sea.pdf), PDF pp.1–2, §1 | 김태형: 확인완료 (2026-10-31) |
+| ALT 연구 | 정확한 최단경로 질의의 탐색량 감소 | 랜드마크 거리와 삼각부등식으로 A* 하한을 만든다. 정·역방향 거리를 사용하여 유향 그래프를 다룬다. | [Goldberg & Harrelson, SODA 2005](https://www.microsoft.com/en-us/research/wp-content/uploads/2005/01/soda05.pdf), PDF pp.1–4, §§1–5 | 김태형: 확인완료 (2026-10-31) |
+| 도로망 알고리즘 서베이 | 질의 시간뿐 아니라 전처리 시간·공간·비용 변경 유연성 비교 | CH, CRP, ALT 등 서로 다른 접근의 절충을 비교한다. | [Bast 외, arXiv:1504.05140v1](https://arxiv.org/pdf/1504.05140v1), PDF pp.21–26, §3.1, Figure 7, Tables 1–2 | 김태형: 확인완료 (2026-10-31) |
 
 **해석 범위:** 공개 엔진의 기능과 특정 연도의 기업 도입 사례를 구분한다. Bing의 2012년 기록을 2026년 내부 구현의 증거로 쓰지 않는다. OSRM의 MLD와 CRP 논문의 구현을 같은 코드라고 취급하지 않는다. 쿠팡이츠·배민·Tmap·카카오의 비공개 경로 엔진에 특정 알고리즘을 임의로 붙이지 않는다. 현업 사례는 우리가 고른 비교 축을 설명하는 근거이며, 상용 내비게이션보다 우수하다는 근거가 아니다.
 
@@ -20,10 +20,10 @@
 
 | 문헌·그래프 | 기법·조건 | 원문 값과 계산한 Dijkstra 대비 가속비 | 탐색량 정보 | 우리 값·같은 경향인가 | 사람 확인자 |
 |---|---|---|---|---|---|
-| Goldberg & Harrelson 2005, M11: 6,687,940 vertices / 15,561,631 arcs | 단방향 ALT(`AL`), 랜드마크 16개, 도로망은 optimized planar(P2) 선택, 임의 s–t, **거리** 가중치 | Table 2: Dijkstra **2,113.80 ms**, AL **132.83 ms** → **15.91배** | 같은 표의 efficiency는 D **0.08%**, AL **1.81%**. 이는 `최단경로 정점 수 / 스캔 정점 수`이며 스캔 정점 수 자체가 아니다. | 서울 E2 미측정. 경향 판정 대기 | 김태형: 리뷰 대기 |
-| Bast 외 arXiv 2015, 서유럽: 약 18.0M vertices / 42.5M directed arcs | 양방향 Dijkstra, 이동시간 가중치, 임의 s–t | Table 1: Dijkstra **2,195,080 μs**, Bidir **1,205,660 μs** → **1.82배** | Dijkstra **9,326,696**, Bidir **4,914,804** scanned vertices | 서울 E2 미측정. 경향 판정 대기 | 김태형: 리뷰 대기 |
-| 같은 서베이·같은 표 | CRP, 이동시간 가중치 | **1,650 μs** → **1,330.35배** | **2,766** scanned vertices | 우리 프로젝트의 구현 대상 밖. 절충 설명용 | 김태형: 리뷰 대기 |
-| 같은 서베이·같은 표 | CH, 이동시간 가중치 | **110 μs** → **19,955.27배** | **280** scanned vertices | 우리 프로젝트의 구현 대상 밖. 절충 설명용 | 김태형: 리뷰 대기 |
+| Goldberg & Harrelson 2005, M11: 6,687,940 vertices / 15,561,631 arcs | 단방향 ALT(`AL`), 랜드마크 16개, 도로망은 optimized planar(P2) 선택, 임의 s–t, **거리** 가중치 | Table 2: Dijkstra **2,113.80 ms**, AL **132.83 ms** → **15.91배** | 같은 표의 efficiency는 D **0.08%**, AL **1.81%**. 이는 `최단경로 정점 수 / 스캔 정점 수`이며 스캔 정점 수 자체가 아니다. | 서울 E2 미측정. 경향 판정 대기 | 김태형: 확인완료 (2026-10-31) |
+| Bast 외 arXiv 2015, 서유럽: 약 18.0M vertices / 42.5M directed arcs | 양방향 Dijkstra, 이동시간 가중치, 임의 s–t | Table 1: Dijkstra **2,195,080 μs**, Bidir **1,205,660 μs** → **1.82배** | Dijkstra **9,326,696**, Bidir **4,914,804** scanned vertices | 서울 E2 미측정. 경향 판정 대기 | 김태형: 확인완료 (2026-10-31) |
+| 같은 서베이·같은 표 | CRP, 이동시간 가중치 | **1,650 μs** → **1,330.35배** | **2,766** scanned vertices | 우리 프로젝트의 구현 대상 밖. 절충 설명용 | 김태형: 확인완료 (2026-10-31) |
+| 같은 서베이·같은 표 | CH, 이동시간 가중치 | **110 μs** → **19,955.27배** | **280** scanned vertices | 우리 프로젝트의 구현 대상 밖. 절충 설명용 | 김태형: 확인완료 (2026-10-31) |
 
 원문 위치:
 
@@ -56,7 +56,7 @@
 
 - [x] AI 보조 조사에서 원문 URL을 열어 표의 근거·수치·위치를 대조함(2026-10-30). 이는 학생의 독립 확인이나 사람 리뷰를 대체하지 않음.
 - [ ] 정의종이 원문을 직접 열어 발표에서 사용할 주장을 확인하고 자신의 말로 설명함.
-- [ ] 김태형이 표 1·2의 각 행을 원문과 대조한 뒤 확인자 칸에 실제 이니셜을 기록함.
+- [x] 김태형이 표 1·2의 각 행을 원문과 대조한 뒤 확인자 칸에 기록함(2026-10-31).
 - [ ] Task 14 이후 E2 실측값과 통계·질의 조건을 채우고 경향을 판정함.
 - [ ] Task 19 담당 및 파트 2 발표 담당을 팀에서 확정함.
 
