@@ -18,4 +18,4 @@
 | 2026-10-30 | 정의종 (본인 검토 대기) | 8 | OpenAI Codex (GPT-6.1) | ALT·랜드마크·테스트 초안 및 자동 검증, 최신 팀 Dijkstra 연동, dict/set 질의 상태·근거리 메모리 회귀 | (본인이 손 추적·코드 확인 후 직접 기입) |
 | 2026-10-30 | 정의종 (본인 검토 대기) | 15 | OpenAI Codex (GPT-6.1) | 혼잡 시나리오·하한·중간 지점 함수와 테스트 작성·자동 검증 | (본인이 손 추적·가정 배율 확인 후 직접 기입) |
 | 2026-10-30 | 정의종 (본인 검토 대기) | 16 | OpenAI Codex (GPT-6.1) | E3 실행·정확성 선검사·CSV·그림 c/d 초안, 기존 그림 f 보존, 계약 테스트. 실제 서울 실험 미실행 | (본인이 코드·입출력 확인 후 직접 기입) |
-| 2026-10-31 | 권세현 | 4 | Claude Code (Claude Opus 5.5) | `verify.py`(path_cost, check_result, verify_all), `tests/test_correctness.py`(EXACT_ALGOS에 dijkstra·astar·bidir·alt4 등록), PR 작성 | 위 예제를 손으로 따라가 봤고, 테스트를 직접 돌려봤어 |
+| 2026-10-31 | 권세현 | 4 | Claude Code (Claude Opus 5.5) | `verify.py`(path_cost, check_result, verify_all), `tests/test_correctness.py`(EXACT_ALGOS에 dijkstra·astar·bidir·alt4 등록), PR 작성 | `check_result` 오류 예제(되돌아가는 경로, 없는 간선)를 손으로 따라가 봄, `test_correctness.py` 직접 실행(58 passed) |
