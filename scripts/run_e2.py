@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,10 +47,13 @@ def merge_rows(path, new_rows, fields, graph):
         with path.open(newline="", encoding="utf-8") as stream:
             kept = [row for row in csv.DictReader(stream) if row["graph"] != graph]
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as stream:
+    # Write a temp file next to the target, then swap it in: a failure mid-write keeps the old file intact
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with tmp.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         writer.writerows(kept + list(new_rows))
+    os.replace(tmp, path)
 
 
 def existing_outputs(results_dir, graphs):

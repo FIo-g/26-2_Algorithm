@@ -324,6 +324,9 @@ def fig_b(summary_csv, tightness_csv, out_png):
     ratios = defaultdict(list)  # (graph, bin, algo) -> per-query h0 / dist
     for r in tight:
         ratios[(r["graph"], r["bin"], r["algo"])].append(float(r["ratio"]))
+    # One fixed color per algorithm for all rows: each Axes has its own color cycle, and row 2 skips bidir
+    algo_list = [a for a in dict.fromkeys(r["algo"] for r in summary) if a != "dijkstra"]
+    colors = {algo: f"C{i}" for i, algo in enumerate(algo_list)}
 
     fig = Figure(figsize=(5 * len(graphs), 10), layout="constrained")
     axes = fig.subplots(3, len(graphs), sharey="row", squeeze=False)
@@ -334,10 +337,10 @@ def fig_b(summary_csv, tightness_csv, out_png):
             by_bin = {r["bin"]: r for r in rows if r["algo"] == algo}
             for row_index, key in ((0, "settled_ratio"), (1, "speedup")):
                 axes[row_index, col].plot(xs, [_float_or_nan(by_bin[b][key]) if b in by_bin else math.nan for b in bins],
-                                          marker="o", label=algo)
+                                          marker="o", label=algo, color=colors[algo])
             if any((graph, b, algo) in ratios for b in bins):  # only astar and alt{k} have tightness rows
                 axes[2, col].plot(xs, [statistics.median(ratios[(graph, b, algo)]) if (graph, b, algo) in ratios
-                                       else math.nan for b in bins], marker="o", label=algo)
+                                       else math.nan for b in bins], marker="o", label=algo, color=colors[algo])
         # the Gangnam >10 km bin holds only diagonal-corner pairs: say so under the tick
         labels = [f"{b}\n(corner pairs only)" if (graph, b) == FIG_B_CORNER else b for b in bins]
         for row_index in range(3):

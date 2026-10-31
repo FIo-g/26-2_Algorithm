@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from routing.bench import ExactnessError, summarize, write_csv
+from routing.bench import ExactnessError, write_csv
 from routing.dijkstra import dijkstra
 from routing.experiments import e2
 from routing.experiments.e2 import run_e2
@@ -60,7 +60,8 @@ def _fig_b_inputs(root):
                     median_settled=100, speedup=("" if (gr, b, a) == ("gss", "3-10km", "alt4") else sp), settled_ratio=sr)
                for gr, bins in (("gangnam", ["<3km", "3-10km", ">10km"]), ("gss", ["<3km", "3-10km"]))
                for b in bins
-               for a, sp, sr in (("dijkstra", 1.0, 1.0), ("astar", 1.5, 0.5), ("alt4", 4.0, 0.1))]
+               for a, sp, sr in (("dijkstra", 1.0, 1.0), ("astar", 1.5, 0.5), ("bidir", 2.0, 0.4), ("alt4", 4.0, 0.1))]
+    # like the real data: bidir has speedup rows only, no tightness rows
     tight = [dict(graph=gr, qid=i, bin=b, algo=a, h0=r * 100, dist=100.0, ratio=r)
              for gr, bins in (("gangnam", ["<3km", "3-10km", ">10km"]), ("gss", ["<3km", "3-10km"]))
              for i, b in enumerate(bins) for a, r in (("astar", 0.6), ("alt4", 0.9))]
@@ -77,6 +78,27 @@ def test_fig_b_renders_png_and_marks_corner_pairs(tmp_path):
     assert (tmp_path / "b.png").read_bytes()[:8] == PNG and (tmp_path / "b.png").stat().st_size > 1000
     labels = [t.get_text() for ax in fig.axes for t in ax.get_xticklabels()]
     assert sum("corner pairs only" in s for s in labels) == 3  # gangnam column only, one per panel row
+
+
+def test_fig_b_same_algorithm_same_color_in_every_row(tmp_path):
+    pytest.importorskip("matplotlib")
+    from routing.figures import fig_b
+    summary, tight = _fig_b_inputs(tmp_path)
+    fig = fig_b(summary, tight, tmp_path / "b.png")
+    def algo_lines(ax):  # drop the dashed Dijkstra reference (axhline has a "_"-prefixed label)
+        return [line for line in ax.get_lines() if not line.get_label().startswith("_")]
+
+    ncols = len(fig.axes) // 3  # subplots are row-major: row r, column c is fig.axes[r * ncols + c]
+    for col in range(ncols):
+        top, bottom = fig.axes[col], fig.axes[2 * ncols + col]
+        top_colors = {line.get_label(): line.get_color() for line in algo_lines(top)}
+        bottom_lines = algo_lines(bottom)
+        assert {line.get_label() for line in bottom_lines} <= set(top_colors) and "alt4" in top_colors
+        for line in bottom_lines:
+            assert line.get_color() == top_colors[line.get_label()], line.get_label()
+    # the top row of the first column has astar, bidir and alt4, each with its own color
+    first = {line.get_label(): line.get_color() for line in algo_lines(fig.axes[0])}
+    assert set(first) == {"astar", "bidir", "alt4"} and len(set(first.values())) == 3
 
 
 def test_make_figures_b(tmp_path):
