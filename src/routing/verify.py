@@ -64,10 +64,13 @@ def verify_all(g: Graph, queries: Iterable, algos: dict[str, Callable], *,
     reference = algos.get(ref, dijkstra)
     messages = []
     for q in queries:
-        ref_dist = reference(g, q.s, q.t)[0]
+        ref_result = reference(g, q.s, q.t)
+        ref_dist = ref_result[0]
         for name, algo in algos.items():
             try:
-                issues = check_result(g, q.s, q.t, ref_dist, algo(g, q.s, q.t))
+                # The reference ran once above; reuse it so its path is still checked.
+                result = ref_result if name == ref else algo(g, q.s, q.t)
+                issues = check_result(g, q.s, q.t, ref_dist, result)
             except Exception as e:  # a crash is a failed check, not a reason to stop the gate
                 issues = [f"raised {type(e).__name__}: {e}"]
             messages.extend(f"{name} q{q.qid}: {issue}" for issue in issues)

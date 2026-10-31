@@ -21,3 +21,4 @@
 | 2026-10-30 | 정의종 (본인 검토 대기) | 19 | OpenAI Codex (GPT-6.1) | 현업 공식 문서·논문 원문 대조, 비교표·공정성·발표 구성 초안. 학생 직접 확인·태형 리뷰 대기 | (본인이 원문을 직접 확인한 후 기입) |
 | 2026-10-31 | 권세현 | 2 | Claude Code (Claude Opus 5.5) | `speeds/collect.py`(수집·오류 기록·키 가림·.env 로드), `tests/test_speeds.py`, `.env.example`·`.gitignore` 설정, 실제 API 응답 확인, PR #5 작성 | 인증키 발급, 환경변수 설정, env, gitignore |
 | 2026-10-31 | 권세현 | 4 | Claude Code (Claude Opus 5.5) | `verify.py`(path_cost, check_result, verify_all), `tests/test_correctness.py`(EXACT_ALGOS에 dijkstra·astar·bidir·alt4 등록), PR 작성 | `check_result` 오류 예제(되돌아가는 경로, 없는 간선)를 손으로 따라가 봄, `test_correctness.py` 직접 실행(58 passed) |
+| 2026-10-31 | 권세현 | 4 (리뷰 수정) | Claude Code (Claude Opus 5.5) | `verify_all`이 기준 알고리즘을 질의당 한 번만 실행하도록 수정, 호출 횟수 테스트 추가, `test_speeds.py` 윈도우 UTF-8 읽기 수정, PR #7 작성 | 새 테스트를 옛 `verify.py`로 돌려 실패(호출 4번) 확인, 새 코드로 되돌려 통과 확인 |
