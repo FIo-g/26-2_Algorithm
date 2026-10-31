@@ -82,9 +82,15 @@ def big_grid():
     return grid_graph(150, 150)  # 22,500 vertices: one per-vertex list is ~180 KB
 
 
-@pytest.mark.parametrize("algo", [dijkstra, astar, bidirectional_dijkstra], ids=["dijkstra", "astar", "bidir"])
+@pytest.mark.parametrize("algo", [dijkstra, astar, bidirectional_dijkstra, None],
+                         ids=["dijkstra", "astar", "bidir", "alt4"])
 def test_short_query_cost_does_not_scale_with_graph(big_grid, algo):
     # Per-query arrays of size n would dominate short (reroute) query times and skew speedups.
+    if algo is None:
+        from routing.alt import alt, preprocess_landmarks
+        # Preprocessing is deliberately outside the per-query allocation check.
+        landmarks = preprocess_landmarks(big_grid, 4)
+        algo = lambda g, s, t: alt(g, s, t, landmarks)
     tracemalloc.start()
     try:
         algo(big_grid, 0, 1)
@@ -140,3 +146,4 @@ def test_run_all_rejects_malformed_decision(tmp_path, first):
 
 def test_run_all_rejects_unknown_option(tmp_path):
     assert _run_all(tmp_path, "--nope").returncode == 64
+

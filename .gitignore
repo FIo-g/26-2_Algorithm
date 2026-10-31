@@ -6,3 +6,7 @@ cache/
 data/graphs/
 data/speeds/
 data/nodelink/
+.env
+.env.*
+!.env.example
+.pytest_tmp/
