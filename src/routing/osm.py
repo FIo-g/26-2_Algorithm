@@ -5,6 +5,7 @@ needs the pickled Graph, so teammates never download OSM data themselves.
 """
 from __future__ import annotations
 
+import re
 from collections import Counter
 from datetime import datetime, timezone
 
@@ -20,6 +21,47 @@ PLACES = {
     "seoul": ["Seoul, South Korea"],
 }
 FALLBACK_KPH = 30  # speed for highway types with no maxspeed anywhere in the graph (planner's choice)
+# Korea's highest posted limit is 120 km/h; larger tags are mapping errors (e.g. a
+# residential street in Songpa tagged 200). Treating them as missing keeps one typo
+# from setting vmax, which would loosen the A* bound for the whole graph.
+MAXSPEED_CAP_KPH = 120
+
+
+def _kph_values(value) -> list[float]:
+    values = value if isinstance(value, list) else [value]
+    out = []
+    for v in values:
+        m = re.match(r"\s*(\d+(?:\.\d+)?)", str(v))
+        if m:
+            out.append(float(m.group(1)) * (1.609344 if "mph" in str(v) else 1.0))
+    return out
+
+
+def drop_implausible_maxspeed(G: nx.MultiDiGraph, cap_kph: float = MAXSPEED_CAP_KPH) -> int:
+    """Delete maxspeed tags with any value above cap_kph, so they get the class mean instead.
+
+    Must run before add_edge_speeds, which averages maxspeed per highway type.
+    The count is stored in G.graph["maxspeed_dropped"] and reported in meta().
+    """
+    dropped = 0
+    for _, _, data in G.edges(data=True):
+        if "maxspeed" in data and any(k > cap_kph for k in _kph_values(data["maxspeed"])):
+            del data["maxspeed"]
+            dropped += 1
+    G.graph["maxspeed_dropped"] = dropped
+    return dropped
+
+
+def sort_highway_lists(G: nx.MultiDiGraph) -> None:
+    """Sort merged highway lists in place.
+
+    Simplification builds these lists from sets, so their order changes with Python's
+    string hash seed. add_edge_speeds and from_osmnx both use the first value, so
+    without sorting the same download can give different edge times on each run.
+    """
+    for _, _, data in G.edges(data=True):
+        if isinstance(data.get("highway"), list):
+            data["highway"] = sorted(data["highway"])
 
 
 def download(name: str) -> nx.MultiDiGraph:
@@ -27,6 +69,8 @@ def download(name: str) -> nx.MultiDiGraph:
     ox.settings.cache_folder = "cache"
     G = ox.graph_from_place(PLACES[name], network_type="drive")
     G = ox.truncate.largest_component(G, strongly=True)
+    sort_highway_lists(G)
+    drop_implausible_maxspeed(G)
     G = ox.routing.add_edge_speeds(G, fallback=FALLBACK_KPH)
     return ox.routing.add_edge_travel_times(G)
 
@@ -72,6 +116,7 @@ def meta(G: nx.MultiDiGraph, g: Graph) -> dict:
         "vmax_mps": g.vmax,
         "vmax_kph": g.vmax * 3.6,
         "maxspeed_missing_ratio": missing / len(edges) if edges else 0.0,
+        "maxspeed_dropped": G.graph.get("maxspeed_dropped", 0),  # tags above the cap, now missing
         "haversine_violations": violations,  # length < straight line breaks the A* lower bound
         "hwy_counts": dict(Counter(g.hwy).most_common()),
         "osmnx_version": ox.__version__,

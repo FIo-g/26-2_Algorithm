@@ -1,7 +1,7 @@
 """OSMnx conversion tests on a hand-made MultiDiGraph; no network access is required."""
 import networkx as nx
 
-from routing.osm import from_osmnx, meta
+from routing.osm import drop_implausible_maxspeed, from_osmnx, meta, sort_highway_lists
 
 
 def tiny_osm():
@@ -39,3 +39,22 @@ def test_meta_counts_haversine_violations():
     G[10][20][0]["length"] = 1200.0                     # 30->10 kept 950 m >= ~882 m
     assert meta(G, from_osmnx(G, "tiny"))["haversine_violations"] == 0
     assert (m["name"], m["n"], m["m"]) == ("tiny", 3, 2)
+
+
+def test_drop_implausible_maxspeed():
+    G = tiny_osm()
+    G.add_edge(10, 30, 0, length=900.0, travel_time=90.0, highway="residential", maxspeed="200")
+    G.add_edge(20, 10, 0, length=1200.0, travel_time=120.0, highway="motorway", maxspeed=["110", "80"])
+    G.add_edge(20, 30, 0, length=1600.0, travel_time=160.0, highway="primary", maxspeed=["60", "200"])
+    assert drop_implausible_maxspeed(G) == 2             # "200" and ["60", "200"]
+    assert "maxspeed" not in G[10][30][0] and "maxspeed" not in G[20][30][0]
+    assert G[30][10][0]["maxspeed"] == "50" and G[20][10][0]["maxspeed"] == ["110", "80"]
+    assert G.graph["maxspeed_dropped"] == 2
+    assert meta(G, from_osmnx(G, "tiny"))["maxspeed_dropped"] == 2
+
+
+def test_sort_highway_lists_makes_order_deterministic():
+    G = tiny_osm(); G[30][10][0]["highway"] = ["secondary", "primary"]
+    sort_highway_lists(G)
+    assert G[30][10][0]["highway"] == ["primary", "secondary"]
+    assert G[30][10][1]["highway"] == "trunk"              # plain strings are left alone
