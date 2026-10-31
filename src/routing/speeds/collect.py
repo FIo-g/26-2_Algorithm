@@ -36,7 +36,7 @@ def build_params(api_key: str, bbox: tuple[float, float, float, float]) -> dict[
 def _log_error(out_dir: Path, now: datetime, kind: str, msg: str, api_key: str) -> None:
     if api_key:
         msg = msg.replace(api_key, "***")
-    msg = msg[:200].replace("\n", " ").replace("\t", " ")
+    msg = msg[:200].replace("\r", " ").replace("\n", " ").replace("\t", " ")
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(out_dir / "errors.log", "a", encoding="utf-8") as f:
         f.write(f"{now.isoformat()}\t{kind}: {msg}\n")
@@ -72,7 +72,15 @@ def run_forever(fetch: Fetch, api_key: str, bbox, out_dir: Path, *, interval_s: 
     polls = 0
     while max_polls is None or polls < max_polls:
         start = time.monotonic()
-        poll_once(fetch, api_key, bbox, out_dir, clock())   # clock() exactly once per poll
+        now = clock()                       # exactly once per poll
+        try:
+            poll_once(fetch, api_key, bbox, out_dir, now)
+        except Exception as e:              # e.g. disk full or file lock; KeyboardInterrupt still stops the loop
+            try:
+                _log_error(Path(out_dir), now, type(e).__name__, str(e), api_key)
+            except Exception:
+                print(f"{now.isoformat()}\t{type(e).__name__}: poll failed; errors.log not writable",
+                      file=sys.stderr, flush=True)
         polls += 1
         if max_polls is not None and polls >= max_polls:
             break

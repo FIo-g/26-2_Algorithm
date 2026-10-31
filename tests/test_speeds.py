@@ -56,6 +56,13 @@ def test_error_log_never_contains_key(tmp_path):
     assert "SECRET123" not in log and "***" in log
 
 
+def test_collector_survives_write_errors(tmp_path):
+    (tmp_path / "20261030").write_text("x")   # a file where the day directory belongs
+    run_forever(lambda u, p: SAMPLE, "K", BBOX_GSS, tmp_path, max_polls=2, sleep=lambda s: None,
+                clock=iter([datetime(2026, 10, 30, 0, i) for i in range(2)]).__next__)
+    assert len((tmp_path / "errors.log").read_text().splitlines()) == 2
+
+
 def test_load_env_file_does_not_override(tmp_path, monkeypatch):
     env = tmp_path / ".env"
     env.write_text('# comment\nITS_API_KEY="from-file"\nSEOUL_API_KEY=abc\n\n', encoding="utf-8")
