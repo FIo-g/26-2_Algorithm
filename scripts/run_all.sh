@@ -9,6 +9,11 @@ cd "$(dirname "$0")/.."
 
 RESULTS_DIR="${RESULTS_DIR:-results}"
 PY="${PY:-.venv/bin/python}"
+# Commands below are word-split when run, so a space in RESULTS_DIR would break them.
+if [[ "$RESULTS_DIR" =~ [[:space:]] ]]; then
+  echo "RESULTS_DIR must not contain spaces: '$RESULTS_DIR'" >&2
+  exit 64
+fi
 COLLECTOR_PATTERN="${COLLECTOR_PATTERN:-routing.speeds.collect}"
 
 dry_run=0
@@ -47,11 +52,11 @@ cmds=(
   "$PY scripts/check_exact.py data/graphs/gangnam_graph_v1.pkl data/queries/gangnam_q_seed42.csv"
   "$PY scripts/check_exact.py data/graphs/gss_graph_v1.pkl data/queries/gss_q_seed42.csv"
   "$PY scripts/check_exact.py data/graphs/seoul_graph_v1.pkl data/queries/seoul_q_seed42.csv"
-  "$PY scripts/run_e1.py data/graphs/gangnam_graph_v1.pkl"
-  "$PY scripts/run_e2.py gangnam gss seoul --overwrite"
-  "$PY scripts/run_e3.py seoul --overwrite"
-  "$PY scripts/run_e3.py gss$real --overwrite"
-  "$PY scripts/make_figures.py all"
+  "$PY scripts/run_e1.py data/graphs/gangnam_graph_v1.pkl --results-dir $RESULTS_DIR"
+  "$PY scripts/run_e2.py gangnam gss seoul --overwrite --results-dir $RESULTS_DIR"
+  "$PY scripts/run_e3.py seoul --overwrite --results-dir $RESULTS_DIR"
+  "$PY scripts/run_e3.py gss$real --overwrite --results-dir $RESULTS_DIR"
+  "$PY scripts/make_figures.py all --results-dir $RESULTS_DIR"
 )
 
 if [[ $dry_run -eq 1 ]]; then
