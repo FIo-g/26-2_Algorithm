@@ -48,7 +48,7 @@ cmds=(
   "$PY scripts/check_exact.py data/graphs/gss_graph_v1.pkl data/queries/gss_q_seed42.csv"
   "$PY scripts/check_exact.py data/graphs/seoul_graph_v1.pkl data/queries/seoul_q_seed42.csv"
   "$PY scripts/run_e1.py data/graphs/gangnam_graph_v1.pkl"
-  "$PY scripts/run_e2.py gangnam gss seoul"
+  "$PY scripts/run_e2.py gangnam gss seoul --overwrite"
   "$PY scripts/run_e3.py seoul --overwrite"
   "$PY scripts/run_e3.py gss$real --overwrite"
   "$PY scripts/make_figures.py all"
