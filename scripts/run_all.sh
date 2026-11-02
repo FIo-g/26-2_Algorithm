@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Final benchmark (plan Task 22): every check and experiment on ONE machine in one go.
-# Usage: bash scripts/run_all.sh [--dry-run] [--allow-collector]
+# Usage: bash scripts/run_all.sh [--dry-run] [--allow-collector] [--allow-battery]
 #   --dry-run          print the commands only
 #   --allow-collector  run even if the speed collector is running here (it skews timings)
-# Env: RESULTS_DIR (default results), PY (default .venv/bin/python)
+#   --allow-battery    run even on battery power (a closed lid then puts the laptop to sleep)
+# Env: RESULTS_DIR (default results), PY (default .venv/bin/python),
+#      POWER_SOURCE_CMD (default "pmset -g batt"; its first line names the power source)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -15,13 +17,17 @@ if [[ "$RESULTS_DIR" =~ [[:space:]] ]]; then
   exit 64
 fi
 COLLECTOR_PATTERN="${COLLECTOR_PATTERN:-routing.speeds.collect}"
+POWER_SOURCE_CMD="${POWER_SOURCE_CMD:-pmset -g batt}"
+export PYTHONUNBUFFERED=1  # progress lines reach the log when they happen, not when a step exits
 
 dry_run=0
 allow_collector=0
+allow_battery=0
 for arg in "$@"; do
   case "$arg" in
     --dry-run) dry_run=1 ;;
     --allow-collector) allow_collector=1 ;;
+    --allow-battery) allow_battery=1 ;;
     *) echo "unknown option: $arg" >&2; exit 64 ;;
   esac
 done
@@ -64,16 +70,25 @@ if [[ $dry_run -eq 1 ]]; then
   exit 0
 fi
 
+# On battery a closed lid sleeps the laptop (caffeinate cannot prevent that). In the 11/2 rehearsal
+# this stretched the run to 3 hours and moved median times by up to 2x. No pmset (e.g. Windows): skip.
+power="$($POWER_SOURCE_CMD 2>/dev/null | head -n 1 || true)"
+if [[ $power == *"Battery Power"* && $allow_battery -eq 0 ]]; then
+  echo "running on battery ($power); plug in AC power, keep the lid open, or pass --allow-battery" >&2
+  exit 3
+fi
+
 mkdir -p "$RESULTS_DIR"
 {
   echo "start: $(date '+%Y-%m-%dT%H:%M:%S%z')"
   $PY -VV
   sysctl -n machdep.cpu.brand_string 2>/dev/null || uname -m
   echo "collector running: $collector_running"
+  echo "power: ${power:-unknown}"
 } > "$RESULTS_DIR/machine.txt"
 
 for c in "${cmds[@]}"; do
-  echo "+ $c"
+  echo "+ [$(date '+%H:%M:%S')] $c"
   $c
 done
 
