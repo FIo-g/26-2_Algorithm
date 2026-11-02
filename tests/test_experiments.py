@@ -178,3 +178,50 @@ def test_run_all_passes_overwrite_to_e2(tmp_path):
     r = subprocess.run(["bash", "scripts/run_all.sh", "--dry-run", "--allow-collector"], cwd=REPO, capture_output=True,
                        text=True, env={**os.environ, "RESULTS_DIR": str(tmp_path)})
     assert r.returncode == 0 and "run_e2.py gangnam gss seoul --overwrite" in r.stdout
+
+
+# ---- Task 13: E1 (exhaustive search limit) and figure (a) ----
+
+from routing.experiments import e1 as e1_module
+from routing.experiments.e1 import grid_counts, run_e1
+from routing.exhaustive import ExhaustiveResult
+
+
+def test_run_e1_stops_at_first_timeout():
+    rows = run_e1(grid_graph(8, 8), 0, start_n=6, per_size=3, time_limit_s=0.02, max_n=64)
+    last = max(r["target_n"] for r in rows)
+    assert any(r["timed_out"] for r in rows if r["target_n"] == last)
+    assert not any(r["timed_out"] for r in rows if r["target_n"] < last)
+
+
+def test_run_e1_actual_sizes_strictly_increase():
+    rows = run_e1(grid_graph(8, 8), 0, start_n=6, per_size=2, time_limit_s=0.02, max_n=64)
+    sizes = sorted({(r["target_n"], r["actual_n"]) for r in rows})
+    assert all(a[1] < b[1] for a, b in zip(sizes, sizes[1:]))
+
+
+def test_grid_counts_values():
+    assert [r["paths"] for r in grid_counts()] == [12, 184, 8512, 1262816, 575780564]
+
+
+def test_run_e1_rows_and_max_n_stop():
+    rows = run_e1(grid_graph(4, 4), 0, start_n=4, step=4, per_size=2, time_limit_s=5.0, max_n=12)
+    assert {r["target_n"] for r in rows} == {4, 8, 12} and not any(r["timed_out"] for r in rows)
+    assert set(rows[0]) == {"target_n", "actual_n", "actual_m", "qid", "ex_time_s", "ex_paths",
+                            "timed_out", "dij_time_s"}
+    assert all(r["ex_paths"] >= 1 and r["actual_n"] >= r["target_n"] for r in rows)
+
+
+def test_run_e1_refuses_wrong_exhaustive(monkeypatch):
+    monkeypatch.setattr(e1_module, "exhaustive_shortest",
+                        lambda g, s, t, time_limit_s: ExhaustiveResult(0.0, [s], 1, False))
+    with pytest.raises(ExactnessError):
+        run_e1(grid_graph(4, 4), 0, start_n=4, per_size=2, max_n=8)
+
+
+def test_fig_a_renders_png(tmp_path):
+    from routing.figures import fig_a
+    rows = run_e1(grid_graph(8, 8), 0, start_n=6, per_size=2, time_limit_s=0.02, max_n=64)
+    write_csv(tmp_path / "e1.csv", rows)
+    fig_a(tmp_path / "e1.csv", tmp_path / "a.png")
+    assert (tmp_path / "a.png").read_bytes().startswith(PNG)
