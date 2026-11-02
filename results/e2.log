@@ -1,0 +1,12 @@
+E2 gangnam: 3144 nodes, 8420 edges, 300 queries
+E2 gangnam: done
+E2 gss: 9317 nodes, 25435 edges, 300 queries
+E2 gss: done
+E2 seoul: 67420 nodes, 185415 edges, 300 queries
+E2 seoul: done
+/Users/taehyeong/Documents/GitHub/26-2_Algorithm/results/e2_gangnam.csv
+/Users/taehyeong/Documents/GitHub/26-2_Algorithm/results/e2_gss.csv
+/Users/taehyeong/Documents/GitHub/26-2_Algorithm/results/e2_seoul.csv
+/Users/taehyeong/Documents/GitHub/26-2_Algorithm/results/e2_alt_prep.csv
+/Users/taehyeong/Documents/GitHub/26-2_Algorithm/results/e2_tightness.csv
+/Users/taehyeong/Documents/GitHub/26-2_Algorithm/results/e2_summary.csv
