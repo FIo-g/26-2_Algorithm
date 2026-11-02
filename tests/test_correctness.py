@@ -93,3 +93,12 @@ def test_verify_all_message_format():
     wrong = {"bad": lambda g, s, t, stats=None: (0.0, [s], 0)}
     msgs = verify_all(g, [Q(7, 0, 8)], wrong)
     assert msgs and all(m.startswith("bad q7: ") for m in msgs)
+
+
+def test_verify_all_runs_reference_once_per_query():
+    g = grid_graph(4, 4); calls = []
+    def counted(g, s, t, stats=None):
+        calls.append((s, t))
+        return dijkstra(g, s, t)
+    assert verify_all(g, [Q(0, 0, 15), Q(1, 3, 12)], {"dijkstra": counted, "astar": astar}) == []
+    assert calls == [(0, 15), (3, 12)]
