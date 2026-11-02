@@ -30,7 +30,7 @@ def test_collector_survives_errors(tmp_path):            # Review Focus 1
         return r
     run_forever(fetch, "K", BBOX_GSS, tmp_path, max_polls=3, sleep=lambda s: None,
                 clock=iter([datetime(2026, 10, 30, 0, i) for i in range(3)]).__next__)
-    assert len((tmp_path / "errors.log").read_text().splitlines()) == 2
+    assert len((tmp_path / "errors.log").read_text(encoding="utf-8").splitlines()) == 2
     assert len(list(tmp_path.rglob("*.json.gz"))) == 1
 
 
@@ -44,7 +44,7 @@ def test_build_params():
 def test_api_error_code_is_logged_not_saved(tmp_path):
     bad = b'{"header":{"resultCode":"99","resultMsg":"invalid key"},"body":{"items":[]}}'
     assert poll_once(lambda u, p: bad, "K", BBOX_GSS, tmp_path, datetime(2026, 10, 30)) is None
-    assert "invalid key" in (tmp_path / "errors.log").read_text()
+    assert "invalid key" in (tmp_path / "errors.log").read_text(encoding="utf-8")
     assert not list(tmp_path.rglob("*.json.gz"))
 
 
@@ -52,7 +52,7 @@ def test_error_log_never_contains_key(tmp_path):
     def fetch(url, params):
         raise RuntimeError(f"403 Forbidden for url: {url}?apiKey={params['apiKey']}")
     poll_once(fetch, "SECRET123", BBOX_GSS, tmp_path, datetime(2026, 10, 30))
-    log = (tmp_path / "errors.log").read_text()
+    log = (tmp_path / "errors.log").read_text(encoding="utf-8")
     assert "SECRET123" not in log and "***" in log
 
 
@@ -60,7 +60,7 @@ def test_collector_survives_write_errors(tmp_path):
     (tmp_path / "20261030").write_text("x")   # a file where the day directory belongs
     run_forever(lambda u, p: SAMPLE, "K", BBOX_GSS, tmp_path, max_polls=2, sleep=lambda s: None,
                 clock=iter([datetime(2026, 10, 30, 0, i) for i in range(2)]).__next__)
-    assert len((tmp_path / "errors.log").read_text().splitlines()) == 2
+    assert len((tmp_path / "errors.log").read_text(encoding="utf-8").splitlines()) == 2
 
 
 def test_load_env_file_does_not_override(tmp_path, monkeypatch):
