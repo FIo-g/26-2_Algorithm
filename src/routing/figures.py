@@ -397,3 +397,55 @@ def _make_b(args) -> Path:
 
 FIGURES["b"] = _make_b
 
+
+
+def fig_a(e1_csv, out_png):
+    """Figure (a): exhaustive search time vs subgraph size (log y), with Dijkstra for contrast.
+
+    Median per size with each query as a faint dot; sizes where any query hit the time
+    limit are marked. Returns the Figure (for tests).
+    """
+    from matplotlib.figure import Figure
+
+    with Path(e1_csv).open(newline="", encoding="utf-8-sig") as stream:
+        rows = list(csv.DictReader(stream))  # one graph only, so no graph column (_read_rows needs one)
+    missing = {"actual_n", "ex_time_s", "timed_out", "dij_time_s"} - set(rows[0] if rows else ())
+    if missing:
+        raise ValueError(f"{e1_csv}: missing CSV columns {sorted(missing)}")
+    by_n = defaultdict(list)
+    for r in rows:
+        by_n[int(r["actual_n"])].append(r)
+    ns = sorted(by_n)
+    ex_med = [statistics.median(float(r["ex_time_s"]) for r in by_n[n]) for n in ns]
+    dij_med = [statistics.median(float(r["dij_time_s"]) for r in by_n[n]) for n in ns]
+    timeout_ns = [n for n in ns if any(r["timed_out"] == "True" for r in by_n[n])]
+
+    fig = Figure(figsize=(8, 5), layout="constrained")
+    ax = fig.subplots()
+    ax.scatter([int(r["actual_n"]) for r in rows], [float(r["ex_time_s"]) for r in rows],
+               s=6, alpha=0.25, color="C0")
+    ax.plot(ns, ex_med, marker="o", color="C0", label="Exhaustive search (median)")
+    ax.plot(ns, dij_med, marker="s", color="C1", label="Dijkstra (median)")
+    if timeout_ns:
+        # mark the slowest query of the size (the one that hit the limit), not the median
+        ax.scatter(timeout_ns, [max(float(r["ex_time_s"]) for r in by_n[n]) for n in timeout_ns],
+                   marker="X", s=120, color="C3", zorder=3,
+                   label=f"Time limit hit (give up at n = {timeout_ns[0]})")
+    ax.set_yscale("log")
+    ax.set_xlabel("Vertices in the Gangnam subgraph (n)")
+    ax.set_ylabel("Time per query (s, log scale)")
+    ax.set_title("E1: exhaustive search time explodes with graph size")
+    ax.grid(alpha=0.25, which="both")
+    ax.legend()
+    Path(out_png).parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_png, dpi=200)
+    return fig
+
+
+def _make_a(args) -> Path:
+    out = Path(args.out_dir) / "fig_a_exhaustive.png"
+    fig_a(Path(args.results_dir) / "e1.csv", out)
+    return out
+
+
+FIGURES["a"] = _make_a
