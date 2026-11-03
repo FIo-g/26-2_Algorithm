@@ -112,6 +112,61 @@ def test_make_figures_b(tmp_path):
     assert (tmp_path / "figures" / "fig_b_speedup.png").read_bytes()[:8] == PNG
 
 
+SLIDES = ("fig_b1_settled.png", "fig_b2_speedup.png", "fig_b3_tightness.png")
+
+
+def _lines(ax):
+    """(label, color, y values) of the algorithm lines, without the dashed Dijkstra reference.
+    A missing bin is drawn as nan, and nan != nan, so it is compared as None."""
+    import math
+    return [(l.get_label(), l.get_color(), [None if math.isnan(y) else round(float(y), 9) for y in l.get_ydata()])
+            for l in ax.get_lines() if not l.get_label().startswith("_")]
+
+
+def test_fig_b_slides_one_png_per_row(tmp_path):
+    pytest.importorskip("matplotlib")
+    from routing.figures import fig_b_slides
+    summary, tight = _fig_b_inputs(tmp_path)
+    figs = fig_b_slides(summary, tight, tmp_path / "slides")
+    assert len(figs) == 3
+    for name, fig in zip(SLIDES, figs):
+        assert (tmp_path / "slides" / name).read_bytes()[:8] == PNG, name
+        assert len(fig.axes) == 2  # one panel per graph (gangnam, gss), side by side
+
+
+def test_fig_b_slides_show_the_same_lines_as_fig_b(tmp_path):
+    pytest.importorskip("matplotlib")
+    from routing.figures import fig_b, fig_b_slides
+    summary, tight = _fig_b_inputs(tmp_path)
+    full = fig_b(summary, tight, tmp_path / "b.png")
+    slides = fig_b_slides(summary, tight, tmp_path / "slides")
+    ncols = len(full.axes) // 3
+    for row, slide in enumerate(slides):
+        for col in range(ncols):
+            assert _lines(slide.axes[col]) == _lines(full.axes[row * ncols + col]), (row, col)
+
+
+def test_fig_b_slides_use_larger_text(tmp_path):
+    pytest.importorskip("matplotlib")
+    from routing.figures import fig_b, fig_b_slides
+    summary, tight = _fig_b_inputs(tmp_path)
+    full = fig_b(summary, tight, tmp_path / "b.png")
+    slide = fig_b_slides(summary, tight, tmp_path / "slides")[0]
+    size = lambda fig: fig.axes[0].get_xticklabels()[0].get_fontsize()
+    assert size(slide) >= 1.4 * size(full)  # readable on a recorded slide
+
+
+def test_make_figures_b_also_writes_slides(tmp_path):
+    pytest.importorskip("matplotlib")
+    from routing.figures import main
+    results = tmp_path / "results"; results.mkdir()
+    summary, tight = _fig_b_inputs(tmp_path)
+    shutil.copy(summary, results / "e2_summary.csv"); shutil.copy(tight, results / "e2_tightness.csv")
+    main(["b", "--results-dir", str(results), "--out-dir", str(tmp_path / "figures")])
+    for name in SLIDES:
+        assert (tmp_path / "figures" / name).read_bytes()[:8] == PNG, name
+
+
 def _load_script():
     spec = importlib.util.spec_from_file_location("run_e2_cli_test", REPO / "scripts" / "run_e2.py")
     module = importlib.util.module_from_spec(spec)
