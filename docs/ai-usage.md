@@ -33,4 +33,4 @@
 | 2026-11-02 | 김태형 | 14 (실행) | Claude Code (Claude Opus 5.5) | 강남·gss·서울 E2 실행(정확성 관문 → 측정), 그림 (b) 생성, 결과 해석 정리, PR #15 작성 | (작성자 기입) |
 | 2026-11-02 | 김태형 | 22 (예행연습) | Claude Code (Claude Opus 5.5) | `run_all.sh` 실제 데이터 예행연습(별도 worktree), 잠자기 원인 확인(`pmset -g log`), RESULTS_DIR 전달·배터리 차단·단계 시각 추가와 테스트 4개, PR #18 작성 | (작성자 기입) |
 | 2026-11-03 | 김태형 | 23 (코드·테스트·예비 실행), E4 연기 문서 반영 | Claude Code (Claude Opus 5.5) | `experiments/reroute_gain.py`(reroute_gain, summarize_gain), `scripts/run_reroute_gain.py`, `tests/test_reroute_gain.py`, `run_all.sh`에 단계 추가, gss·서울 예비 실행, spec·통합 계획·태형·의종 가이드에 E4 연기와 Task 23 반영 | (작성자 기입) |
-| 2026-11-03 | 김태형 | 14 (발표용 그림 b 분할, 영상 파트 구성안) | Claude Code (Claude Opus 5.5) | `fig_b_slides`(그림 b를 지표별 3장으로 분할, 글씨 확대, 같은 색·데이터), 테스트 4개, `docs/video/part3-dijkstra-speedup.md`(슬라이드 구성안·예비 수치·예상 질문, 대본 제외), 수치를 CSV와 대조 | (작성자 기입) |
+| 2026-11-03 | 김태형 | 14 (발표용 그림 b 분할, 영상 파트 구성안) | Claude Code (Claude Opus 5.5) | `fig_b_slides`(그림 b를 지표별 3장으로 분할, 글씨 확대, 같은 색·데이터), 테스트 4개, `docs/video/part3-dijkstra-speedup.md`(슬라이드 구성안·예비 수치·예상 질문, 대본 제외), 수치를 CSV와 대조 | 세 장의 색이 원래 그림 (b)와 같은지, 서울 장거리에서 ALT16이 5배 근처인지, 하한 그림에서 A*가 0.4 근처에 머무는지 그림을 열어 확인함 |
