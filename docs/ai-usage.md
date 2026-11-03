@@ -33,3 +33,4 @@
 | 2026-11-02 | 김태형 | 14 (실행) | Claude Code (Claude Opus 5.5) | 강남·gss·서울 E2 실행(정확성 관문 → 측정), 그림 (b) 생성, 결과 해석 정리, PR #15 작성 | (작성자 기입) |
 | 2026-11-02 | 김태형 | 22 (예행연습) | Claude Code (Claude Opus 5.5) | `run_all.sh` 실제 데이터 예행연습(별도 worktree), 잠자기 원인 확인(`pmset -g log`), RESULTS_DIR 전달·배터리 차단·단계 시각 추가와 테스트 4개, PR #18 작성 | (작성자 기입) |
 | 2026-11-03 | 김태형 | 23 (코드·테스트·예비 실행), E4 연기 문서 반영 | Claude Code (Claude Opus 5.5) | `experiments/reroute_gain.py`(reroute_gain, summarize_gain), `scripts/run_reroute_gain.py`, `tests/test_reroute_gain.py`, `run_all.sh`에 단계 추가, gss·서울 예비 실행, spec·통합 계획·태형·의종 가이드에 E4 연기와 Task 23 반영 | (작성자 기입) |
+| 2026-11-04 | 권세현 | 20 (REJECT) | Claude Code (Claude Opus 5.5) | 수집 중단 원인 진단(API 응답 resultCode 4001), 데스크톱 상시 수집 설정, `results/match_decision.md` 작성, PR 작성 | (작성자 기입) |
