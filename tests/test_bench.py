@@ -121,15 +121,17 @@ def test_run_all_dry_run_order_without_adoption(tmp_path):
     out = r.stdout
     assert r.returncode == 0 and "--real" not in out
     assert (out.index("tests/test_correctness.py") < out.index("check_exact.py") < out.index("run_e1.py")
-            < out.index("run_e2.py") < out.index("run_e3.py") < out.index("make_figures.py all"))
+            < out.index("run_e2.py") < out.index("run_e3.py") < out.index("run_reroute_gain.py gss seoul --overwrite")
+            < out.index("make_figures.py all"))
     assert not (tmp_path / "machine.txt").exists()  # dry run writes nothing
 
 
 def test_run_all_passes_results_dir_to_every_writer(tmp_path):
     out = _run_all(tmp_path, "--dry-run", "--allow-collector").stdout
     writers = [line for line in out.splitlines()
-               if any(s in line for s in ("run_e1.py", "run_e2.py", "run_e3.py", "make_figures.py"))]
-    assert len(writers) == 5 and all(line.endswith(f"--results-dir {tmp_path}") for line in writers), writers
+               if any(s in line for s in ("run_e1.py", "run_e2.py", "run_e3.py", "run_reroute_gain.py",
+                                          "make_figures.py"))]
+    assert len(writers) == 6 and all(line.endswith(f"--results-dir {tmp_path}") for line in writers), writers
 
 
 def test_run_all_rejects_results_dir_with_spaces(tmp_path):
@@ -150,7 +152,7 @@ def test_run_all_records_power_and_step_times(tmp_path):
     machine = (tmp_path / "machine.txt").read_text()
     assert r.returncode == 0 and "power: Now drawing from AC Power" in machine and "end: " in machine
     steps = [line for line in r.stdout.splitlines() if line.startswith("+ [")]
-    assert len(steps) == 9 and all(line[3:11].count(":") == 2 for line in steps)  # "+ [HH:MM:SS] cmd"
+    assert len(steps) == 10 and all(line[3:11].count(":") == 2 for line in steps)  # "+ [HH:MM:SS] cmd"
 
 
 def test_run_all_stops_when_collector_runs(tmp_path):
