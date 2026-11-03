@@ -125,6 +125,34 @@ def test_run_all_dry_run_order_without_adoption(tmp_path):
     assert not (tmp_path / "machine.txt").exists()  # dry run writes nothing
 
 
+def test_run_all_passes_results_dir_to_every_writer(tmp_path):
+    out = _run_all(tmp_path, "--dry-run", "--allow-collector").stdout
+    writers = [line for line in out.splitlines()
+               if any(s in line for s in ("run_e1.py", "run_e2.py", "run_e3.py", "make_figures.py"))]
+    assert len(writers) == 5 and all(line.endswith(f"--results-dir {tmp_path}") for line in writers), writers
+
+
+def test_run_all_rejects_results_dir_with_spaces(tmp_path):
+    r = _run_all(tmp_path, "--dry-run", "--allow-collector", RESULTS_DIR=str(tmp_path / "a b"))
+    assert r.returncode == 64 and "RESULTS_DIR" in r.stderr  # commands are word-split, so a space would break them
+
+
+def test_run_all_refuses_battery_power(tmp_path):
+    # PY=echo turns every step into a harmless echo, so the real-run path can be tested
+    battery = dict(PY="echo", POWER_SOURCE_CMD="echo Now drawing from Battery Power")
+    r = _run_all(tmp_path, "--allow-collector", **battery)
+    assert r.returncode == 3 and "battery" in r.stderr and not (tmp_path / "machine.txt").exists()
+    assert _run_all(tmp_path, "--allow-collector", "--allow-battery", **battery).returncode == 0
+
+
+def test_run_all_records_power_and_step_times(tmp_path):
+    r = _run_all(tmp_path, "--allow-collector", PY="echo", POWER_SOURCE_CMD="echo Now drawing from AC Power")
+    machine = (tmp_path / "machine.txt").read_text()
+    assert r.returncode == 0 and "power: Now drawing from AC Power" in machine and "end: " in machine
+    steps = [line for line in r.stdout.splitlines() if line.startswith("+ [")]
+    assert len(steps) == 9 and all(line[3:11].count(":") == 2 for line in steps)  # "+ [HH:MM:SS] cmd"
+
+
 def test_run_all_stops_when_collector_runs(tmp_path):
     marker = f"fake-collector-{os.getpid()}"
     # stands in for the speed collector; the marker stays in argv (sh -c would exec sleep and drop it)
