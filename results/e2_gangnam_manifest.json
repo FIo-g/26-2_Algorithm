@@ -1,0 +1,19 @@
+{
+  "graph": "gangnam",
+  "graph_path": "/Users/taehyeong/Documents/GitHub/26-2_Algorithm/data/graphs/gangnam_graph_v1.pkl",
+  "graph_sha256": "ff5f8682cf0d92320c41a190b4680e9fc8bc6bfd41b8cbe806dc4b432f96abe6",
+  "queries_path": "/Users/taehyeong/Documents/GitHub/26-2_Algorithm/data/queries/gangnam_q_seed42.csv",
+  "queries_sha256": "c4aa788102436008d607bd3bf8f0454b896f14daa551da126b217cdfab1f0519",
+  "nodes": 3144,
+  "edges": 8420,
+  "query_count": 300,
+  "ks": [
+    4,
+    8,
+    16
+  ],
+  "landmark_seed": 0,
+  "landmark_graph": "free-flow query graph (same as E3 g_lb unless real speeds are adopted)",
+  "timing": "shared time_all (warmup + 3 repeats, median); ALT preprocessing measured once per k",
+  "completed_utc": "2026-11-02T08:25:02.483948+00:00"
+}
