@@ -262,7 +262,7 @@ def fig_c(accuracy_csvs, timing_csvs, out_png):
         for row_index in (1, 2):
             axes[row_index, col].axhline(1, color="grey", linewidth=0.8, linestyle="--")
         axes[0, col].legend(fontsize="small")
-    fig.suptitle("E3: measured congestion snapshots; preprocessing reused")
+    fig.suptitle("E3: synthetic congestion scenarios; preprocessing reused")
     fig.text(0.01, 0.005, "Control is excluded from timing. Missing or zero-denominator metrics are N/A; errors are not assumed.", fontsize=8)
     fig.tight_layout(rect=(0, 0.025, 1, 0.97))
     _save(plt, fig, out_png)
