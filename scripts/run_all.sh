@@ -62,6 +62,7 @@ cmds=(
   "$PY scripts/run_e2.py gangnam gss seoul --overwrite --results-dir $RESULTS_DIR"
   "$PY scripts/run_e3.py seoul --overwrite --results-dir $RESULTS_DIR"
   "$PY scripts/run_e3.py gss$real --overwrite --results-dir $RESULTS_DIR"
+  "$PY scripts/run_reroute_gain.py gss seoul --overwrite --results-dir $RESULTS_DIR"
   "$PY scripts/make_figures.py all --results-dir $RESULTS_DIR"
 )
 

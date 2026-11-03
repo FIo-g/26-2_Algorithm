@@ -45,6 +45,7 @@
 | 20 | 표준노드링크 매칭 | 세현 | 의종 | P4 | 11/2 |
 | 21 | 실제 속도 스냅샷 → E3 | 의종 | 세현 | P4 | 11/4 |
 | 22 | `run_all` 최종 실행 + 결과 동결 | 태형 | 세현 | P1 | 11/5 |
+| 23 | 정적 재탐색 효과 (E4 연기 대체, 11/3 추가) | 태형 | 의종 | P3 | 11/4 |
 
 - 담당은 spec 6장을 따랐다. 다음은 계획 작성자의 판단이다.
   - 정확성 검사 도구 중 질의 생성과 벤치는 태형, 검사(verify)와 관문은 세현이 맡는다.
@@ -1363,6 +1364,36 @@ def test_run_all_dry_run_real_only_for_gss(tmp_path):
 - [ ] **Step 5: 결과 동결 (11/5)**: 수집기를 끈 머신에서 `bash scripts/run_all.sh`를 실행하고, 결과·그림을 커밋한 뒤 태그 `results-frozen`을 단다. 이후에는 숫자를 바꾸지 않는다.
 - [ ] **Step 6: AI 사용 기록**
 
+### Task 23: 정적 재탐색 효과 (E4 연기 대체, 11/3 추가) — 담당 태형 · 리뷰 의종
+
+E4(SUMO)를 연기하면서 RQ3를 좁혀서 답한다. "교통이 바뀌었을 때 경로를 다시 구하면 통행시간이 얼마나 줄어드나"를 차량 1대 기준으로 본다. 혼잡은 E3의 합성 시나리오를 쓴다.
+
+**Files:**
+- Create: `src/routing/experiments/reroute_gain.py`, `scripts/run_reroute_gain.py`
+- Test: `tests/test_reroute_gain.py`, `tests/test_bench.py`(`run_all` 순서)
+
+**Interfaces:**
+- `reroute_gain(g0, queries, *, graph, scenarios) -> list[dict]`: 질의 × 시나리오마다 두 행을 만든다.
+  - `depart`: 출발할 때 혼잡을 안다. 자유류 경로를 혼잡 시간으로 그대로 달린 값(`fixed_s`)과 혼잡 그래프의 최단(`reroute_s`)을 비교한다.
+  - `midway`: E3의 재탐색 출발점(`congestion.midpoint`)에서 혼잡이 시작된다. 앞 절반은 두 경우 모두 자유류 시간이다.
+  - `saving = (fixed_s - reroute_s) / fixed_s`(통행 전체 기준). 차이가 1e-9 이내이면 `saving = 0`, `improved = 0`이다.
+- `summarize_gain(rows)`: (graph, scenario, mode)와 거리 구간별, 그리고 `all`에 대해 n, n_improved, 절감의 중앙값·평균·p95(최근접 순위, E2와 같음)·최댓값을 낸다.
+- `python scripts/run_reroute_gain.py gss seoul [--results-dir DIR] [--overwrite]`
+  - 출력: `reroute_gain_{graph}.csv`, `reroute_gain_{graph}_summary.csv`, `reroute_gain_{graph}_manifest.json`
+  - 시나리오: `synth08`, `synth18`, `random30`. `synth03`은 자유류와 같고, `control`은 휴리스틱을 깨려고 도로를 빠르게 만든 대조군이라 뺀다.
+- `run_all.sh`: E3 다음, 그림 앞에서 실행한다.
+
+**손으로 따라갈 예제:** `tests/test_reroute_gain.py`의 4정점 그래프
+- 자유류 경로는 s→a→t(20 s)다. 혼잡이 s→a와 a→t를 두 배로 늘린다.
+- `depart`: 그대로 가면 40 s, 다시 구하면 s→b→t 24 s → 절감 0.4
+- `midway`: a에서 혼잡이 시작된다. 그대로 가면 10 + 20 = 30 s, 다시 구하면 10 + (a→b→t 13) = 23 s → 절감 7/30
+
+**한계 (발표에서 밝힌다):** 차량 1대가 한 시점의 혼잡을 안다고 가정한다. 혼잡은 남은 통행 동안 바뀌지 않고, 다른 차량은 반응하지 않는다. 그래서 같은 우회로로 몰리는 효과와 보급률 30%·100%의 차이는 볼 수 없다. 이 부분은 SUMO E4의 몫으로 남긴다.
+
+- [x] **Step 1~4**: 실패하는 테스트 → 구현 → `pytest tests/test_reroute_gain.py tests/test_bench.py`
+- [ ] **Step 5**: 11/5 `run_all` 동결 실행에 포함한다.
+- [ ] **Step 6: AI 사용 기록**
+
 ---
 
 ## 일정 (spec 7장 관문 기준)
@@ -1381,17 +1412,20 @@ def test_run_all_dry_run_real_only_for_gss(tmp_path):
 
 - 밀리면 spec 7장 우선순위의 아래부터 포기한다: 21 → 20 → (E4) → 16의 Weighted A*.
 - 태형은 E4(SUMO)가 겹쳐 11/2~11/3이 가장 빡빡하다. 리뷰 담당(세현)이 Task 14 실행을 이어받을 수 있게 명령을 팀 채팅에 남긴다.
+- **11/3 결정:** SUMO를 지금 돌릴 수 없어 E4를 11/9 영상 범위에서 빼고 나중에 돌린다(시점 미정). 11/2·11/3의 E4 칸은 해당 없음. 태형은 11/3~4에 대신 Task 23(정적 재탐색 효과)을 한다.
 
 ## 열린 결정
 
 - [ ] **중간 보고서(Pass/Fail 필수)**: 마감과 형식 확인. 진행 상황과 역할 분담을 담는다(위 팀 운영 표 사용).
 - [ ] Task 19(파트 2) 담당 확정 (안: 의종)
 - [ ] 이 레포를 GitHub에 올리고 팀원 초대 (spec 11장의 `seoul-routing` 대신 이 레포를 쓰는지)
-- [ ] 안양 SUMO 환경 수업 사용 승인 (연구실)
+- [ ] 안양 SUMO 환경 수업 사용 승인 (연구실): E4 연기로 보류(11/3)
 - [ ] LMS 영상 길이 제한 확인
 - [ ] 실제 속도 채택 여부 (11/2, Task 20)
 
 ## 후속: E4 계획 (윈도우 PC, 별도 문서)
+
+> **11/3 결정: 연기.** SUMO를 지금 돌릴 수 없어 E4는 나중에 돌린다(시점 미정). 그때까지 RQ3는 Task 23(정적 재탐색 효과)으로 좁혀 답한다. 아래 내용은 E4를 다시 시작할 때 쓴다.
 
 이 계획이 E4에 넘겨주는 것: `routing` 코어 패키지(표준 라이브러리만 사용, 윈도우에서 `pip install -e . --no-deps`), `Graph` 형식, `dijkstra`, `Stats`, `time_all`/`summarize`, `server_ratio`.
 
