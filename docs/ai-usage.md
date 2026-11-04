@@ -33,3 +33,4 @@
 | 2026-11-02 | 김태형 | 14 (실행) | Claude Code (Claude Opus 5.5) | 강남·gss·서울 E2 실행(정확성 관문 → 측정), 그림 (b) 생성, 결과 해석 정리, PR #15 작성 | (작성자 기입) |
 | 2026-11-02 | 김태형 | 22 (예행연습) | Claude Code (Claude Opus 5.5) | `run_all.sh` 실제 데이터 예행연습(별도 worktree), 잠자기 원인 확인(`pmset -g log`), RESULTS_DIR 전달·배터리 차단·단계 시각 추가와 테스트 4개, PR #18 작성 | (작성자 기입) |
 | 2026-11-03 | 김태형 | 23 (코드·테스트·예비 실행), E4 연기 문서 반영 | Claude Code (Claude Opus 5.5) | `experiments/reroute_gain.py`(reroute_gain, summarize_gain), `scripts/run_reroute_gain.py`, `tests/test_reroute_gain.py`, `run_all.sh`에 단계 추가, gss·서울 예비 실행, spec·통합 계획·태형·의종 가이드에 E4 연기와 Task 23 반영 | (작성자 기입) |
+| 2026-11-04 | 권세현 | 18 | Claude Code (Claude Opus 5.5) | `graph_table`, `fig_g`(지도 3패널, 간선 색 = hwy_class), `make_figures.py g`, 테스트 4개, 실제 그래프로 `results/graph_table.csv`와 그림 (g) 생성 | 강남구 meta로 vmax 80 km/h·결측 93.8% 검산, 그림의 motorway(빨간색) 위치를 meta 개수와 대조(강남 0개, gss 8개), `hwy_class`를 직접 실행해 trunk_link→trunk, residential→other 확인하고 범례 테스트 통과 확인 |
