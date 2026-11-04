@@ -1,0 +1,24 @@
+{
+  "graph": "seoul",
+  "graph_path": "C:\\Users\\\uc815\uc758\uc885\\Documents\\Github\\26-2_Algorithm\\data\\graphs\\seoul_graph_v1.pkl",
+  "graph_sha256": "e224f6dbe6c8d391ca07c8a0d23b4a70c7ca8f1ab804e50b3dfc7f226cc79db2",
+  "queries_path": "C:\\Users\\\uc815\uc758\uc885\\Documents\\Github\\26-2_Algorithm\\data\\queries\\seoul_q_seed42.csv",
+  "queries_sha256": "bab7770f13ccc41a12e9b078d284a78d39ce8f3d0b24f93a6c55d897422d4f52",
+  "nodes": 67420,
+  "edges": 185415,
+  "query_count": 300,
+  "ks": [
+    4,
+    8,
+    16
+  ],
+  "eps": [
+    1.2,
+    1.5
+  ],
+  "scenario_seed": 0,
+  "scenarios": "synthetic assumptions + negative control",
+  "control_included_in_baseline": false,
+  "timing": "shared Task 11 time_all (warmup + 3 repeats, median)",
+  "completed_utc": "2026-11-03T05:43:46.428526+00:00"
+}
