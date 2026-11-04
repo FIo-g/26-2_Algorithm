@@ -262,7 +262,7 @@ def fig_c(accuracy_csvs, timing_csvs, out_png):
         for row_index in (1, 2):
             axes[row_index, col].axhline(1, color="grey", linewidth=0.8, linestyle="--")
         axes[0, col].legend(fontsize="small")
-    fig.suptitle("E3: measured congestion snapshots; preprocessing reused")
+    fig.suptitle("E3: synthetic congestion scenarios; preprocessing reused")
     fig.text(0.01, 0.005, "Control is excluded from timing. Missing or zero-denominator metrics are N/A; errors are not assumed.", fontsize=8)
     fig.tight_layout(rect=(0, 0.025, 1, 0.97))
     _save(plt, fig, out_png)
@@ -275,6 +275,7 @@ def fig_d(alt_prep_csv, e3_timing_csv, out_png):
     fig, axes = plt.subplots(2, 2, figsize=(10, 7))
     metrics = [("prep_s", "Preprocessing (s)"), ("index_mb", "Distance-array payload (MB)"),
                ("speedup", "synth08 speedup vs Dijkstra"), ("breakeven", "synth08 break-even queries")]
+    no_break_even = []
     for graph in sorted({r["graph"] for r in rows}):
         selected = [r for r in rows if r["graph"] == graph]
         xs = [r["k"] for r in selected]
@@ -285,12 +286,18 @@ def fig_d(alt_prep_csv, e3_timing_csv, out_png):
             ax.set_ylabel(label)
             ax.set_xticks(sorted({r["k"] for r in rows}))
             ax.grid(alpha=0.25)
+        missing = [str(r["k"]) for r in selected if not math.isfinite(r["breakeven"])]
+        if missing:
+            no_break_even.append(f"{graph}: no break-even at k = {', '.join(missing)}")
         for r in selected:
-            if not math.isfinite(r["breakeven"]):
-                axes[1, 1].annotate(f"{graph}: no break-even at k={r['k']}",
-                                    xy=(r["k"], 0), xytext=(0, 10), textcoords="offset points", fontsize=8)
             if r["k_actual"] != r["k"]:
                 axes[0, 0].annotate(f"actual={r['k_actual']}", (r["k"], r["prep_s"]), fontsize=8)
+    if no_break_even:
+        axes[1, 1].text(0.03, 0.97, "\n".join(no_break_even), transform=axes[1, 1].transAxes,
+                        va="top", fontsize=9, bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none"})
+    if not any(math.isfinite(r["breakeven"]) for r in rows):
+        axes[1, 1].set_ylim(0, 1)
+        axes[1, 1].set_yticks([])
     axes[0, 0].legend(fontsize="small")
     fig.suptitle("ALT trade-off: E2 preprocessing + E3 synth08 queries")
     fig.text(0.01, 0.005, "Use matching lower-bound graphs. Break-even is recomputed from synth08 medians; payload excludes Python overhead.", fontsize=8)
