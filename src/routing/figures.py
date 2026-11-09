@@ -10,6 +10,7 @@ import math
 from pathlib import Path
 
 import csv
+import json
 import re
 import statistics
 from collections import defaultdict
@@ -81,6 +82,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--out-dir", "--output-dir", dest="out_dir", default="figures")
     p.add_argument("--results-dir", default="results")
     p.add_argument("--e3-graph", default="gss", choices=("gangnam", "gss", "seoul"))
+    p.add_argument("--graphs-dir", default="data/graphs", help="figure g: {name}_graph_v1.pkl and .meta.json")
     args = p.parse_args(argv)
     for name in (list(FIGURES) if "all" in args.which else args.which):
         print(FIGURES[name](args))
@@ -512,3 +514,83 @@ def _make_a(args) -> Path:
 
 
 FIGURES["a"] = _make_a
+
+
+GRAPH_TABLE_FIELDS = ("name", "n", "m", "vmax_mps", "maxspeed_missing_ratio")
+
+
+def graph_table(meta_paths) -> list[dict]:
+    """One row per graph from its .meta.json: name, n, m, vmax_kph, maxspeed_missing_ratio."""
+    rows = []
+    for path in _paths(meta_paths):
+        meta = json.loads(path.read_text(encoding="utf-8"))
+        missing = [k for k in GRAPH_TABLE_FIELDS if k not in meta]
+        if missing:
+            raise ValueError(f"{path}: missing fields {missing}")
+        rows.append({"name": meta["name"], "n": meta["n"], "m": meta["m"],
+                     "vmax_kph": round(meta["vmax_mps"] * 3.6, 1),
+                     "maxspeed_missing_ratio": round(meta["maxspeed_missing_ratio"], 4)})
+    return rows
+
+
+FIG_G_GRAPHS = ("gangnam", "gss", "seoul")  # the size ladder: 1 district, 3 districts, all of Seoul
+# hwy_class classes, major roads first; minor roads are drawn first (underneath) in light grey
+HWY_STYLE = {"motorway": ("#d62728", 1.6), "trunk": ("#ff7f0e", 1.4), "primary": ("#1f77b4", 1.1),
+             "secondary": ("#2ca02c", 0.9), "tertiary": ("#9467bd", 0.7), "other": ("#c7c7c7", 0.3)}
+
+
+def fig_g(graph_paths, out_png):
+    """Figure (g): one map panel per graph, edges colored by hwy_class, one shared legend.
+
+    Reads the .pkl graphs the experiments use (largest SCC, same edges). Returns the Figure.
+    """
+    from matplotlib.collections import LineCollection
+    from matplotlib.figure import Figure
+    from matplotlib.lines import Line2D
+
+    from routing.congestion import hwy_class
+
+    paths = _paths(graph_paths)
+    fig = Figure(figsize=(5 * len(paths), 5.6), layout="constrained")
+    axes = fig.subplots(1, len(paths), squeeze=False)[0]
+    seen = set()
+    for ax, path in zip(axes, paths):
+        g = load_graph(path)
+        segments = defaultdict(list)
+        for u, v, h in zip(g.tail, g.head, g.hwy):
+            (la1, lo1), (la2, lo2) = g.coords[u], g.coords[v]
+            segments[hwy_class(h)].append(((lo1, la1), (lo2, la2)))
+        for cls in reversed(HWY_STYLE):  # minor roads underneath
+            if segments[cls]:
+                color, width = HWY_STYLE[cls]
+                ax.add_collection(LineCollection(segments[cls], colors=color, linewidths=width))
+                seen.add(cls)
+        ax.autoscale()
+        lat0 = statistics.fmean(lat for lat, _ in g.coords)
+        ax.set_aspect(1 / math.cos(math.radians(lat0)))  # degrees of lon are shorter than of lat
+        ax.set_title(f"{g.name or path.stem}: n = {g.n:,}, m = {g.m:,}")
+        ax.set_xticks([])
+        ax.set_yticks([])
+    labels = {"other": "other (residential, living_street, ...)"}
+    handles = [Line2D([], [], color=HWY_STYLE[c][0], linewidth=2.5, label=labels.get(c, c))
+               for c in HWY_STYLE if c in seen]
+    fig.suptitle("Graph size ladder (each panel at its own scale; *_link roads joined to their class)")
+    fig.legend(handles=handles, loc="outside lower center", ncol=len(handles), title="Road class (OSM highway)")
+    Path(out_png).parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_png, dpi=200)
+    return fig
+
+
+def _make_g(args) -> Path:
+    from routing.bench import write_csv
+
+    graphs = Path(args.graphs_dir)
+    table = Path(args.results_dir) / "graph_table.csv"
+    write_csv(table, graph_table([graphs / f"{n}_graph_v1.meta.json" for n in FIG_G_GRAPHS]))
+    print(table)
+    out = Path(args.out_dir) / "fig_g_graphs.png"
+    fig_g([graphs / f"{n}_graph_v1.pkl" for n in FIG_G_GRAPHS], out)
+    return out
+
+
+FIGURES["g"] = _make_g
