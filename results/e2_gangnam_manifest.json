@@ -15,5 +15,5 @@
   "landmark_seed": 0,
   "landmark_graph": "free-flow query graph (same as E3 g_lb unless real speeds are adopted)",
   "timing": "shared time_all (warmup + 3 repeats, median); ALT preprocessing measured once per k",
-  "completed_utc": "2026-11-02T08:25:02.483948+00:00"
+  "completed_utc": "2026-11-09T10:18:00.294706+00:00"
 }

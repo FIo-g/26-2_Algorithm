@@ -1,0 +1,72 @@
++ [19:14:22] .venv/bin/python -m pytest tests/test_correctness.py
+============================= test session starts ==============================
+platform darwin -- Python 3.14.8, pytest-9.2.0, pluggy-1.7.0
+rootdir: /Users/taehyeong/Documents/GitHub/26-2_Algorithm
+configfile: pyproject.toml
+collected 59 items
+
+tests/test_correctness.py .............................................. [ 77%]
+.............                                                            [100%]
+
+============================== 59 passed in 0.38s ==============================
++ [19:14:22] .venv/bin/python scripts/check_exact.py data/graphs/gangnam_graph_v1.pkl data/queries/gangnam_q_seed42.csv
+Graph(name='gangnam', n=3144, m=8420, vmax=22.22 m/s): 300 queries (loaded data/queries/gangnam_q_seed42.csv)
+algos: dijkstra, astar, bidir, alt4, alt8, alt16 (landmarks ready after 0.1 s)
+ALL EXACT: 300 queries x 6 algos (2.2 s)
++ [19:14:25] .venv/bin/python scripts/check_exact.py data/graphs/gss_graph_v1.pkl data/queries/gss_q_seed42.csv
+Graph(name='gss', n=9317, m=25435, vmax=30.56 m/s): 300 queries (loaded data/queries/gss_q_seed42.csv)
+algos: dijkstra, astar, bidir, alt4, alt8, alt16 (landmarks ready after 0.3 s)
+ALL EXACT: 300 queries x 6 algos (5.8 s)
++ [19:14:31] .venv/bin/python scripts/check_exact.py data/graphs/seoul_graph_v1.pkl data/queries/seoul_q_seed42.csv
+Graph(name='seoul', n=67420, m=185415, vmax=30.56 m/s): 300 queries (loaded data/queries/seoul_q_seed42.csv)
+algos: dijkstra, astar, bidir, alt4, alt8, alt16 (landmarks ready after 2.9 s)
+ALL EXACT: 300 queries x 6 algos (25.8 s)
++ [19:14:56] .venv/bin/python scripts/run_e1.py data/graphs/gangnam_graph_v1.pkl --results-dir results
+Graph(name='gangnam', n=3144, m=8420, vmax=22.22 m/s), root = vertex 1475 (osm 3089780830) nearest to Gangnam Station
+sizes run: 10..90 (27 sizes, 540 queries)
+give-up n = 90 (first size with a query over 10 s)
+wrote results/e1.csv, results/e1_grid.csv (175 s)
++ [19:17:51] .venv/bin/python scripts/run_e2.py gangnam gss seoul --overwrite --results-dir results
+E2 gangnam: 3144 nodes, 8420 edges, 300 queries
+E2 gangnam: done
+E2 gss: 9317 nodes, 25435 edges, 300 queries
+E2 gss: done
+E2 seoul: 67420 nodes, 185415 edges, 300 queries
+E2 seoul: done
+results/e2_gangnam.csv
+results/e2_gss.csv
+results/e2_seoul.csv
+results/e2_alt_prep.csv
+results/e2_tightness.csv
+results/e2_summary.csv
++ [19:20:06] .venv/bin/python scripts/run_e3.py seoul --overwrite --results-dir results
+results/e3_seoul_accuracy.csv
+results/e3_seoul_timing.csv
+results/e3_seoul_reroute.csv
+results/e3_seoul_wastar.csv
+results/e3_seoul_manifest.json
+results/server_ratio.csv
++ [19:38:05] .venv/bin/python scripts/run_e3.py gss --overwrite --results-dir results
+results/e3_gss_accuracy.csv
+results/e3_gss_timing.csv
+results/e3_gss_reroute.csv
+results/e3_gss_wastar.csv
+results/e3_gss_manifest.json
+results/server_ratio.csv
++ [19:42:29] .venv/bin/python scripts/run_reroute_gain.py gss seoul --overwrite --results-dir results
+reroute gain gss: 9317 nodes, 25435 edges, 300 queries
+reroute gain gss: done
+reroute gain seoul: 67420 nodes, 185415 edges, 300 queries
+reroute gain seoul: done
+results/reroute_gain_gss.csv
+results/reroute_gain_gss_summary.csv
+results/reroute_gain_gss_manifest.json
+results/reroute_gain_seoul.csv
+results/reroute_gain_seoul_summary.csv
+results/reroute_gain_seoul_manifest.json
++ [19:43:21] .venv/bin/python scripts/make_figures.py all --results-dir results
+figures/fig_f_search_space.png
+figures/fig_c_congestion.png
+figures/fig_d_alt_tradeoff.png
+figures/fig_b_speedup.png
+figures/fig_a_exhaustive.png

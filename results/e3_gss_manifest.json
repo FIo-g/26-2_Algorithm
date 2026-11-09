@@ -1,0 +1,24 @@
+{
+  "graph": "gss",
+  "graph_path": "/Users/taehyeong/Documents/GitHub/26-2_Algorithm/data/graphs/gss_graph_v1.pkl",
+  "graph_sha256": "927aed7741a67aa7db5ab40ce950091914d635a1aa13723ccaf2a665870a36e2",
+  "queries_path": "/Users/taehyeong/Documents/GitHub/26-2_Algorithm/data/queries/gss_q_seed42.csv",
+  "queries_sha256": "344487706a1535cda553289a3d43b073e2cd64e1afee970dacfe9252eac01322",
+  "nodes": 9317,
+  "edges": 25435,
+  "query_count": 300,
+  "ks": [
+    4,
+    8,
+    16
+  ],
+  "eps": [
+    1.2,
+    1.5
+  ],
+  "scenario_seed": 0,
+  "scenarios": "synthetic assumptions + negative control",
+  "control_included_in_baseline": false,
+  "timing": "shared Task 11 time_all (warmup + 3 repeats, median)",
+  "completed_utc": "2026-11-09T10:42:29.892329+00:00"
+}

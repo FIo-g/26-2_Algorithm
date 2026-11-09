@@ -1,0 +1,6 @@
+start: 2026-11-09T19:14:22+0900
+Python 3.14.8 (main, Sep 30 2026, 17:55:09) [Clang 21.0.0 (clang-2100.3.34.2)]
+Apple M5 Pro
+collector running: no
+power: Now drawing from 'AC Power'
+end: 2026-11-09T19:43:23+0900
