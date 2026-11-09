@@ -1,0 +1,4 @@
+name,n,m,vmax_kph,maxspeed_missing_ratio
+gangnam,3144,8420,80.0,0.9377
+gss,9317,25435,110.0,0.9576
+seoul,67420,185415,110.0,0.9581
