@@ -314,15 +314,19 @@ def _float_or_nan(text):
     return float(text) if text not in (None, "") else math.nan
 
 
-def fig_b(summary_csv, tightness_csv, out_png):
-    """Figure (b): per graph size, settled ratio and speedup per distance bin, and bound tightness.
+# One row of figure (b) per metric: (key, y label, slide file, slide title)
+FIG_B_ROWS = (
+    ("settled_ratio", "Settled nodes / Dijkstra (median)", "fig_b1_settled.png",
+     "Search size: settled nodes relative to Dijkstra (lower = less work)"),
+    ("speedup", "Speedup vs Dijkstra (median time)", "fig_b2_speedup.png",
+     "Speedup: Dijkstra median query time / algorithm median query time"),
+    ("tightness", "Lower bound tightness (median h0 / distance)", "fig_b3_tightness.png",
+     "Lower bound tightness: median h0 / true distance (higher = tighter)"),
+)
 
-    Rows: settled nodes / Dijkstra (main metric, machine independent), speedup vs Dijkstra,
-    median h0 / true distance of the A* and ALT lower bounds. Returns the Figure (for tests).
-    """
-    from matplotlib.figure import Figure
-    from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter
 
+def _fig_b_data(summary_csv, tightness_csv):
+    """Rows, graph order, bins, per-query tightness ratios and one fixed color per algorithm."""
     summary = _read_rows(summary_csv, {"bin", "algo", "speedup", "settled_ratio"})
     tight = _read_rows(tightness_csv, {"bin", "algo", "ratio"})
     graphs = sorted({r["graph"] for r in summary},
@@ -331,47 +335,98 @@ def fig_b(summary_csv, tightness_csv, out_png):
     ratios = defaultdict(list)  # (graph, bin, algo) -> per-query h0 / dist
     for r in tight:
         ratios[(r["graph"], r["bin"], r["algo"])].append(float(r["ratio"]))
-    # One fixed color per algorithm for all rows: each Axes has its own color cycle, and row 2 skips bidir
+    # One fixed color per algorithm for all rows: each Axes has its own color cycle, and the tightness row skips bidir
     algo_list = [a for a in dict.fromkeys(r["algo"] for r in summary) if a != "dijkstra"]
     colors = {algo: f"C{i}" for i, algo in enumerate(algo_list)}
+    return summary, graphs, bins, ratios, colors
 
+
+def _fig_b_panel(ax, key, graph, data):
+    """Draw one metric for one graph: settled_ratio or speedup (log scale), or tightness (0..1)."""
+    from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter
+
+    summary, _, bins, ratios, colors = data
+    xs = list(range(len(bins)))
+    rows = [r for r in summary if r["graph"] == graph]
+    for algo in [a for a in dict.fromkeys(r["algo"] for r in rows) if a != "dijkstra"]:
+        if key == "tightness":
+            if any((graph, b, algo) in ratios for b in bins):  # only astar and alt{k} have tightness rows
+                ax.plot(xs, [statistics.median(ratios[(graph, b, algo)]) if (graph, b, algo) in ratios
+                             else math.nan for b in bins], marker="o", label=algo, color=colors[algo])
+        else:
+            by_bin = {r["bin"]: r for r in rows if r["algo"] == algo}
+            ax.plot(xs, [_float_or_nan(by_bin[b][key]) if b in by_bin else math.nan for b in bins],
+                    marker="o", label=algo, color=colors[algo])
+    # the Gangnam >10 km bin holds only diagonal-corner pairs: say so under the tick
+    ax.set_xticks(xs, [f"{b}\n(corner pairs only)" if (graph, b) == FIG_B_CORNER else b for b in bins])
+    ax.grid(alpha=0.25)
+    if key == "tightness":
+        ax.set_ylim(0, 1.02)
+        return
+    ax.set_yscale("log")
+    ax.yaxis.set_major_locator(LogLocator(subs=(1, 2, 5)))  # ticks at 0.1, 0.2, 0.5, 1, 2, 5, ...
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))  # plain numbers, not 1e-01
+    ax.yaxis.set_minor_formatter(NullFormatter())
+    ax.axhline(1, color="grey", linewidth=0.8, linestyle="--")  # = Dijkstra
+
+
+def fig_b(summary_csv, tightness_csv, out_png):
+    """Figure (b): per graph size, settled ratio and speedup per distance bin, and bound tightness.
+
+    Rows: settled nodes / Dijkstra (main metric, machine independent), speedup vs Dijkstra,
+    median h0 / true distance of the A* and ALT lower bounds. Returns the Figure (for tests).
+    """
+    from matplotlib.figure import Figure
+
+    data = _fig_b_data(summary_csv, tightness_csv)
+    graphs = data[1]
     fig = Figure(figsize=(5 * len(graphs), 10), layout="constrained")
     axes = fig.subplots(3, len(graphs), sharey="row", squeeze=False)
-    xs = list(range(len(bins)))
+    for row, (key, ylabel, _, _) in enumerate(FIG_B_ROWS):
+        for col, graph in enumerate(graphs):
+            _fig_b_panel(axes[row, col], key, graph, data)
+        axes[row, 0].set_ylabel(ylabel)
     for col, graph in enumerate(graphs):
-        rows = [r for r in summary if r["graph"] == graph]
-        for algo in [a for a in dict.fromkeys(r["algo"] for r in rows) if a != "dijkstra"]:
-            by_bin = {r["bin"]: r for r in rows if r["algo"] == algo}
-            for row_index, key in ((0, "settled_ratio"), (1, "speedup")):
-                axes[row_index, col].plot(xs, [_float_or_nan(by_bin[b][key]) if b in by_bin else math.nan for b in bins],
-                                          marker="o", label=algo, color=colors[algo])
-            if any((graph, b, algo) in ratios for b in bins):  # only astar and alt{k} have tightness rows
-                axes[2, col].plot(xs, [statistics.median(ratios[(graph, b, algo)]) if (graph, b, algo) in ratios
-                                       else math.nan for b in bins], marker="o", label=algo, color=colors[algo])
-        # the Gangnam >10 km bin holds only diagonal-corner pairs: say so under the tick
-        labels = [f"{b}\n(corner pairs only)" if (graph, b) == FIG_B_CORNER else b for b in bins]
-        for row_index in range(3):
-            ax = axes[row_index, col]
-            ax.set_xticks(xs, labels)
-            ax.grid(alpha=0.25)
-        for row_index in (0, 1):
-            ax = axes[row_index, col]
-            ax.set_yscale("log")
-            ax.yaxis.set_major_locator(LogLocator(subs=(1, 2, 5)))  # ticks at 0.1, 0.2, 0.5, 1, 2, 5, ...
-            ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))  # plain numbers, not 1e-01
-            ax.yaxis.set_minor_formatter(NullFormatter())
-            ax.axhline(1, color="grey", linewidth=0.8, linestyle="--")  # = Dijkstra
-        axes[2, col].set_ylim(0, 1.02)
         axes[0, col].set_title(graph)
         axes[2, col].set_xlabel("Straight-line distance of the query")
-    axes[0, 0].set_ylabel("Settled nodes / Dijkstra (median)")
-    axes[1, 0].set_ylabel("Speedup vs Dijkstra (median time)")
-    axes[2, 0].set_ylabel("Lower bound tightness (median h0 / distance)")
     axes[0, 0].legend(fontsize="small")
     fig.suptitle("E2: A*, bidirectional and ALT vs Dijkstra by query distance")
     Path(out_png).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     return fig
+
+
+def fig_b_slides(summary_csv, tightness_csv, out_dir):
+    """Figure (b) split for slides: one PNG per row of fig_b, graphs side by side, larger text.
+
+    Same panels, data and colors as fig_b. Returns the Figures in FIG_B_ROWS order (for tests).
+    """
+    import matplotlib
+    from matplotlib.figure import Figure
+
+    data = _fig_b_data(summary_csv, tightness_csv)
+    graphs = data[1]
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
+    figs = []
+    with matplotlib.rc_context({"font.size": 15}):
+        for key, ylabel, filename, title in FIG_B_ROWS:
+            fig = Figure(figsize=(16, 6.5), layout="constrained")
+            axes = fig.subplots(1, len(graphs), sharey=True, squeeze=False)[0]
+            for ax, graph in zip(axes, graphs):
+                _fig_b_panel(ax, key, graph, data)
+                ax.set_title(graph)
+                ax.set_xlabel("Straight-line distance of the query")
+            axes[0].set_ylabel(ylabel)
+            handles = {}  # every algorithm drawn in any panel, in drawing order
+            for ax in axes:
+                for line in ax.get_lines():
+                    if not line.get_label().startswith("_"):
+                        handles.setdefault(line.get_label(), line)
+            fig.legend(list(handles.values()), list(handles), loc="outside right upper")
+            fig.suptitle(title)
+            fig.savefig(Path(out_dir) / filename, dpi=200)
+            figs.append(fig)
+    return figs
 
 
 def _make_c(args) -> Path:
@@ -399,6 +454,7 @@ def _make_b(args) -> Path:
     root = Path(args.results_dir)
     out = Path(args.out_dir) / "fig_b_speedup.png"
     fig_b(root / "e2_summary.csv", root / "e2_tightness.csv", out)
+    fig_b_slides(root / "e2_summary.csv", root / "e2_tightness.csv", args.out_dir)  # fig_b1..b3 next to it
     return out
 
 
