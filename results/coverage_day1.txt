@@ -1,0 +1,27 @@
+Real-time speed coverage (ITS, bbox 126.98,37.42,127.19,37.55)
+Generated 2026-11-09 from data/speeds/raw (collector stopped 2026-11-03, Task 20 REJECT)
+
+Day 1 (2026-10-31): 42 snapshots, 7441 unique linkId
+All days: 118 snapshots, 7442 unique linkId, items per snapshot 7441-7442
+
+Top 20 road names by unique linkId (day 1):
+ 1. 올림픽대로  167
+ 2. 양재대로  165
+ 3. 강변북로  155
+ 4. 남부순환로  99
+ 5. 천호대로  92
+ 6. 세종포천고속도로  90
+ 7. 언주로  86
+ 8. 헌릉로  83
+ 9. -  76
+10. 강남대로  71
+11. 송파대로  70
+12. 논현로  68
+13. 올림픽로  67
+14. 뚝섬로  66
+15. 경부고속도로  63
+16. 선릉로  63
+17. 아차산로  62
+18. 동남로  60
+19. 과천대로  59
+20. 산성대로  58
