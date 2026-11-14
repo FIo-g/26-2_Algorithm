@@ -1,0 +1,299 @@
+/* Tokens, base, type scale, plates, sign parts. Light scheme only. */
+
+:root {
+  --blue: #0F4C9C;
+  --blue-deep: #0A3572;
+  --on-blue-2: #C9D8EE;
+  --white: #FFFFFF;
+  --red: #D3222A;
+  --yellow: #FFC400;
+  --black: #000000;
+  --steel: #D5D9DE;
+  --steel-ink: #4A535D;
+  --hairline: #C2C8CF;
+
+  --gap: clamp(8px, 1.6vw, 16px);
+  --radius: clamp(18px, 3vw, 30px);
+  --keyline: clamp(3px, 0.5vw, 5px);
+  --pad: clamp(1.25rem, 5vw, 5rem);
+  --measure: 66ch;
+
+  --font-latin: var(--font-overpass), system-ui, sans-serif;
+  --font-hangul: var(--font-gothic-a1), var(--font-overpass), system-ui, sans-serif;
+  --focus: var(--blue);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+html {
+  scrollbar-color: var(--blue) var(--steel);
+  scrollbar-width: thin;
+  -webkit-text-size-adjust: 100%;
+}
+
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--steel); }
+::-webkit-scrollbar-thumb { background: var(--blue); border: 3px solid var(--steel); border-radius: 6px; }
+
+body {
+  margin: 0;
+  background: var(--steel);
+  color: var(--black);
+  font-family: var(--font-latin);
+  font-size: clamp(1.0625rem, 0.5vw + 0.95rem, 1.25rem);
+  line-height: 1.55;
+}
+
+::selection { background: var(--yellow); color: var(--black); }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Type scale */
+
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+
+h1.display, .display {
+  font-size: clamp(1.75rem, 7.2vw, 6rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3.6vw, 3.1rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 1.5rem 0 0.5rem;
+}
+
+h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 1.5rem 0 0.5rem;
+}
+
+p {
+  margin: 0 0 1em;
+  max-width: var(--measure);
+}
+
+small, .small { font-size: 0.875rem; }
+.muted { color: var(--steel-ink); }
+.plate--blue .muted { color: var(--on-blue-2); }
+
+:lang(ko) { font-family: var(--font-hangul); font-weight: 800; }
+
+a {
+  color: var(--blue-deep);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+.plate--blue a:not(.subplate) { color: var(--white); }
+
+.num, table, .readout, .tabular { font-variant-numeric: tabular-nums; }
+
+table { border-collapse: collapse; width: 100%; font-size: 1rem; }
+caption { text-align: left; margin-bottom: 0.5rem; font-weight: 700; }
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  border-bottom: 1px solid var(--hairline);
+}
+th { font-weight: 700; }
+td.num, th.num { text-align: right; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+/* Wrap a table in <div class="visually-hidden">: a table ignores width and overflow on itself. */
+
+/* Plates */
+
+.plate {
+  position: relative;
+  margin: var(--gap);
+  border-radius: var(--radius);
+  padding: calc(var(--pad) + var(--gap)) var(--pad);
+  --focus: var(--blue);
+}
+.plate::before {
+  content: "";
+  position: absolute;
+  inset: var(--gap);
+  border: var(--keyline) solid currentColor;
+  border-radius: calc(var(--radius) - var(--gap));
+  pointer-events: none;
+}
+.plate--blue   { background: var(--blue);   color: var(--white); --focus: var(--yellow); }
+.plate--white  { background: var(--white);  color: var(--black); }
+.plate--yellow { background: var(--yellow); color: var(--black); }
+.plate--steel  { background: var(--steel);  color: var(--black); }
+.plate--steel::before { display: none; }
+
+.plate > :first-child { margin-top: 0; }
+
+/* Sign parts */
+
+.subplate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0.2em 0.35em 0.2em 0;
+  padding: 0.35em 0.7em;
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--black);
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 120ms, color 120ms;
+}
+a.subplate:hover,
+button.subplate:hover:not(:disabled) { background: var(--yellow); color: var(--black); }
+.subplate[aria-pressed="true"],
+.subplate[aria-checked="true"] { background: var(--black); color: var(--white); }
+.subplate:disabled { opacity: 0.45; cursor: not-allowed; }
+.subplate:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+.roundel {
+  display: inline-grid;
+  place-items: center;
+  width: 3.2em;
+  height: 3.2em;
+  border-radius: 50%;
+  border: 0.384em solid var(--red); /* ring is 12% of the diameter */
+  background: var(--white);
+  color: var(--black);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+
+.caution {
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  margin-right: 0.35em;
+  vertical-align: -0.25em;
+  flex: none;
+}
+.caution-field { fill: var(--yellow); stroke: var(--red); stroke-width: 2.5; stroke-linejoin: round; }
+.caution-mark { fill: var(--black); }
+
+.stop { display: inline-block; width: 4.4em; height: 4.4em; vertical-align: middle; }
+.stop-field { fill: var(--red); }
+.stop-text {
+  fill: var(--white);
+  font-family: var(--font-latin);
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.glyph {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.25em;
+  flex: none;
+}
+
+/* Layout helpers */
+
+.site-nav {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  padding: 0.5rem var(--gap);
+  margin: 0;
+  background: var(--steel);
+  scrollbar-width: thin;
+}
+.site-nav a { white-space: nowrap; }
+
+.caveat { display: flex; gap: 0.5rem; align-items: flex-start; }
+
+/* Sign list: no bullets, a solid square marker in the ink colour. */
+.sign-list { list-style: none; margin: 0 0 1em; padding: 0; }
+.sign-list > li { position: relative; padding-left: 1.25em; margin: 0 0 0.75em; max-width: var(--measure); }
+.sign-list > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.55em;
+  height: 0.55em;
+  background: currentColor;
+}
+/* On the yellow caution plate the list is a warning, so it is larger. */
+.plate--yellow .sign-list > li { font-size: 1.2rem; }
+
+/* Full-width block for charts, tables and demos inside a plate (text stays at the measure). */
+.plate-full { max-width: none; width: 100%; }
+
+/* Scroll wrapper for a wide table. Give it tabindex, role and aria-label in markup. */
+.table-scroll { overflow-x: auto; max-width: 100%; }
+
+/* Chart panels: three columns from 900px, one below, each at most 420px wide. */
+.panel-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+.panel-grid > * { width: 100%; max-width: 420px; justify-self: center; }
+@media (min-width: 900px) {
+  .panel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .panel-grid > * { justify-self: stretch; }
+}
+
+/* Wide or narrow chart variant, switched at 700px. */
+.show-narrow { display: block; }
+.show-wide { display: none; }
+@media (min-width: 700px) {
+  .show-narrow { display: none; }
+  .show-wide { display: block; }
+}
+
+/* Two columns from 900px: figure left, controls and narration right. One column below. */
+.demo-split { display: grid; gap: 3rem; align-items: center; }
+@media (min-width: 900px) {
+  .demo-split { grid-template-columns: minmax(0, 40rem) minmax(0, 1fr); }
+}
+
+.source { font-size: 0.875rem; color: var(--steel-ink); margin: 0.5rem 0 0; }
+.plate--blue .source { color: var(--on-blue-2); }
+
+.credit { font-size: 0.875rem; margin: 2rem 0 0; }
+.credit a { color: inherit; }
+
+/* Charts: text uses the page font, and nothing is distinguished by colour alone. */
+.chart svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.chart text { font-family: inherit; }
+.chart .chart-hairline { stroke: var(--hairline); stroke-width: 1; }
+.chart .chart-axis { stroke: currentColor; stroke-width: 2; }
+
+/* Motion: one authored moment elsewhere. Control colour changes only. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

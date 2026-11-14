@@ -1,0 +1,83 @@
+.lead {
+  font-size: 1.1875rem;
+  max-width: var(--measure);
+}
+
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  font-size: 0.9375rem;
+}
+
+.key li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.key svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.chartTitle {
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.sub {
+  margin-top: 2.5rem;
+}
+
+.source {
+  font-size: 0.875rem;
+  color: var(--steel-ink);
+  margin: 0.5rem 0 0;
+}
+
+/* Hashed module class does not match the global .plate--blue .source rule, so repeat it here. */
+:global(.plate--blue) .source {
+  color: var(--on-blue-2);
+}
+
+/* Heading row for a sign: the sign shape sits beside the heading, not above it. */
+.signHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.signHead h2 {
+  margin: 0;
+}
+
+.bigCaution {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-right: 0;
+  flex: none;
+}
+
+.bigStop {
+  width: 6rem;
+  height: 6rem;
+  flex: none;
+}
+
+.caveat {
+  margin-top: 1.5rem;
+  max-width: var(--measure);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.caveat p {
+  margin: 0;
+}

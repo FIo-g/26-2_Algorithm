@@ -1,0 +1,52 @@
+/* Table reflows into stacked rows below 36rem, so the page never scrolls sideways. */
+.roundel {
+  font-size: 0.95rem;
+}
+
+/* Centre the roundel column on wide screens so it does not butt against the number before it. */
+@media (min-width: 36.01rem) {
+  .speedCol {
+    text-align: center;
+    padding-inline: 1rem;
+  }
+}
+
+@media (max-width: 36rem) {
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table tr {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.25rem 0;
+    border-bottom: 0;
+    text-align: right;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    text-align: left;
+  }
+}

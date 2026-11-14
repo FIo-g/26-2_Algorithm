@@ -1,0 +1,69 @@
+/* Results-sign charts. Each viewBox is about the CSS width it is shown at, so SVG text (13 px in the viewBox)
+   renders at about 13 px on a 375 px phone and on a 1440 px desktop. */
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.w304 { max-width: 304px; }
+.w320 { max-width: 320px; }
+.w704 { max-width: 704px; }
+
+/* Chart A and B lines: method colour, ALT drawn over a black casing so yellow reads on white. */
+.line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.casing {
+  fill: none;
+  stroke: var(--black);
+  stroke-width: 6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Dijkstra is the reference and is black in METHODS, so its reference line is black too. */
+.reference {
+  stroke: var(--black);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.bracket {
+  stroke: var(--black);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.bar {
+  stroke: var(--black);
+  stroke-width: 2;
+}
+
+.card {
+  background: var(--white);
+  color: var(--black);
+  padding: 0.5rem;
+  min-width: 0;
+}
+
+.limit {
+  stroke: var(--red);
+  stroke-width: 2;
+}
+
+/* Exhaustive chart: a narrow and a wide drawing, one per breakpoint. */
+.narrowOnly { display: block; }
+.wideOnly { display: none; }
+
+@media (min-width: 900px) {
+  .narrowOnly { display: none; }
+  .wideOnly { display: block; }
+}
+
+.roundelLarge { font-size: 1.5625rem; }

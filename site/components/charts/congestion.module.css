@@ -1,0 +1,82 @@
+/* Tables reflow into stacked rows below 36rem, so they never scroll sideways. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* White sheet for a table set on a blue plate; ink stays black inside it. */
+.sheet {
+  background: var(--white);
+  color: var(--black);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+}
+
+.cell {
+  display: block;
+}
+
+.count {
+  display: block;
+  color: var(--steel-ink);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.median {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 36rem) {
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td,
+  .table th {
+    display: block;
+    width: 100%;
+  }
+
+  .table tr {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-bottom: 0;
+    text-align: right;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    text-align: left;
+  }
+
+  /* A table caption is shrink-to-fit inside the stacked block table, so it wraps; block keeps it on one line. */
+  .table caption {
+    display: block;
+  }
+}
