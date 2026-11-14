@@ -5,7 +5,8 @@
 #   --allow-collector  run even if the speed collector is running here (it skews timings)
 #   --allow-battery    run even on battery power (a closed lid then puts the laptop to sleep)
 # Env: RESULTS_DIR (default results), PY (default .venv/bin/python),
-#      POWER_SOURCE_CMD (default "pmset -g batt"; its first line names the power source)
+#      POWER_SOURCE_CMD (default "pmset -g batt"; its first line names the power source),
+#      PGREP (default pgrep; if missing, the collector state is unknown and the run stops)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -17,6 +18,7 @@ if [[ "$RESULTS_DIR" =~ [[:space:]] ]]; then
   exit 64
 fi
 COLLECTOR_PATTERN="${COLLECTOR_PATTERN:-routing.speeds.collect}"
+PGREP="${PGREP:-pgrep}"
 POWER_SOURCE_CMD="${POWER_SOURCE_CMD:-pmset -g batt}"
 export PYTHONUNBUFFERED=1  # progress lines reach the log when they happen, not when a step exits
 
@@ -33,9 +35,14 @@ for arg in "$@"; do
 done
 
 collector_running=no
-if pgrep -f "$COLLECTOR_PATTERN" >/dev/null 2>&1; then collector_running=yes; fi
+if ! command -v "$PGREP" >/dev/null 2>&1; then collector_running=unknown  # e.g. Git Bash has no pgrep
+elif "$PGREP" -f "$COLLECTOR_PATTERN" >/dev/null 2>&1; then collector_running=yes; fi
 if [[ $collector_running == yes && $allow_collector -eq 0 ]]; then
   echo "speed collector is running on this machine; stop it or pass --allow-collector" >&2
+  exit 2
+fi
+if [[ $collector_running == unknown && $allow_collector -eq 0 ]]; then
+  echo "cannot check for the speed collector ($PGREP not found); make sure it is stopped and pass --allow-collector" >&2
   exit 2
 fi
 

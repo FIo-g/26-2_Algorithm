@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import sys
 import tracemalloc
@@ -104,10 +105,27 @@ def test_short_query_cost_does_not_scale_with_graph(big_grid, algo):
 REPO = Path(__file__).resolve().parents[1]
 
 
+def _find_bash():
+    """A bash that keeps our env vars. On Windows a bare "bash" is WSL (System32 or WindowsApps), which
+    drops RESULTS_DIR, so the script would write into the real results/; use Git for Windows' bash."""
+    if os.name != "nt":
+        return shutil.which("bash")
+    git = shutil.which("git")  # ...\Git\cmd\git.exe -> ...\Git\bin\bash.exe
+    found = [Path(git).resolve().parents[1] / "bin" / "bash.exe"] if git else []
+    found.append(Path(shutil.which("bash") or "."))
+    wsl = ("system32", "windowsapps")
+    return next((str(p) for p in found if p.is_file() and not any(w in str(p).lower() for w in wsl)), None)
+
+
+BASH = _find_bash()
+
+
 def _run_all(tmp_path, *args, decision=None, **env):
+    if BASH is None:
+        pytest.skip("no bash outside WSL (install Git for Windows)")
     if decision is not None:
         (tmp_path / "match_decision.md").write_text(decision)
-    return subprocess.run(["bash", "scripts/run_all.sh", *args], cwd=REPO, capture_output=True, text=True,
+    return subprocess.run([BASH, "scripts/run_all.sh", *args], cwd=REPO, capture_output=True, text=True,
                           env={**os.environ, "RESULTS_DIR": str(tmp_path), **env})
 
 
@@ -156,6 +174,8 @@ def test_run_all_records_power_and_step_times(tmp_path):
 
 
 def test_run_all_stops_when_collector_runs(tmp_path):
+    if BASH is None or subprocess.run([BASH, "-c", "command -v pgrep"], capture_output=True).returncode:
+        pytest.skip("this bash has no pgrep (e.g. Git Bash); covered by the cannot-be-checked test")
     marker = f"fake-collector-{os.getpid()}"
     # stands in for the speed collector; the marker stays in argv (sh -c would exec sleep and drop it)
     fake = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", marker])
@@ -166,6 +186,15 @@ def test_run_all_stops_when_collector_runs(tmp_path):
         fake.wait()
     assert r.returncode == 2 and "collector" in r.stderr
     assert _run_all(tmp_path, "--dry-run", COLLECTOR_PATTERN=marker).returncode == 0  # gone -> runs
+
+
+def test_run_all_stops_when_collector_cannot_be_checked(tmp_path):
+    # Git Bash has no pgrep; an unchecked collector must not pass as "not running"
+    r = _run_all(tmp_path, "--dry-run", PGREP="no-such-pgrep")
+    assert r.returncode == 2 and "pgrep" in r.stderr
+    r = _run_all(tmp_path, "--allow-collector", PGREP="no-such-pgrep", PY="echo",
+                 POWER_SOURCE_CMD="echo Now drawing from AC Power")
+    assert r.returncode == 0 and "collector running: unknown" in (tmp_path / "machine.txt").read_text()
 
 
 @pytest.mark.parametrize("first", ["**ADOPT**", "adopt", "# ADOPT", "maybe", ""])
