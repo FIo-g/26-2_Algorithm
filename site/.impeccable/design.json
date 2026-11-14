@@ -1,0 +1,352 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-14T19:51:49+00:00",
+  "title": "Design System: Seoul shortest paths",
+  "extensions": {
+    "colorMeta": {
+      "sign-blue": {
+        "role": "primary",
+        "displayName": "Sign Blue",
+        "canonical": "#0F4C9C",
+        "tonalRamp": [
+          "#132439",
+          "#0C3B79",
+          "#1156B1",
+          "#1671E9",
+          "#4E93EE",
+          "#86B5F3",
+          "#B9D4F8",
+          "#ECF1F9"
+        ]
+      },
+      "sign-blue-deep": {
+        "role": "primary",
+        "displayName": "Deep Sign Blue",
+        "canonical": "#0A3572",
+        "tonalRamp": [
+          "#132339",
+          "#0B397A",
+          "#1053B2",
+          "#156DEA",
+          "#4D90EF",
+          "#85B3F4",
+          "#B9D3F9",
+          "#ECF1F9"
+        ]
+      },
+      "on-blue-secondary": {
+        "role": "neutral",
+        "displayName": "Pale Blue",
+        "canonical": "#C9D8EE",
+        "tonalRamp": [
+          "#1A2432",
+          "#203C65",
+          "#2E5793",
+          "#3D73C2",
+          "#6C95D1",
+          "#9AB6DF",
+          "#C5D5ED",
+          "#EEF1F6"
+        ]
+      },
+      "sheeting-white": {
+        "role": "neutral",
+        "displayName": "Sheeting White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#616161",
+          "#808080",
+          "#9E9E9E",
+          "#BDBDBD",
+          "#D9D9D9",
+          "#F2F2F2"
+        ]
+      },
+      "regulation-red": {
+        "role": "tertiary",
+        "displayName": "Regulation Red",
+        "canonical": "#D3222A",
+        "tonalRamp": [
+          "#371617",
+          "#721217",
+          "#A71B21",
+          "#DC232C",
+          "#E4585E",
+          "#ED8D91",
+          "#F4BDC0",
+          "#F8EDED"
+        ]
+      },
+      "caution-yellow": {
+        "role": "secondary",
+        "displayName": "Caution Yellow",
+        "canonical": "#FFC400",
+        "tonalRamp": [
+          "#3D330F",
+          "#856600",
+          "#C29500",
+          "#FFC400",
+          "#FFD23D",
+          "#FFE07A",
+          "#FFEDB2",
+          "#FAF6EB"
+        ]
+      },
+      "legend-black": {
+        "role": "neutral",
+        "displayName": "Legend Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#616161",
+          "#808080",
+          "#9E9E9E",
+          "#BDBDBD",
+          "#D9D9D9",
+          "#F2F2F2"
+        ]
+      },
+      "steel": {
+        "role": "neutral",
+        "displayName": "Steel",
+        "canonical": "#D5D9DE",
+        "tonalRamp": [
+          "#232629",
+          "#3A414A",
+          "#55606D",
+          "#707E8F",
+          "#929DAA",
+          "#B5BCC5",
+          "#D4D8DD",
+          "#F1F2F3"
+        ]
+      },
+      "steel-ink": {
+        "role": "neutral",
+        "displayName": "Steel Ink",
+        "canonical": "#4A535D",
+        "tonalRamp": [
+          "#242629",
+          "#3B424A",
+          "#56606C",
+          "#717F8E",
+          "#939EA9",
+          "#B5BCC4",
+          "#D4D9DD",
+          "#F1F2F3"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#C2C8CF",
+        "tonalRamp": [
+          "#242629",
+          "#3A424A",
+          "#55606C",
+          "#707E8F",
+          "#939DAA",
+          "#B5BCC5",
+          "#D4D8DD",
+          "#F1F2F3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero legend only, two stacked lines."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "One per sign; states the finding as a sentence."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sub-blocks inside a sign."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraphs and list items, held to 66ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Text on supplementary plates."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Source lines, credits and notes."
+      },
+      "hangul": {
+        "displayName": "Hangul",
+        "purpose": "Place and team names only, always weight 800."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "plate-state",
+        "value": "background-color 120ms, color 120ms",
+        "purpose": "Hover and selected colour change on supplementary plates. The only CSS transition."
+      },
+      {
+        "name": "search-replay",
+        "value": "requestAnimationFrame, clock = intersections settled",
+        "purpose": "Hero map replay. Autoplays unless prefers-reduced-motion: reduce; scrubbable."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition-duration and animation-duration 0.01ms, scroll-behavior auto",
+        "purpose": "Applied globally under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "900px"
+      },
+      {
+        "name": "table-reflow",
+        "value": "36rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Blue sign",
+      "kind": "card",
+      "refersTo": "plate-blue",
+      "description": "Instruction sign: a section that explains.",
+      "html": "<section class=\"ds-plate-blue\"><h2>How each method picks the next intersection</h2><p>White legend and keyline on a sign-blue field.</p></section>",
+      "css": ".ds-plate-blue{position:relative;border-radius:24px;padding:40px 32px;background:var(--blue,#0F4C9C);color:var(--white,#fff);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif} .ds-plate-blue::before{content:'';position:absolute;inset:12px;border:4px solid currentColor;border-radius:12px;pointer-events:none} .ds-plate-blue h2{margin:0 0 .5rem;font-size:2rem;font-weight:800;line-height:1.02;letter-spacing:-.02em} .ds-plate-blue p{margin:0}"
+    },
+    {
+      "name": "White sign",
+      "kind": "card",
+      "refersTo": "plate-white",
+      "description": "Regulation and results sign: a section that reports.",
+      "html": "<section class=\"ds-plate-white\"><h2>Every method had to match Dijkstra before we timed it</h2><p>Black legend and keyline on white.</p></section>",
+      "css": ".ds-plate-white{position:relative;border-radius:24px;padding:40px 32px;background:var(--white,#fff);color:var(--black,#000);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif} .ds-plate-white::before{content:'';position:absolute;inset:12px;border:4px solid currentColor;border-radius:12px;pointer-events:none} .ds-plate-white h2{margin:0 0 .5rem;font-size:2rem;font-weight:800;line-height:1.02;letter-spacing:-.02em} .ds-plate-white p{margin:0}"
+    },
+    {
+      "name": "Yellow sign",
+      "kind": "card",
+      "refersTo": "plate-yellow",
+      "description": "Caution sign: results that went against the team, and limits.",
+      "html": "<section class=\"ds-plate-yellow\"><h2>What this does not show</h2><p>Black ink on caution yellow.</p></section>",
+      "css": ".ds-plate-yellow{position:relative;border-radius:24px;padding:40px 32px;background:var(--yellow,#FFC400);color:var(--black,#000);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif} .ds-plate-yellow::before{content:'';position:absolute;inset:12px;border:4px solid currentColor;border-radius:12px;pointer-events:none} .ds-plate-yellow h2{margin:0 0 .5rem;font-size:2rem;font-weight:800;line-height:1.02;letter-spacing:-.02em} .ds-plate-yellow p{margin:0}"
+    },
+    {
+      "name": "Supplementary plate button",
+      "kind": "button",
+      "refersTo": "subplate",
+      "description": "The one control shape: link, button or static label.",
+      "html": "<button type=\"button\" class=\"ds-subplate\">Replay</button>",
+      "css": ".ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400)} .ds-subplate[aria-checked=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Method chooser",
+      "kind": "chip",
+      "refersTo": "subplate-selected",
+      "description": "Radio group of supplementary plates; the selected plate is inverted. Each method keeps its shape and colour.",
+      "html": "<div class=\"ds-methods\" role=\"radiogroup\" aria-label=\"Search method\"><button type=\"button\" role=\"radio\" aria-checked=\"true\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"var(--black,#000)\"/></g></svg>Dijkstra</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><polygon points=\"12,3 22,20 2,20\" fill=\"var(--blue,#0F4C9C)\"/></g></svg>A*</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><polygon points=\"12,2 22,12 12,22 2,12\" fill=\"var(--red,#D3222A)\"/></g></svg>Bidirectional</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" fill=\"var(--yellow,#FFC400)\"/></g></svg>ALT (16)</button></div>",
+      "css": ".ds-methods{display:flex;flex-wrap:wrap;gap:.5rem} .ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400)} .ds-subplate[aria-checked=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "subplate",
+      "description": "Steel strip of supplementary plate links above the first sign.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Sections\"><a href=\"#\" class=\"ds-subplate\">Map</a><a href=\"#\" class=\"ds-subplate\">Methods</a><a href=\"#\" class=\"ds-subplate\">Results</a><a href=\"#\" class=\"ds-subplate\">Limits</a></nav>",
+      "css": ".ds-nav{display:flex;gap:.25rem;overflow-x:auto;padding:.5rem;background:var(--steel,#D5D9DE)} .ds-nav a{white-space:nowrap;margin:.2em .35em .2em 0} .ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400)} .ds-subplate[aria-checked=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Roundel",
+      "kind": "custom",
+      "refersTo": "roundel",
+      "description": "Top speed of a graph as a speed-limit sign.",
+      "html": "<span class=\"ds-roundel\" role=\"img\" aria-label=\"Top speed 80 km/h\">80</span>",
+      "css": ".ds-roundel{display:inline-grid;place-items:center;width:3.2em;height:3.2em;border-radius:50%;border:.384em solid var(--red,#D3222A);background:var(--white,#fff);color:var(--black,#000);font:800 1.25rem/1 Overpass,system-ui,sans-serif;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Caveat",
+      "kind": "custom",
+      "description": "Caution triangle with one sentence, next to anything estimated or synthetic.",
+      "html": "<p class=\"ds-caveat\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3.5 L21.5 20 H2.5 Z\" fill=\"var(--yellow,#FFC400)\" stroke=\"var(--red,#D3222A)\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><rect x=\"11\" y=\"8.5\" width=\"2\" height=\"7\" rx=\"1\"/><circle cx=\"12\" cy=\"17.6\" r=\"1.2\"/></svg><span>Caveat: congestion here is synthetic.</span></p>",
+      "css": ".ds-caveat{display:flex;gap:.5rem;align-items:flex-start;margin:0;color:var(--black,#000);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif}"
+    },
+    {
+      "name": "Scrub track",
+      "kind": "input",
+      "description": "Range input framed by a supplementary plate; position is intersections settled.",
+      "html": "<label class=\"ds-scrub\"><input type=\"range\" min=\"0\" max=\"100\" value=\"60\" aria-label=\"Intersections settled\"></label>",
+      "css": ".ds-scrub{display:flex;padding:.15em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff)} .ds-scrub:focus-within{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-scrub input{width:100%;height:1.75rem;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer} .ds-scrub input:focus{outline:none} .ds-scrub input::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--black,#000)} .ds-scrub input::-moz-range-track{height:4px;border-radius:2px;background:var(--black,#000)} .ds-scrub input::-webkit-slider-thumb{-webkit-appearance:none;width:1.25rem;height:1.25rem;margin-top:calc((4px - 1.25rem)/2);border:3px solid var(--black,#000);border-radius:50%;background:var(--blue,#0F4C9C)} .ds-scrub input::-moz-range-thumb{width:1.25rem;height:1.25rem;box-sizing:border-box;border:3px solid var(--black,#000);border-radius:50%;background:var(--blue,#0F4C9C)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Sign Stack",
+    "overview": "\n**Creative North Star: \"The Sign Stack\"**\n\nThe page is a column of Korean traffic safety signs (교통안전표지) laid on unpainted steel. Each section is one sign: a flat colour field with rounded corners and a keyline set in from the edge. The colour of the field says what kind of statement the section makes. Blue instructs, white regulates and reports, yellow warns, bare steel is the back of the sign.\n\nEverything is flat sheeting. The build has no gradient, no shadow, no blur and no translucent panel anywhere; depth comes only from one opaque thing sitting on another. Type is one highway grotesque in heavy weights with tabular numerals. Shapes (disc, triangle, diamond, square, octagon, red-ringed roundel) carry meaning every time they appear and are never ornament.",
+    "keyCharacteristics": [
+      "One section is one sign: field colour, inset keyline, rounded corners.",
+      "Five sign colours plus steel, all flat and opaque.",
+      "White supplementary plates with a black border carry controls, navigation and readouts.",
+      "A method is always its shape and colour together: black disc, blue triangle, red diamond, yellow square.",
+      "Heavy grotesque Latin, heavy gothic Hangul for names, tabular numerals for every figure.",
+      "Nothing is told by colour alone; every source file is named under the thing it feeds."
+    ],
+    "rules": [
+      {
+        "name": "The Field Means Something Rule",
+        "body": "A sign's field colour is chosen by what the section says: blue explains, white reports, yellow warns, steel credits. Colour is never picked for rhythm or variety.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paired Ink Rule",
+        "body": "Secondary text follows its field: Steel Ink on white, yellow and steel; Pale Blue on blue. Links are Deep Sign Blue on light fields and white on blue. The focus ring is Sign Blue on light fields and Caution Yellow on blue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shape And Colour Rule",
+        "body": "A method is identified by shape and colour together, with its name beside it: Dijkstra black disc, A* blue triangle, Bidirectional red diamond, ALT yellow square (small, medium, large for 4, 8, 16 landmarks). Every glyph has a 2px outline in the current text colour so it reads on any field. A yellow line on white is drawn over a black casing; the yellow route on blue is drawn over a blue casing.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Every number that can change or be compared (tables, readouts, counters, roundels) uses tabular numerals. A live counter reserves its final width so plates do not move.",
+        "section": "typography"
+      },
+      {
+        "name": "The Heavy Hangul Rule",
+        "body": "Text marked as Korean is Gothic A1 at 800, whatever weight surrounds it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Sheeting Rule",
+        "body": "No shadow, gradient, blur or translucent surface. If something needs separating, give it a border, a keyline or an opaque field. The one use of transparency is the hero road network itself: roads not yet settled and the previous method's roads are drawn as fainter white.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do make each new section one sign, and pick its field by meaning: blue explains, white reports, yellow warns, steel credits.",
+      "Do put every control, navigation link and readout on a white supplementary plate with a 2px black border.",
+      "Do show a method as its shape, its colour and its name together.",
+      "Do use tabular numerals for every figure and reserve the width of anything that counts.",
+      "Do switch secondary text, link and focus colours with the field (Steel Ink and Sign Blue on light; Pale Blue, white and Caution Yellow on blue).",
+      "Do put a source line under every chart, table and demo, and a caution triangle with a sentence next to anything estimated or synthetic.",
+      "Do keep text to 66ch and let charts, tables and demos take the full width of the sign.",
+      "Do give text over the map an opaque patch or outline in the field colour."
+    ],
+    "donts": [
+      "Don't add shadows, gradients, blur or translucent panels.",
+      "Don't use red as a sign field; it is for rings, limits and wrong-answer cells.",
+      "Don't use a sign shape (roundel, triangle, octagon, disc, diamond, square) as decoration.",
+      "Don't distinguish anything by colour alone.",
+      "Don't set Hangul lighter than 800, or use it for anything but names.",
+      "Don't let the page scroll sideways at 375px; reflow the table or scroll it inside its own region.",
+      "Don't add a dark scheme; the tokens are light only."
+    ]
+  }
+}
