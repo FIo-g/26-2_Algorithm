@@ -36,7 +36,7 @@
 /* Both title lines stay on one line. The longer one, "The same answer for less", is 11.5em wide and the sign's
    content is 279px at 375px, so 1.4rem is the floor; from 480px 5vw takes over, and 4.5rem is reached at 1440px. */
 .title:global(.display) {
-  font-size: clamp(1.4rem, 5vw, 4.5rem);
+  font-size: clamp(1.4rem, min(5vw, 6.5svh), 4.5rem);
 }
 .lede {
   width: fit-content;
@@ -46,7 +46,8 @@
 }
 
 /* The map area. SearchMap sizes and shifts the network inside it, so whatever sticks out is clipped here. From 900px
-   the whole network is fitted and the height leaves room for the title, the lede and a row of controls on screen. */
+   the network fills the width of the sign: the height follows the width at the network's aspect (--map-aspect, set by
+   MapSection from hero.json), capped at one window under the nav so the whole map fits on screen. */
 .slot {
   display: grid;
   grid-template: minmax(0, 1fr) / minmax(0, 1fr); /* a network wider than the slot overflows evenly on both sides */
@@ -337,7 +338,11 @@
 
 @media (min-width: 900px) {
   .slot {
-    height: clamp(20rem, calc(100svh - 23rem), 46rem);
+    height: auto;
+    aspect-ratio: var(--map-aspect, 1.2);
+    max-height: calc(100svh - var(--nav-h) - 6rem);
+    min-height: 20rem;
+    margin-inline: auto; /* the height cap narrows the box, so centre it */
   }
   .controls {
     font-size: 1rem;

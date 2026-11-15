@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { HERO_SOURCE_LINE } from "@/components/hero/data";
 import styles from "@/components/hero/hero.module.css";
 import { SearchMap } from "@/components/hero/SearchMap";
@@ -31,7 +32,12 @@ export function MapSection() {
     ),
   }));
   return (
-    <section id="map" aria-labelledby="map-title" className={styles.root}>
+    <section
+      id="map"
+      aria-labelledby="map-title"
+      className={styles.root}
+      style={{ "--map-aspect": graphs.seoul.aspect } as CSSProperties}
+    >
       <h1 id="map-title" className={`display ${styles.title}`}>
         <span className={styles.legend}>Seoul shortest paths</span>{" "}
         <span className={styles.legend}>The same answer for less</span>
