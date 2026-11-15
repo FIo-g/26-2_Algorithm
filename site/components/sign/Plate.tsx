@@ -11,7 +11,7 @@ export type PlateProps = {
   children: ReactNode;
 };
 
-// One section of the page is one sign.
+// A sign set inside the page column (inline), sized by its content.
 export function Plate({ tone, id, labelledBy, inline, className, children }: PlateProps) {
   const classes = ["plate", `plate--${tone}`, inline && "plate--inline", className].filter(Boolean).join(" ");
   return (
