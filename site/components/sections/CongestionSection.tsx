@@ -1,9 +1,19 @@
 import { AccuracyGrid } from "@/components/charts/AccuracyGrid";
 import { RerouteGain } from "@/components/charts/RerouteGain";
-import { SumoTable } from "@/components/charts/SumoTable";
+import { SumoTable, findE4, formatTravelS } from "@/components/charts/SumoTable";
 import { GraphPicker } from "@/components/ui/GraphPicker";
 import { formatInt, formatMultiplier } from "@/lib/format";
-import { GRAPH_LABELS, loadAccuracy, loadE4Summary, loadReroute, timingSpeed, type ExperimentGraph } from "@/lib/results";
+import {
+  GRAPH_LABELS,
+  loadAccuracy,
+  loadE4Manifest,
+  loadE4Summary,
+  loadReroute,
+  timingSpeed,
+  type E4Manifest,
+  type E4Row,
+  type ExperimentGraph,
+} from "@/lib/results";
 
 const GRAPHS: ExperimentGraph[] = ["seoul", "gss"];
 
@@ -40,8 +50,46 @@ function CongestionPanel({ graph }: { graph: ExperimentGraph }) {
   );
 }
 
+function SumoBlock({ rows, manifest }: { rows: E4Row[]; manifest: E4Manifest }) {
+  const seeds = findE4(rows, "W", "medium", "fixed").seeds;
+  const wFixed = findE4(rows, "W", "medium", "fixed");
+  const w30 = findE4(rows, "W", "medium", "reroute30");
+  const w100 = findE4(rows, "W", "medium", "reroute100");
+  const hFixed = findE4(rows, "W", "high", "fixed");
+  const h30 = findE4(rows, "W", "high", "reroute30");
+  const h100 = findE4(rows, "W", "high", "reroute100");
+  const equipped = findE4(rows, "W", "medium", "reroute30", "equipped");
+  const unequipped = findE4(rows, "W", "medium", "reroute30", "unequipped");
+
+  return (
+    <>
+      <h3>When many vehicles re-route, it helps only if the fixed routes jam</h3>
+      <p>
+        {`Simulated in SUMO on a 3 × 3 intersection network in Anyang: SUMO's built-in re-routing (Dijkstra, every ${manifest.periodS} s) on 30% or 100% of vehicles, against fixed routes. Mean of ${seeds} seeds. Signal times and demand are assumed values.`}
+      </p>
+      <SumoTable rows={rows} plans={manifest.plans} />
+      <p>
+        {`Normal demand (Webster timing): re-routing only made trips longer, and more re-routing made it worse: ${formatTravelS(wFixed.meanTtS)} s, then ${formatTravelS(w30.meanTtS)} s, then ${formatTravelS(w100.meanTtS)} s.`}
+      </p>
+      <p>
+        {`Heavy demand (Webster timing): with fixed routes only ${formatInt(hFixed.arrivedPct)}% of vehicles arrived, so ${formatTravelS(hFixed.meanTtS)} s is a lower bound; with re-routing every vehicle arrived: ${formatTravelS(h30.meanTtS)} s at 30%, ${formatTravelS(h100.meanTtS)} s at 100%.`}
+      </p>
+      <p>
+        {`In the 30% run under normal demand, re-routing vehicles (${formatTravelS(equipped.meanTtS)} s) were slower than the rest (${formatTravelS(unequipped.meanTtS)} s): we read this as vehicles crowding onto the same fast road.`}
+      </p>
+      <p>
+        Webster timing is computed from the original routes, which may favour fixed routes. The queue-responsive plan is in
+        the file but left out here, because it miscounts re-routed vehicles.
+      </p>
+      <p className="small muted">Source: results/e4_summary.csv, results/e4_manifest.json.</p>
+    </>
+  );
+}
+
 export function CongestionSection() {
   const sumo = loadE4Summary();
+  const manifest = loadE4Manifest();
+  if (sumo && !manifest) throw new Error("e4_summary.csv exists but e4_manifest.json does not");
   const panels = Object.fromEntries(GRAPHS.map((graph) => [graph, <CongestionPanel key={graph} graph={graph} />]));
 
   return (
@@ -64,15 +112,7 @@ export function CongestionSection() {
         panels={panels}
       />
 
-      {sumo && (
-        <>
-          <h3>What happens when many drivers re-route (SUMO)</h3>
-          <p>
-            Simulated in SUMO, not measured traffic.
-          </p>
-          <SumoTable rows={sumo} />
-        </>
-      )}
+      {sumo && manifest && <SumoBlock rows={sumo} manifest={manifest} />}
     </section>
   );
 }

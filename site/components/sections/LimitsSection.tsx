@@ -1,11 +1,12 @@
 import { formatPercent } from "@/lib/format";
-import { maxspeedMissingRange } from "@/lib/results";
+import { loadE4Summary, maxspeedMissingRange } from "@/lib/results";
 
 // Estimated speeds, synthetic congestion and the one-vehicle re-routing model are disclosed here.
 export function LimitsSection() {
   const range = maxspeedMissingRange();
   const low = formatPercent(range.min, 0);
   const high = formatPercent(range.max, 0);
+  const sumo = loadE4Summary() !== null;
 
   return (
     <section id="limits" className="flow-section" aria-labelledby="limits-title">
@@ -19,8 +20,9 @@ export function LimitsSection() {
           Congestion is synthetic. Real speeds from the national ITS API were collected but not used in these results.
         </li>
         <li>
-          Re-routing is modelled for one vehicle on a fixed congestion snapshot, so it does not change the traffic around
-          it.
+          {sumo
+            ? "On the Seoul graphs re-routing is modelled for one vehicle on a fixed congestion snapshot, so it does not change the traffic around it. The SUMO test is a separate 3 × 3 network with assumed signals and demand."
+            : "Re-routing is modelled for one vehicle on a fixed congestion snapshot, so it does not change the traffic around it."}
         </li>
       </ul>
       <p className="small muted">Source: results/graph_table.csv, column maxspeed_missing_ratio; results/match_decision.md.</p>

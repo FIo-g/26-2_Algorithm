@@ -82,4 +82,20 @@
   .table caption {
     display: block;
   }
+
+  /* SumoTable: one full-width line per cell; the note wraps to its own line under the value. */
+  .table.sumo tr {
+    display: block;
+  }
+
+  .table.sumo td {
+    flex-wrap: wrap;
+    gap: 0 1rem;
+    white-space: nowrap;
+  }
+
+  .table.sumo .count {
+    flex-basis: 100%;
+    white-space: nowrap;
+  }
 }

@@ -1,5 +1,5 @@
 // Typed loaders for results/*.csv. Every number shown on the site comes through here.
-import { readResults, resultsExists } from "./csv";
+import { readResults, readResultsJson, resultsExists } from "./csv";
 import { isMethodId, type MethodId } from "./methods";
 
 export const GRAPH_IDS = ["gangnam", "gss", "seoul"] as const;
@@ -401,5 +401,15 @@ export function loadE4Summary(): E4Row[] | null {
     meanTtMaxS: num(r.mean_tt_max_s, "mean_tt_max_s"),
     changePct: optNum(r.change_pct),
   }));
+}
+
+// e4_manifest.json (SUMO): plan names and the re-routing period. The file may be absent, in which case the loader returns null.
+export type E4Manifest = { plans: Record<string, string>; periodS: number };
+
+export function loadE4Manifest(): E4Manifest | null {
+  if (!resultsExists("e4_manifest.json")) return null;
+  const m = readResultsJson("e4_manifest.json") as { plans?: Record<string, string>; period_s?: number };
+  if (!m.plans || typeof m.period_s !== "number") throw new Error("e4_manifest.json needs plans and period_s");
+  return { plans: m.plans, periodS: m.period_s };
 }
 

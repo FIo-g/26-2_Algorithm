@@ -48,3 +48,7 @@ export function readResults(name: string): CsvRow[] {
   cache.set(name, rows);
   return rows;
 }
+
+export function readResultsJson(name: string): unknown {
+  return JSON.parse(fs.readFileSync(resultsPath(name), "utf8"));
+}

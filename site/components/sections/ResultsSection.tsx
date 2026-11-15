@@ -67,7 +67,7 @@ function GraphPanel({
       <p className={styles.source}>Source: results/graph_table.csv.</p>
 
       <p className={styles.lead}>
-        {`On trips ${bandPhrase(">10km")} in ${name}, ${METHODS[lead.algo].label} settled ${share} of what Dijkstra settled and ran ${formatMultiplier(lead.speedup)} as fast.`}
+        {`On trips ${bandPhrase(">10km")} in ${name}, ${METHODS[lead.algo].label} settled ${share} of what Dijkstra settled and ran ${formatMultiplier(lead.speedup, 2)} as fast.`}
       </p>
 
       <ul className={styles.key} aria-label="Method key">
