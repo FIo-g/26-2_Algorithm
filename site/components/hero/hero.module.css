@@ -1,14 +1,14 @@
-/* The map scrolly. The section is one tall blue sign. On a phone the stage (map and controls) sticks to the top of the
-   screen and the cards scroll under it. From 900px the sign has two columns: the intro and the cards in the left one,
-   the stage pinned under the nav in the right one, so text never lies on the map. Class selectors are doubled up where
-   they have to beat the single-class rules in globals.css. */
+/* The map section: one blue sign as wide as the article column, with everything in one column: title, lede, map,
+   controls, the explanation of the selected method, the source line. Nothing sticks and nothing listens to scroll.
+   Class selectors are doubled up where they have to beat the single-class rules in globals.css. */
 
 .root {
   --focus: var(--yellow);
+  --col: clamp(1.25rem, 5vw, 4rem); /* the side gutter of .flow in globals.css */
   position: relative;
-  isolation: isolate;
-  margin: var(--gap);
-  padding-bottom: calc(var(--gap) + var(--keyline) + 0.75rem);
+  width: min(100% - 2 * var(--col), 72rem - 2 * var(--col)); /* 72rem is the max-width of .flow */
+  margin: var(--gap) auto 0;
+  padding: calc(clamp(1.25rem, 3vw, 2.5rem) + var(--gap));
   border-radius: var(--radius);
   background: var(--blue);
   color: var(--white);
@@ -19,14 +19,9 @@
   content: "";
   position: absolute;
   inset: var(--gap);
-  z-index: 4; /* above the opaque stage ground, which is as wide as the sign on a phone */
   border: var(--keyline) solid currentColor;
   border-radius: calc(var(--radius) - var(--gap));
   pointer-events: none;
-}
-
-.intro {
-  padding: calc(var(--pad) + var(--gap)) var(--pad) 0.75rem;
 }
 
 .legend {
@@ -38,45 +33,28 @@
 .legend + .legend {
   margin-top: 0.2em;
 }
-/* On a phone both title lines must stay on one line. The longer one, "The same answer for less", is 11.5em wide and the
-   content column is 100vw - 56px, so the size can be at most (100vw - 56px) / 11.5. */
+/* Both title lines stay on one line. The longer one, "The same answer for less", is 11.5em wide and the sign's
+   content is 279px at 375px, so 1.4rem is the floor; from 480px 5vw takes over, and 4.5rem is reached at 1440px. */
 .title:global(.display) {
-  font-size: clamp(1.5rem, calc(8.7vw - 5.5px), 3.25rem);
+  font-size: clamp(1.4rem, 5vw, 4.5rem);
 }
 .lede {
   width: fit-content;
-  max-width: min(36rem, 100%);
-  margin: 1rem 0 0;
+  max-width: min(48rem, 100%);
+  margin: 0.75rem 0 0;
   padding: 0.25rem 0.75rem 0.25rem 0;
 }
 
-/* The stage: the map and its controls. On a phone it sticks to the top of the screen on an opaque ground and holds the
-   map, one row of controls, one readout line and the credit, so it stays under 58svh at 375x667. */
-.stage {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  padding: 0.375rem var(--pad) 0.3rem;
-  background: var(--blue);
-}
-/* Nothing to pin when the map did not draw: the fallback table scrolls with the page. */
-@media (max-width: 899.98px) {
-  .stage:has(.fallback) {
-    position: static;
-  }
-}
-
-/* The map area. On a phone it is a block at the top of the stage. From 900px it takes the height the controls leave.
-   SearchMap sizes and shifts the network inside it, so whatever sticks out is clipped here. */
+/* The map area. SearchMap sizes and shifts the network inside it, so whatever sticks out is clipped here. From 900px
+   the whole network is fitted and the height leaves room for the title, the lede and a row of controls on screen. */
 .slot {
-  flex: none;
   display: grid;
   grid-template: minmax(0, 1fr) / minmax(0, 1fr); /* a network wider than the slot overflows evenly on both sides */
   place-items: center;
   container-type: size;
   overflow: hidden;
-  height: min(77vw, 42svh);
-  margin: 0 calc(var(--gap) + var(--keyline) - var(--pad));
+  height: min(77vw, 46svh);
+  margin-top: 0.75rem;
 }
 
 /* The network keeps its aspect and is centred inside the slot. */
@@ -161,14 +139,13 @@
   align-items: flex-end;
 }
 
-/* Controls. A phone gets one row (play, scrub) and one readout line; the method plates are not shown, because the
-   cards pick the method as the page scrolls. */
+/* Controls: the method plates, play and the scrub, then the readouts. The plates wrap on a phone. */
 .controls {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
-  margin-top: 0.3rem;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
   font-size: 0.9375rem;
 }
 .row {
@@ -182,7 +159,7 @@
   font-size: 0.8125rem;
 }
 .methods {
-  display: none;
+  display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -273,33 +250,12 @@
   }
 }
 
-/* The source line sits in the controls on a wide screen. A phone has no room for it in the stage, so it closes the sign. */
-.stage .source {
-  display: none;
-  color: var(--on-blue-2);
-}
-.root .notes {
-  margin: 0.5rem var(--pad) 0;
-  color: var(--on-blue-2);
-}
-
-.stage .credit {
-  width: fit-content;
-  margin: 0.2rem 0 0;
-  font-size: 0.75rem;
-  line-height: 1.2;
-}
-
-/* The cards: one per method, in the order of hero.json. On a phone they are 55svh apart and scroll under the stage. */
-.steps {
-  margin: 0;
-  padding: 0.75rem var(--pad) 0;
-  list-style: none;
-}
-.step {
-  min-height: 55svh;
-}
-.card {
+/* The explanation of the selected method on a white plate (the glyphs need a white ground). Every method is in the
+   HTML and all of them sit in one grid cell, so the plate keeps the height of the tallest and nothing below it moves
+   when the method changes. */
+.explain {
+  display: grid;
+  margin-top: 0.75rem;
   padding: 1rem 1.25rem;
   border: 2px solid var(--black);
   border-radius: 6px;
@@ -308,26 +264,33 @@
   font-size: 0.9375rem;
   line-height: 1.4;
 }
-.cardTitle {
+.variant {
+  grid-area: 1 / 1;
+}
+.variant[data-shown="false"] {
+  visibility: hidden;
+}
+.explain p {
+  margin: 0 0 0.4rem;
+  max-width: none;
+}
+.explain .name {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0 0 0.5rem;
   font-size: 1.5rem;
+  font-weight: 800;
   line-height: 1.15;
 }
-.cardTitle :global(.glyph) {
+.name :global(.glyph) {
   width: 1em;
   height: 1em;
   vertical-align: baseline;
 }
-.card p {
-  margin: 0 0 0.4rem;
-  max-width: none;
-}
 /* Both graphs' numbers are in the HTML. The sentence for the graph on the map shows: by screen width until the map
    has loaded, then by the graph it loaded (SearchMap sets data-graph on the section). */
-.card .facts {
+.explain .facts {
   display: none;
   margin: 0;
 }
@@ -336,9 +299,25 @@
     display: block;
   }
 }
+@media (min-width: 900px) {
+  .root:not([data-graph]) .facts[data-for="seoul"] {
+    display: block;
+  }
+}
 .root[data-graph="seoul"] .facts[data-for="seoul"],
 .root[data-graph="gangnam"] .facts[data-for="gangnam"] {
   display: block;
+}
+
+.root .notes {
+  margin: 0.75rem 0 0;
+  color: var(--on-blue-2);
+}
+.root .credit {
+  width: fit-content;
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
 /* No WebGL2, or the data did not load. */
@@ -355,57 +334,12 @@
 .fallback :lang(ko) {
   font-size: 1em;
 }
-.root .fallback .source {
-  display: block;
-  max-width: none;
-  margin: 0.75rem 0 0;
-  color: var(--steel-ink);
-}
 
 @media (min-width: 900px) {
-  .root {
-    --in: calc(var(--gap) + var(--keyline) + 1rem); /* where content starts, measured in from the edge of the sign */
-    --stage-h: calc(100svh - var(--nav-h) - var(--gap) - var(--in) - 0.75rem); /* the stage ends 0.75rem above the screen bottom at scroll 0 */
-    display: grid;
-    grid-template-columns: clamp(22rem, 38%, 34rem) minmax(0, 1fr);
-    column-gap: 2rem;
-    padding: var(--in);
-  }
-
-  /* The intro is tall enough that the first card starts in the lower part of the first screen. Its width is the
-     column's, so the title is sized from it: "Seoul shortest paths" is 9.3em wide, so 1/9.4 of the width fits line one, and line two wraps. */
-  .intro {
-    min-height: calc(65svh - var(--nav-h) - var(--gap) - var(--in));
-    padding: 0 0 0.75rem;
-    container-type: inline-size;
-  }
-  .title:global(.display) {
-    font-size: calc(100cqw / 9.4);
-    line-height: 1.02;
-  }
-
-  /* The stage spans both grid rows, so it stays pinned until the last card has gone. */
-  .stage {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: start;
-    top: calc(var(--nav-h) + 0.75rem);
-    display: flex;
-    flex-direction: column;
-    height: var(--stage-h);
-    padding: 0;
-    container-type: inline-size; /* the method plates and the long readouts show only if the row has room */
-  }
   .slot {
-    flex: 1 1 0;
-    min-height: 0;
-    height: auto;
-    margin: 0;
+    height: clamp(20rem, calc(100svh - 23rem), 46rem);
   }
-
   .controls {
-    margin-top: 0.75rem;
-    gap: 0.5rem;
     font-size: 1rem;
   }
   .readouts {
@@ -417,43 +351,7 @@
   .scrub input {
     height: 1.75rem;
   }
-  .stage .source {
-    display: block;
-    margin: 0.5rem 0 0;
-  }
-  .root .notes {
-    display: none;
-  }
-  .root:not([data-graph]) .facts[data-for="seoul"] {
-    display: block;
-  }
-  .methods {
-    display: flex;
-    flex-basis: 100%; /* its own row inside .row when the stage is narrow */
-  }
-  @container (min-width: 46rem) {
-    .methods {
-      display: flex;
-      flex-basis: auto;
-    }
-  }
-  @container (max-width: 39.99rem) {
-    .long {
-      display: none;
-    }
-    .short {
-      display: inline;
-    }
-  }
-
-  /* The cards are in the left column's flow, one step of at least 80svh each. */
-  .steps {
-    padding: 0;
-  }
-  .step {
-    min-height: 80svh;
-  }
-  .card {
+  .explain {
     font-size: 1rem;
     line-height: 1.45;
   }

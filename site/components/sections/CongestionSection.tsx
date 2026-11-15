@@ -2,8 +2,8 @@ import { AccuracyGrid } from "@/components/charts/AccuracyGrid";
 import { RerouteGain } from "@/components/charts/RerouteGain";
 import { SumoTable } from "@/components/charts/SumoTable";
 import { GraphPicker } from "@/components/ui/GraphPicker";
-import { formatInt } from "@/lib/format";
-import { GRAPH_LABELS, loadAccuracy, loadE4Summary, loadReroute, type ExperimentGraph } from "@/lib/results";
+import { formatInt, formatMultiplier } from "@/lib/format";
+import { GRAPH_LABELS, loadAccuracy, loadE4Summary, loadReroute, timingSpeed, type ExperimentGraph } from "@/lib/results";
 
 const GRAPHS: ExperimentGraph[] = ["seoul", "gss"];
 
@@ -24,6 +24,10 @@ function CongestionPanel({ graph }: { graph: ExperimentGraph }) {
         rows={accuracy}
         source={`results/e3_${graph}_accuracy.csv`}
       />
+      <p>
+        {`Exact is not the same as fast: under 08 h congestion, on trips over 10 km in ${GRAPH_LABELS[graph]}, ALT (16) ran at ${formatMultiplier(timingSpeed(graph, "synth08", ">10km", "alt16"), 3)} Dijkstra's speed, because its bounds were built on free-flow times.`}
+      </p>
+      <p className="small muted">Source: results/e3_{graph}_timing.csv, median time per method.</p>
 
       <h3>Does re-routing help one driver?</h3>
       <p className="small muted">One vehicle, synthetic congestion snapshot.</p>

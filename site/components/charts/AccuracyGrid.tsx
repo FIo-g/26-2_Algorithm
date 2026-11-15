@@ -74,7 +74,7 @@ export function AccuracyGrid({ title, rows, source }: { title: string; rows: Acc
           </tbody>
         </table>
       </div>
-      <p className="small muted">Source: {source}</p>
+      <p className="source">Source: {source}</p>
     </>
   );
 }

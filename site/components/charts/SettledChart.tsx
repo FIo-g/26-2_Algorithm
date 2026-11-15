@@ -10,7 +10,7 @@ export function SettledChart({ rows, graph }: { rows: E2Row[]; graph: GraphId })
       graph={graph}
       value={(r) => r.settledRatio}
       tickFormat={(v) => formatPercent(v, 0)}
-      valueFormat={(v) => formatPercent(v, 0)}
+      valueFormat={(v) => formatPercent(v, v < 0.1 ? 1 : 0)}
       yTitle="Settled, % of Dijkstra"
       reference={1}
       referenceLabel="Dijkstra"

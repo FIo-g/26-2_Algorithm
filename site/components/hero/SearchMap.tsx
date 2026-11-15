@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, ty
 import { MethodGlyph } from "@/components/sign/MethodGlyph";
 import { SubPlate } from "@/components/sign/SubPlate";
 import { formatInt, formatMinutesSeconds } from "@/lib/format";
-import { isMethodId, METHODS, type MethodId } from "@/lib/methods";
-import { HERO_SOURCE_LINE, loadHero, samePath, segmentRanks, share, type GraphKey, type HeroData } from "./data";
+import { METHODS, type MethodId } from "@/lib/methods";
+import { loadHero, samePath, segmentRanks, share, type GraphKey, type HeroData } from "./data";
 import { createRenderer } from "./gl";
 import styles from "./hero.module.css";
 import { createPlayer, type Player, type PlayerState } from "./player";
@@ -14,7 +14,6 @@ const PLAY_SECONDS = 7; // Dijkstra from 0 to the end
 const MIN_SECONDS = 1.6; // so a search of a few dozen intersections is still watchable
 const LIVE_DELAY_MS = 400; // the spoken readout waits for the clock to settle, so scrubbing does not flood it
 const FIT_MARGIN = 0.03; // wide screens: margin round the whole network, as a share of its size
-const STEP_LINE = 0.65; // a card's step is active once the top edge of the step is above this share of the viewport height
 const VIEW_MARGIN = 0.08; // narrow screens: margin round the area the search covered
 const DIM_WIDE: [number, number] = [0.16, 0.42]; // alpha of unlit roads and of the previous method's roads
 const DIM_NARROW: [number, number] = [0.3, 0.55];
@@ -24,7 +23,7 @@ const GRAPH_NAME: Record<GraphKey, string> = { gangnam: "Gangnam-gu", seoul: "Se
 
 type Problem = "load" | "gl" | null;
 
-// Spoken once a second method has finished with the same route and travel time as Dijkstra. The cards say it in text.
+// Spoken once a second method has finished with the same route and travel time as Dijkstra. The explanation says it in text.
 function followText(data: HeroData, method: MethodId, completed: MethodId[]): string {
   const current = data.algos[method];
   const baseline = data.algos.dijkstra;
@@ -181,35 +180,41 @@ function Fallback({ data }: { data: HeroData | null }) {
         This browser cannot draw the map. The route runs from <span lang="ko">{sLabel.ko}</span> {sLabel.en} to{" "}
         <span lang="ko">{tLabel.ko}</span> {tLabel.en}.
       </p>
-      <table>
-        <caption className="visually-hidden">Intersections settled and travel time for each method</caption>
-        <thead>
-          <tr>
-            <th scope="col">Method</th>
-            <th scope="col" className="num">
-              Intersections settled
-            </th>
-            <th scope="col" className="num">
-              Estimated travel time
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.order.map((id) => (
-            <tr key={id}>
-              <th scope="row">{METHODS[id].label}</th>
-              <td className="num">{formatInt(data.algos[id].settled)}</td>
-              <td className="num">{formatMinutesSeconds(data.algos[id].time_s)}</td>
+      <div
+        className="table-scroll"
+        tabIndex={0}
+        role="region"
+        aria-label="Intersections settled and travel time for each method"
+      >
+        <table>
+          <caption className="visually-hidden">Intersections settled and travel time for each method</caption>
+          <thead>
+            <tr>
+              <th scope="col">Method</th>
+              <th scope="col" className="num">
+                Intersections settled
+              </th>
+              <th scope="col" className="num">
+                Estimated travel time
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className={`source ${styles.source}`}>{HERO_SOURCE_LINE}</p>
+          </thead>
+          <tbody>
+            {data.order.map((id) => (
+              <tr key={id}>
+                <th scope="row">{METHODS[id].label}</th>
+                <td className="num">{formatInt(data.algos[id].settled)}</td>
+                <td className="num">{formatMinutesSeconds(data.algos[id].time_s)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
-export function SearchMap() {
+export function SearchMap({ explain }: { explain: { id: MethodId; body: ReactNode }[] }) {
   const [data, setData] = useState<HeroData | null>(null);
   const [problem, setProblem] = useState<Problem>(null);
   const [ui, setUi] = useState<PlayerState>({
@@ -241,7 +246,7 @@ export function SearchMap() {
   }, []);
 
   // Size and place the network in the map area, again whenever the area changes size. The section also learns which
-  // graph is on the map, so its cards show that graph's numbers.
+  // graph is on the map, so the explanation shows that graph's numbers.
   useEffect(() => {
     const slot = slotRef.current;
     if (!data || !slot) return;
@@ -318,37 +323,10 @@ export function SearchMap() {
     });
     observer.observe(canvas);
 
-    // Scrolling picks the method: the last step whose top edge is above STEP_LINE of the viewport height, or Dijkstra
-    // before the first one. A choice made with the controls holds until the active step changes.
-    const steps = Array.from(canvas.closest("section")?.querySelectorAll<HTMLElement>("[data-step]") ?? []);
-    let applied = -1;
-    let frame = 0;
-    const pickStep = () => {
-      frame = 0;
-      const line = window.innerHeight * STEP_LINE;
-      let at = -1;
-      for (let i = 0; i < steps.length; i++) {
-        if (steps[i].getBoundingClientRect().top <= line) at = i;
-      }
-      if (at === applied) return;
-      applied = at;
-      const id = at < 0 ? "dijkstra" : steps[at].dataset.step;
-      if (id && isMethodId(id) && data.order.includes(id)) player.select(id, !reducedRef.current);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(pickStep);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-
     reducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     player.start(!reducedRef.current);
-    pickStep(); // a page restored part way down starts on the method of the card in view
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(frame);
       window.clearTimeout(liveTimer);
       observer.disconnect();
       player.dispose();
@@ -357,7 +335,23 @@ export function SearchMap() {
     };
   }, [data, problem]);
 
-  if (problem) return <Fallback data={data} />;
+  const explanation = (
+    <div className={styles.explain}>
+      {explain.map(({ id, body }) => (
+        <div key={id} className={styles.variant} data-shown={id === ui.method}>
+          {body}
+        </div>
+      ))}
+    </div>
+  );
+  if (problem) {
+    return (
+      <>
+        <Fallback data={data} />
+        {explanation}
+      </>
+    );
+  }
 
   const corners = data ? placeLabels(data, layout) : (["ar", "ar"] as [Corner, Corner]);
   const order = data?.order ?? DEFAULT_ORDER;
@@ -489,8 +483,9 @@ export function SearchMap() {
             </span>
           </SubPlate>
         </div>
-        <p className={`source ${styles.source}`}>{HERO_SOURCE_LINE}</p>
       </div>
+
+      {explanation}
 
       <p className="visually-hidden" aria-live="polite" aria-atomic="true">
         {live}

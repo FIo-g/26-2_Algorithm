@@ -43,6 +43,8 @@ function GraphPanel({
   const name = GRAPH_LABELS[graph];
   const row = graphRow(graph);
   const lead = getE2(graph, ">10km", "alt16");
+  // Shares under 10% keep one decimal, so a small share does not round to a whole percent.
+  const share = formatPercent(lead.settledRatio, lead.settledRatio < 0.1 ? 1 : 0);
 
   return (
     <div>
@@ -65,7 +67,7 @@ function GraphPanel({
       <p className={styles.source}>Source: results/graph_table.csv.</p>
 
       <p className={styles.lead}>
-        {`On trips ${bandPhrase(">10km")} in ${name}, ${METHODS[lead.algo].label} settled ${formatPercent(lead.settledRatio, 0)} of what Dijkstra settled and ran ${formatMultiplier(lead.speedup)} as fast.`}
+        {`On trips ${bandPhrase(">10km")} in ${name}, ${METHODS[lead.algo].label} settled ${share} of what Dijkstra settled and ran ${formatMultiplier(lead.speedup)} as fast.`}
       </p>
 
       <ul className={styles.key} aria-label="Method key">
@@ -162,7 +164,7 @@ export function ResultsSection() {
         <h3>Why not just try every path?</h3>
       </div>
       {firstTimeout && limit !== null && (
-        <p>{`At ${formatInt(firstTimeout.n)} intersections, ${firstTimeout.timedOut} of ${firstTimeout.total} queries hit the ${formatDecimal(limit, 0)} second limit.`}</p>
+        <p>{`On Gangnam-gu subgraphs grown around Gangnam Station, at ${formatInt(firstTimeout.n)} intersections ${firstTimeout.timedOut} of ${firstTimeout.total} queries hit the ${formatDecimal(limit, 0)} second limit.`}</p>
       )}
       {limit !== null && <ExhaustiveChart rows={e1} limitS={limit} />}
       <p className={styles.source}>

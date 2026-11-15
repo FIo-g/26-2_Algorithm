@@ -54,6 +54,7 @@ export type GraphRow = {
   n: number; // intersections
   m: number; // road segments
   vmaxKph: number; // top speed, drawn as a Roundel
+  maxspeedMissingRatio: number; // share of roads with no OSM maxspeed tag (speed is estimated from road class)
 };
 
 export function loadGraphTable(): GraphRow[] {
@@ -62,7 +63,14 @@ export function loadGraphTable(): GraphRow[] {
     n: num(r.n, "n"),
     m: num(r.m, "m"),
     vmaxKph: num(r.vmax_kph, "vmax_kph"),
+    maxspeedMissingRatio: num(r.maxspeed_missing_ratio, "maxspeed_missing_ratio"),
   }));
+}
+
+// Range of the untagged-road share over all graphs, for the speed-estimate caveat.
+export function maxspeedMissingRange(): { min: number; max: number } {
+  const r = loadGraphTable().map((g) => g.maxspeedMissingRatio);
+  return { min: Math.min(...r), max: Math.max(...r) };
 }
 
 export function graphRow(graph: GraphId): GraphRow {
@@ -298,6 +306,36 @@ export function loadWastar(graph: ExperimentGraph): WastarRow[] {
     nRatio: num(r.n_ratio, "n_ratio"),
     nUnreachable: num(r.n_unreachable, "n_unreachable"),
   }));
+}
+
+// e3_{gss,seoul}_timing.csv: one row per query and method (E3, synthetic congestion)
+
+export type TimingRow = {
+  graph: ExperimentGraph;
+  scenario: string;
+  bin: Band;
+  kind: string;
+  algo: MethodId;
+  timeS: number;
+};
+
+export function loadTiming(graph: ExperimentGraph): TimingRow[] {
+  return readResults(`e3_${graph}_timing.csv`).map((r) => ({
+    graph: r.graph as ExperimentGraph,
+    scenario: r.scenario,
+    bin: r.bin as Band,
+    kind: r.kind,
+    algo: method(r.algo),
+    timeS: num(r.time_s, "time_s"),
+  }));
+}
+
+// Speed relative to Dijkstra: median Dijkstra time divided by the method's median time, over one scenario and band.
+// Only kind "full" rows: the file also holds reroute and weighted runs, which would skew the medians.
+export function timingSpeed(graph: ExperimentGraph, scenario: string, bin: Band, algo: MethodId): number {
+  const rows = loadTiming(graph).filter((r) => r.scenario === scenario && r.bin === bin && r.kind === "full");
+  const medianOf = (a: MethodId) => median(rows.filter((r) => r.algo === a).map((r) => r.timeS));
+  return medianOf("dijkstra") / medianOf(algo);
 }
 
 // reroute_gain_{gss,seoul}_summary.csv: saving from re-routing one vehicle. Savings are fractions.

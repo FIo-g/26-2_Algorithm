@@ -185,7 +185,7 @@ details > summary:hover { background: var(--yellow); color: var(--black); }
 .subplate[aria-current="true"],
 details[open] > summary { background: var(--black); color: var(--white); }
 .subplate:disabled { opacity: 0.45; cursor: not-allowed; }
-/* Phone-sized targets for the nav and the graph picker. The stage controls keep their size. */
+/* Phone-sized targets for the nav and the radio groups; play and the scrub keep their size. */
 @media (max-width: 899.98px) {
   .site-nav .subplate,
   [role="radiogroup"] .subplate { min-height: 2.75rem; }

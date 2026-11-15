@@ -1,4 +1,4 @@
-// One-line description of each method. Read by the step demo and the map cards.
+// One-line description of each method. Read by the step demo and the map explanation.
 export const METHOD_COPY = {
   dijkstra: "Always settles the closest unsettled intersection. Never looks at a settled one again.",
   astar:

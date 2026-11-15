@@ -11,7 +11,7 @@ Why: the first build read as a slide deck. Every section was a viewport-sized fr
 - Page ground is `--white`. `--steel` is only the nav bar and the footer. The map sign sits on the white page at every width.
 - Everything after the map is one article column: `<div class="flow">` (max-width 72rem, centred, inline padding `clamp(1.25rem, 5vw, 4rem)`). Sections inside it are plain `<section class="flow-section">`: no border, no background, no min-height. Space between sections is `clamp(4rem, 9vw, 7.5rem)`. The column has the same space above its first section and below its last. Inside a section or a picker panel, blocks (a chart with its source line, a table, a plate, a sub-heading group) are 2rem to 2.5rem apart; a source line belongs to the block above it and never touches the next paragraph. Headings and text sit directly on the page.
 - A plate is now an inline sign inside the column, sized by its content: `<Plate inline ...>` (no outer margin, padding `clamp(1.25rem, 3vw, 2.5rem)` plus the keyline gap, keyline kept). Only two things are plates: the map sign (blue) and the step-demo widget (blue). Nothing else gets a frame or a coloured field. No section other than the map stage may be sized to the viewport.
-- `--nav-h: 3.75rem` is defined on `:root`. Nav: `position: sticky; top: 0; z-index: 20` from 900px, not sticky below 900px. It marks the section in view with `aria-current="true"` (inverted plate, the look of a selected SubPlate), found with an IntersectionObserver. Links: Map, Same answer, Methods, Results, Congestion, Team. `html` gets a `scroll-padding-top` that clears the sticky nav and a sticky picker.
+- `--nav-h: 3.75rem` is defined on `:root`. Nav: `position: sticky; top: 0; z-index: 20` from 900px, not sticky below 900px. It marks the section in view with `aria-current="true"` (inverted plate, the look of a selected SubPlate), found with an IntersectionObserver. Links: Map, Same answer, Methods, Results, Congestion, Limits, Team. `html` gets a `scroll-padding-top` that clears the sticky nav and a sticky picker.
 - `#team` is a `<footer>` on a full-width steel band, same copy as before.
 - `<details>`: the summary looks like a SubPlate button. Native element, no JavaScript.
 - `lib/method-copy.ts` holds the one-line description of each method (moved out of `StepDemo`), keyed `dijkstra`, `astar`, `bidir`, `alt`. The step demo and the map cards both read it.
@@ -32,44 +32,30 @@ Why: the first build read as a slide deck. Every section was a viewport-sized fr
 - The radio row is `position: sticky` (top `var(--nav-h)` from 900px, `0` below; z-index 10), white background, hairline under it, so the graph can be changed while reading any chart below it. Below 900px the row is one line that scrolls sideways inside itself (like the nav) and keeps the selected plate in view by setting the row's own `scrollLeft` (never `scrollIntoView`, which would move the page). Options are listed largest graph first, so the initial one is visible without scrolling.
 - Selection is local to one picker and is not kept in the URL (say so in a `shortcut:` comment).
 
-### 0.2 Map scrolly (`MapSection` + `components/hero/`)
+### 0.2 Map (`MapSection` + `components/hero/`)
 
-The map is pinned while the reader scrolls through the four methods. Section `#map`. DOM order: `intro` (h1 in two lines, the lede), `stage` (map, markers, controls, source line, OSM credit), `steps` (an `<ol>` of four cards, one per method in `hero.json` order).
+Revision 4 (2026-11-15, the user's layout): one column, in this order, at every width. No pinning, no scroll steps, no side cards. Earlier layouts are void: revision 2 pinned the map and let cards scroll over it, revision 3 put the cards in a column beside the map.
 
-From 900px (revision 3, 2026-11-15: the cards used to lie over the map and covered the search they describe; text is now beside the map, never on it):
-- The section is one tall blue sign with its keyline, the same structure as below 900px, laid out in two columns: text on the left (about 38% of the width, at least 22rem, at most 34rem), the map on the right.
-- Left column, in normal flow: `intro` (h1 and lede), then the four cards. Nothing in the left column ever overlaps the map.
-- Right column: `stage`, `position: sticky` under the nav, as tall as the viewport minus the nav and the sign's insets. It holds the map area and, under the map (not over it), the controls, the source line and the OSM credit. The only things drawn on the map are the two markers, their labels and the route.
-- The network is fitted whole into the map area with a small margin. Marker labels choose the corner that clears the route and the other marker and stays inside the map area. The old logic that steered the route and labels round the title, the lede and a resting card is deleted.
-- Controls: the method radio group is shown only when it fits on one row (stage 46rem wide or more); otherwise it is hidden as on a phone and scrolling picks the method. Play or Pause and the scrub, then the readouts.
-- The title is sized so that "Seoul shortest paths" stays on one line in the left column. `intro` is tall enough that the first card starts in the lower part of the first screen.
-- Each card's step is at least 80svh, so one card is read at a time. Cards are white plates (white, 2px black border, 6px radius, padding 1rem 1.25rem) and are not sticky.
-- Everything in the stage is visible at 1024x700 and up, with no scrolling inside the sign.
+Section `#map` is one blue sign with its keyline, as wide as the article column (`.flow`), natural height. Inside it, top to bottom:
 
-Below 900px:
-- The whole section is one tall blue sign with its keyline. Order: `intro`, `stage`, `steps`.
-- `stage` is `position: sticky; top: 0` on an opaque blue ground and holds the map (height `min(77vw, 42svh)`), one row (Play or Pause, scrub) and one readout line. At 375x667 it is at most 58svh tall. The method radio group is not shown below 900px: scrolling picks the method.
-- The cards scroll under the stage, at least 55svh apart, so one is read at a time.
+1. `h1` in two lines: "Seoul shortest paths" / "The same answer for less".
+2. The lede: "Four exact methods on one road network. Every road that turns white is one our Python code settled, in the order it settled it."
+3. The map. The whole network fitted and centred from 900px; on a phone, zoomed to the area Dijkstra searched, as before. Only the two markers, their labels and the route are drawn on it. Height from 900px: about `clamp(18rem, calc(100svh - 26rem), 44rem)`, so that at 1440x900 the first screen shows the title, the lede, the whole map and the first row of controls. Below 900px: about `min(77vw, 46svh)`.
+4. Controls: the method radio group (four plates, shown at every width, wrapping on a phone), Play or Pause, the scrub; then the readouts (settled count, and the estimated travel time once finished).
+5. The method explanation, directly above the source line: for the selected method, its `MethodGlyph` and label, the one-liner from `lib/method-copy.ts`, and the facts sentence built from `hero.json` for the graph on the map (Dijkstra: "Here it settled {settled} of {n} intersections before it reached {tLabel.en}."; the others: "Here it settled {settled} intersections: {share} of what Dijkstra settled. Same route, same estimated travel time ({time})." with the same-route check kept). A white plate, since the glyphs need a white ground. All methods and both graphs are server-rendered; only the selected method for the graph on the map is shown. The block keeps the height of its tallest variant, so nothing under it moves when the method changes. It changes when a method plate is chosen, by click or arrow keys.
+6. The source line "Replay of site/public/data/hero.json, written by scripts/export_site_data.py", then the OSM credit.
 
-Card content, numbers from `hero.json` for the graph on the map:
-- `MethodGlyph` and the label as an `h2` (about 1.5rem).
-- The one-liner from `lib/method-copy.ts`.
-- Dijkstra: "Here it settled {settled} of {n} intersections before it reached {tLabel.en}."
-- The others: "Here it settled {settled}: {share} of what Dijkstra settled. Same route, same {time}." Claim "same route" only if the path and travel time do equal Dijkstra's (keep the check).
-- These numbers are in the server-rendered HTML: `MapSection` reads `public/data/hero.json` at build (as `lib/demos.ts` reads `demos.json`). Both graphs are rendered and the one matching the map is shown: Seoul from 900px, Gangnam-gu below, and once the map has loaded, the graph that was loaded.
-
-Scroll picks the method:
-- The active step is the last one whose top edge has passed 65% of the viewport height, at every width. Before the first step it is Dijkstra.
-- When the active step changes, call `player.select(method, animate)`. With `prefers-reduced-motion` show the finished state. Scrolling back up selects the previous method.
-- The radio group, Play and the scrub stay manual controls. A manual choice holds until the next step change.
-- Load is unchanged: Dijkstra plays once over about 7 seconds; reduced motion shows the finished state.
-- Native scroll only: no wheel or touch listeners, no scroll snapping, no `preventDefault` on scroll.
-- Marker labels must not jump while the page scrolls: their corners depend only on the size of the map area.
-- The cards are ordinary content in DOM order and read correctly with no map. With no WebGL2 or a failed load, the fallback table shows as before and the cards still render.
+Behaviour:
+- Load is unchanged: Dijkstra plays once over about 7 seconds; with `prefers-reduced-motion` the finished state is shown. Choosing another method keeps the previous one as the ghost and plays the new one.
+- There is no scroll listener and nothing sticky in this section.
+- Marker labels pick the corner that clears the route and the other marker and stays inside the map area.
+- With no WebGL2 or a failed load, the fallback table shows as before, and the explanation still renders.
 
 ### 0.3 Sections after the map
 
 All inside `.flow`, in this order.
+
+Content rule, revision 4 (2026-11-15). A review against the team's final deck found the page now hid two things it must say, so they are back in plain form: a short "Assumptions and limits" section (the project rule is that estimated speeds are always disclosed) and one sentence on speed under congestion (the deck's main finding is that exact does not mean fast). Everything else in the revision 3 rule below still holds: no caution plates, no caveat marks, no warning colours.
 
 Content rule (revision 3, the user's decision on 2026-11-15): the page shows what the team did. It has no limits section, no caution plates and no caveat lines, and it does not single out the cases that went against us. Two things stay, because without them the page would say something false: every measured value stays in its chart (nothing below 1x is hidden), and synthetic or estimated data keeps one plain label where it appears ("synthetic congestion", "estimated travel time"), written as a description, not as a warning.
 
@@ -77,12 +63,13 @@ Content rule (revision 3, the user's decision on 2026-11-15): the page shows wha
 - `#methods`: h2 "How each method picks the next intersection" and one sentence on the page ("Step through the real heap pushes and pops on graphs small enough to check by hand."), then the step demo inside an inline blue plate.
 - `#results`: h2 "ALT looks at the fewest roads and runs fastest". The claim is checked at build: if on any graph and trip length a method other than ALT is faster or settles fewer intersections, the build throws. Then a `GraphPicker` (seoul, gss, gangnam; initial `seoul`). The panel for graph g, top to bottom:
   1. Facts from `graph_table.csv`: intersections, road segments, top speed as a `Roundel`. Name the source file.
-  2. Lead sentence for g, band `>10km`, `alt16`: "On trips over 10 km in {graph}, ALT (16) settled {p} of what Dijkstra settled and ran {s} as fast."
+  2. Lead sentence for g, band `>10km`, `alt16`: "On trips over 10 km in {graph}, ALT (16) settled {p} of what Dijkstra settled and ran {s} as fast." A share under 10% is shown with one decimal (4.5%, as in the team's deck), not rounded to a whole percent.
   3. Chart A and Chart B for g only: side by side from 900px, stacked below. Each y scale is still computed over all three graphs. The method key appears once, above the two charts. All measured values are drawn.
   4. h3 "How close each bound gets to the true time": the sentence "The straight-line bound assumes the whole trip at the graph top speed.", Chart C for g only, and the `Roundel` with "top speed in the graph".
   5. h3 "What ALT's preprocessing costs": the `e2_alt_prep.csv` rows for g only. From 900px, blocks 4 and 5 sit side by side in two columns.
-  After the picker, not tied to a graph: `StopOctagon` beside h3 "Why not just try every path?", the sentence from data ("At {n} intersections, {k} of {m} queries hit the {limit} second limit.": this is the result of experiment E1 about brute force, not a caveat, and it stays), Chart D and its source. The grid-count table goes inside `<details>` with the summary "Simple paths in a k by k grid".
-- `#congestion`: h2 "Slower roads never break the answer. Faster roads do." and the paragraph. Then one plain sentence, no caution mark: "The congestion scenarios are synthetic: multipliers by road class for 03, 08 and 18 h, and a random 30% of edges slowed." Then a `GraphPicker` (seoul, gss; initial `seoul`). The panel for g: h3 "Wrong answers out of {n} queries", the control explanation and the accuracy grid for g; h3 "Does re-routing help one driver?", the two notes and the re-routing table for g. The SUMO block, if `e4_summary.csv` exists, comes after the picker as an unframed h3.
+  After the picker, not tied to a graph: `StopOctagon` beside h3 "Why not just try every path?", the sentence from data ("On subgraphs grown around Gangnam Station, at {n} intersections {k} of {m} queries hit the {limit} second limit.": this is the result of experiment E1 about brute force, not a caveat, and it stays), Chart D and its source. The grid-count table goes inside `<details>` with the summary "Simple paths in a k by k grid".
+- `#congestion`: h2 "Slower roads never break the answer. Faster roads do." and the paragraph. Then one plain sentence, no caution mark: "The congestion scenarios are synthetic: multipliers by road class for 03, 08 and 18 h, and a random 30% of edges slowed." Then a `GraphPicker` (seoul, gss; initial `seoul`). The panel for g: h3 "Wrong answers out of {n} queries", the control explanation and the accuracy grid for g; then one sentence on speed, built from `e3_{g}_timing.csv` (speed is the median Dijkstra time divided by the method's median time, scenario `synth08`, band `>10km`, `alt16`, three digits, so Seoul reads 0.457x as in the deck): "Exact is not the same as fast: under 08 h congestion, on trips over 10 km in {graph}, ALT (16) ran at {x} of Dijkstra's speed, because its bounds were built on free-flow times." with its source line; h3 "Does re-routing help one driver?", the two notes and the re-routing table for g. The SUMO block, if `e4_summary.csv` exists, comes after the picker as an unframed h3.
+- `#limits`: h2 "Assumptions and limits", an unframed section with a plain list of three items, numbers from data: (1) travel times are estimates: OpenStreetMap has no posted speed on {min}% to {max}% of these roads (`graph_table.csv`), so each road gets a representative speed for its road class; (2) congestion is synthetic: real speeds from the national ITS API were collected but not used in these results (`results/match_decision.md`); (3) re-routing is modelled for one vehicle on a fixed congestion snapshot, so it does not change the traffic around it. Then a source line. No plate, no caution mark.
 - `#team`: the footer. Data line: "Road data: OpenStreetMap (© OpenStreetMap contributors, ODbL). Non-commercial coursework." The lines about sources that were collected and not used are gone.
 
 ### 0.4 Motion

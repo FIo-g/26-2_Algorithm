@@ -37,7 +37,7 @@ Everything on the page comes from the team's own Python implementation and its f
 - Three road graphs: Gangnam-gu (3,144 vertices), Gangnam+Seocho+Songpa "gss" (9,317), all of Seoul (67,420 vertices, 185,415 edges).
 - Edge weights are travel times estimated from road class, because OSM `maxspeed` is missing on 94 to 96 percent of edges. The site labels travel times as estimated where it shows one.
 - Congestion in experiment E3 is synthetic. Real ITS speed data was collected but rejected (monthly API call limit ended collection before a morning-peak snapshot existed). The site labels the congestion scenarios as synthetic in one plain sentence.
-- The site shows what the team did (the user's decision, 2026-11-15): no limits section, no caution plates, no caveat lines. Every measured value still appears in its chart, including the cases where A* and Bidirectional are slower than Dijkstra; the page does not single them out.
+- The site shows what the team did (the user's decision, 2026-11-15): no caution plates, no caveat marks. After a review against the team's deck the same day, a short plain "Assumptions and limits" section and one sentence on speed under congestion were put back. Every measured value still appears in its chart, including the cases where A* and Bidirectional are slower than Dijkstra; the page does not single them out.
 - No claim that any Korean company uses a specific algorithm. Citations only from `docs/industry.md`.
 - Text in `docs/explain/*.md` is each member's own writing. Quote it with attribution; do not rewrite it.
 - Road data is from OpenStreetMap: visible "OpenStreetMap" credit and ODbL link are required.
