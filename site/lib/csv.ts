@@ -33,7 +33,7 @@ export function parseCsv(text: string): CsvRow[] {
 }
 
 // Results live one level above site/ (the repository root), so resolve from cwd, which is site/ during build.
-export function resultsPath(name: string): string {
+function resultsPath(name: string): string {
   return path.join(process.cwd(), "..", "results", name);
 }
 

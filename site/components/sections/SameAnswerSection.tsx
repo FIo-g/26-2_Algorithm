@@ -1,6 +1,5 @@
-import { CautionTriangle } from "@/components/sign/CautionTriangle";
-import { formatInt, formatPercentPoints } from "@/lib/format";
-import { BANDS, GRAPH_IDS, getE2, maxspeedMissingRangePercent } from "@/lib/results";
+import { formatInt } from "@/lib/format";
+import { BANDS, GRAPH_IDS, getE2 } from "@/lib/results";
 
 // Query counts per graph and band come from e2_summary.csv (the Dijkstra rows, one per query set).
 function queryCountsPerBand(): number[] {
@@ -15,7 +14,6 @@ function queryCountsPerBand(): number[] {
 export function SameAnswerSection() {
   const perBand = queryCountsPerBand();
   const perGraph = perBand.reduce((sum, n) => sum + n, 0);
-  const missing = maxspeedMissingRangePercent();
 
   return (
     <section id="same-answer" className="flow-section" aria-labelledby="same-answer-title">
@@ -26,15 +24,6 @@ export function SameAnswerSection() {
         distance band, with random seed 42. Only after a method passed did we measure its time.
       </p>
       <p className="source">Query counts: results/e2_summary.csv</p>
-
-      <p className="caveat">
-        <CautionTriangle />
-        <span>
-          Caveat: travel times are estimates. Between {formatPercentPoints(missing.min)} and{" "}
-          {formatPercentPoints(missing.max)} of roads have no posted speed in OpenStreetMap, so we filled them in from
-          the road class.
-        </span>
-      </p>
     </section>
   );
 }

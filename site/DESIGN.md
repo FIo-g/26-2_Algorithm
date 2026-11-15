@@ -80,11 +80,6 @@ components:
     textColor: "{colors.sheeting-white}"
     rounded: "{rounded.plate}"
     padding: "calc(clamp(1.25rem, 3vw, 2.5rem) + clamp(8px, 1.6vw, 16px))"
-  plate-yellow-inline:
-    backgroundColor: "{colors.caution-yellow}"
-    textColor: "{colors.legend-black}"
-    rounded: "{rounded.plate}"
-    padding: "calc(clamp(1.25rem, 3vw, 2.5rem) + clamp(8px, 1.6vw, 16px))"
   subplate:
     backgroundColor: "{colors.sheeting-white}"
     textColor: "{colors.legend-black}"
@@ -128,7 +123,7 @@ components:
 
 **Creative North Star: "The Pinned Sign"**
 
-One Korean traffic safety sign (교통안전표지) stays pinned while the reader scrolls through four methods, and the road network on it replays the team's real searches. Below it the page is one white article column: headings, paragraphs, charts and tables with no frame round them. A sign appears again only where a sign is meant: a blue instruction sign round the step-by-step demo, and a yellow caution sign round results that went against the team and round the limits. The page ends on a band of bare steel, the back of the sign.
+One Korean traffic safety sign (교통안전표지) stays pinned while the reader scrolls through four methods, and the road network on it replays the team's real searches. Below it the page is one white article column: headings, paragraphs, charts and tables with no frame round them. A sign appears again only where a sign is meant: a blue instruction sign round the step-by-step demo, and nothing else gets a sign. The page ends on a band of bare steel, the back of the sign.
 
 Everything is flat sheeting. The build has no gradient, no shadow, no blur and no translucent panel; depth comes only from one opaque thing sitting on another. Type is one highway grotesque in heavy weights with tabular numerals. Shapes (disc, triangle, diamond, square, octagon, red-ringed roundel) carry meaning every time they appear and are never ornament.
 
@@ -136,7 +131,7 @@ Density is open between sections (a large gap, one finding per heading) and comp
 
 **Key Characteristics:**
 - One pinned sign, then one white column. Sections are not framed.
-- A sign (colour field, inset keyline, rounded corners) is used only for instruction (blue) and caution (yellow).
+- A sign (colour field, inset keyline, rounded corners) is used only for instruction (blue).
 - Five sign colours plus steel, all flat and opaque.
 - White supplementary plates with a black border carry controls, navigation and readouts; the selected one is inverted.
 - A method is always its shape and colour together: black disc, blue triangle, red diamond, yellow square.
@@ -152,10 +147,10 @@ The palette is the traffic sign palette at full strength, on a white page.
 - **Deep Sign Blue** (`sign-blue-deep`): link text on white, yellow and steel only.
 
 ### Secondary
-- **Caution Yellow** (`caution-yellow`): the warning field (cases slower than Dijkstra, limits). Also the route line on the map, the path and settled vertices in the step demos, the ALT method colour, the hover state of a supplementary plate, the focus ring on blue fields, the step-demo slider, and text selection.
+- **Caution Yellow** (`caution-yellow`): no sign field any more. The route line on the map, the path and settled vertices in the step demos, the ALT method colour, the hover state of a supplementary plate, the focus ring on blue fields, the step-demo slider, and text selection.
 
 ### Tertiary
-- **Regulation Red** (`regulation-red`): rings and limits only. The roundel ring, the caution triangle border, the stop octagon, the destination marker ring, limit lines in charts, the Bidirectional method colour, and the background of a table cell that reports wrong answers. Never a field colour for a sign.
+- **Regulation Red** (`regulation-red`): rings and limits only. The roundel ring, the stop octagon, the destination marker ring, limit lines in charts, the Bidirectional method colour, and the background of a table cell that reports wrong answers. Never a field colour for a sign.
 
 ### Neutral
 - **Sheeting White** (`sheeting-white`): the page ground and article column; the supplementary plate and step card; the sticky graph picker row; legends and keylines on blue.
@@ -166,7 +161,7 @@ The palette is the traffic sign palette at full strength, on a white page.
 - **Hairline** (`hairline`): 1px table row rules, chart gridlines and the rule under the graph picker row.
 
 ### Named Rules
-**The Field Means Something Rule.** A colour field is used only where the content is that kind of statement: blue instructs, yellow warns, steel is the back of the sign. Reported results sit on the plain white page, not on a sign.
+**The Field Means Something Rule.** A colour field is used only where the content is that kind of statement: blue instructs, steel is the back of the sign. Reported results sit on the plain white page, not on a sign.
 
 **The Paired Ink Rule.** Secondary text follows its field: Steel Ink on white, yellow and steel; Pale Blue on blue. Links are Deep Sign Blue on light fields and white on blue. The focus ring is Sign Blue on light fields and Caution Yellow on blue.
 
@@ -201,7 +196,7 @@ The page has four parts in order: the navigation strip, the map section, the art
 
 **Article column.** One centred column, at most 72rem wide, with a side gutter of clamp(1.25rem, 5vw, 4rem). Text inside it is held to 66ch; charts, tables, plates and the picker row use the full column. The footer band runs the full width of the page and its content sits in the same column.
 
-**Spacing rhythm.** Three steps. Between sections, and above the footer: clamp(4rem, 9vw, 7.5rem). Above a heading inside a section: 2.5rem (0.75rem below a headline, 0.5rem below a title); the first child of a section has no top margin. Between blocks inside a section (after a source line, above a caveat, round a chart pair, a method key or a collapsed table): 2rem. A source line sits 0.5rem under the thing it names.
+**Spacing rhythm.** Three steps. Between sections, and above the footer: clamp(4rem, 9vw, 7.5rem). Above a heading inside a section: 2.5rem (0.75rem below a headline, 0.5rem below a title); the first child of a section has no top margin. Between blocks inside a section (after a source line, round a chart pair, a method key or a collapsed table): 2rem. A source line sits 0.5rem under the thing it names.
 
 **The pinned sign.** From 900px the map section is a steel ground with `gap` of padding. The blue sign is as tall as the viewport minus the navigation strip and two gaps, and sticks under the strip. The title and lede lie over its first screen and scroll away. Each method is one scroll step 110svh tall; its card sticks 1.5rem inside the keyline at the top left of the sign, at most 28rem wide, and leaves when its step ends. The last step leaves a tail one sign high, so the last card has gone before the sign starts to leave. A step takes over the map when its top edge passes 40% of the viewport height.
 
@@ -224,7 +219,7 @@ There are no shadows. The system is flat: depth is stacking order only, with opa
 
 - **Sign:** rounded rectangle (`rounded.plate`) with a keyline (`spacing.keyline` thick, in the current text colour) inset by `gap`, its corner radius reduced by the same amount so the curves stay concentric.
 - **Supplementary plate and step card:** small radius (6px) with a 2px black border.
-- **Sign shapes:** roundel (circle, red ring 12% of its diameter, black tabular numeral), caution triangle (yellow, red border, black mark), stop octagon (red, white "STOP"), start marker (blue disc with a white ring), destination marker (white disc with a red ring).
+- **Sign shapes:** roundel (circle, red ring 12% of its diameter, black tabular numeral), stop octagon (red, white "STOP"), start marker (blue disc with a white ring), destination marker (white disc with a red ring).
 - **Method shapes:** disc, triangle, diamond, square, drawn in a 24 by 24 box with a 2px outline.
 - **List marker:** a solid square in the text colour, 0.55em.
 - **Lines:** 2px chart axes in the text colour, 1px hairlines for grids and table rows, 3px data lines with round joins and caps, 1.5px dashed black for the Dijkstra reference.
@@ -258,10 +253,10 @@ A radio group of supplementary plates that switches the road graph for everythin
 A summary is drawn as a supplementary plate, with the state written out after a 2px divider: "Show" when closed, "Hide" when open. Open is inverted like a selected plate. Used for a table that is supporting detail.
 
 ### Inline sign (Plate)
-A sign sized by its content inside the article column: no outer margin, padding of clamp(1.25rem, 3vw, 2.5rem) plus `gap`, inset keyline, first child has no top margin. Two tones are in use. Blue holds the step-demo widget. Yellow holds the "slower than Dijkstra" table (black row rules, natural-width table) and the limits list.
+A sign sized by its content inside the article column: no outer margin, padding of clamp(1.25rem, 3vw, 2.5rem) plus `gap`, inset keyline, first child has no top margin. Blue is the only tone in use; it holds the step-demo widget.
 
 ### Sign heading
-A large sign shape beside a title in a wrapping row, 1rem apart: a 4.5rem caution triangle on the yellow sign, a 6rem stop octagon beside "Why not just try every path?".
+A large sign shape beside a title in a wrapping row, 1rem apart: a 6rem stop octagon beside "Why not just try every path?".
 
 ### Step demo
 On the blue inline sign. A method radio group, then a small graph or grid drawn in white on blue: yellow for the path and settled vertices, a white ring round the current vertex. Back, Next and a step counter as supplementary plates, a native range slider tinted Caution Yellow, a live narration line (1.25rem, height reserved for three lines) and readout plates.
@@ -271,9 +266,6 @@ Graph facts as a wrapping grid of label-above-number pairs: label 0.9375rem in S
 
 ### Roundel
 The top speed of a graph as a speed-limit sign. 3.2em across at 1.25rem type; 1.5625rem type beside the tightness chart. Carries a text alternative.
-
-### Caveat
-A caution triangle followed by one sentence that says what is estimated or synthetic. It sits 2rem under the thing it qualifies.
 
 ### Tables
 Left-aligned text, right-aligned tabular numbers, 1px hairline under each row, header weight 700. A cell reporting wrong answers is red with white 800 text and always shows the count; a zero cell is Steel Ink.
@@ -285,7 +277,7 @@ Server-rendered SVG on the white page, no chart library and no card round them. 
 Small Steel Ink text under every chart, table and demo, naming the result file it was built from.
 
 ### Sign list
-No bullets; a solid square marker in the text colour. On a yellow sign list items are body size, and 1.1em from 900px.
+No bullets; a solid square marker in the text colour.
 
 ### Footer band
 Full-width steel, no keyline and no rounded corners, padding clamp(2.5rem, 6vw, 4rem) top and bottom. Team names (the only Hangul besides place names), repository link, data sources and credits in small text.
@@ -294,12 +286,12 @@ Full-width steel, no keyline and no rounded corners, padding clamp(2.5rem, 6vw, 
 
 ### Do:
 - **Do** write a new section as plain content in the white column: a headline that states the finding, then text, charts and tables with no frame.
-- **Do** use a sign only where the content is an instruction (blue) or a caution (yellow), sized by its content inside the column.
+- **Do** use a sign only where the content is an instruction (blue), sized by its content inside the column.
 - **Do** put every control, navigation link and readout on a white supplementary plate with a 2px black border, and invert the selected or current one.
 - **Do** show a method as its shape, its colour and its name together.
 - **Do** use tabular numerals for every figure and reserve the width of anything that counts.
 - **Do** switch secondary text, link and focus colours with the field (Steel Ink and Sign Blue on light; Pale Blue, white and Caution Yellow on blue).
-- **Do** put a source line under every chart, table and demo, and a caution triangle with a sentence next to anything estimated or synthetic.
+- **Do** put a source line under every chart, table and demo, and one plain label next to anything estimated or synthetic, written as a description, not a warning.
 - **Do** keep text to 66ch and let charts, tables and signs take the full column.
 - **Do** keep the three spacing steps: section gap, 2.5rem above a heading, 2rem between blocks.
 - **Do** make every sticky layer opaque and set the anchor offset to clear it.

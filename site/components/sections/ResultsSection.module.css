@@ -96,41 +96,10 @@
   margin: 0;
 }
 
-/* The yellow plate's table is short: natural width, black rules, and room for the speed column. */
-.slowPlate table {
-  width: auto;
-}
-
-.slowPlate th,
-.slowPlate td {
-  padding-right: 3rem;
-  border-bottom-color: var(--black);
-}
-
-/* The plate's bottom edge is the keyline, so the last paragraph carries no margin. */
-.slowPlate > :last-child {
-  margin-bottom: 0;
-}
-
-.bigCaution {
-  width: 4.5rem;
-  height: 4.5rem;
-  flex: none;
-}
-
 .bigStop {
   width: 6rem;
   height: 6rem;
   flex: none;
-}
-
-.caveat {
-  margin-top: 2rem;
-  max-width: var(--measure);
-}
-
-.caveat p {
-  margin: 0;
 }
 
 .details {

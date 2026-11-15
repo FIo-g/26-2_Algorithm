@@ -148,10 +148,6 @@ td.num, th.num { text-align: right; }
   pointer-events: none;
 }
 .plate--blue   { background: var(--blue);   color: var(--white); --focus: var(--yellow); }
-.plate--white  { background: var(--white);  color: var(--black); }
-.plate--yellow { background: var(--yellow); color: var(--black); }
-.plate--steel  { background: var(--steel);  color: var(--black); }
-.plate--steel::before { display: none; }
 
 /* A sign sized by its content, inside the article column. */
 .plate--inline {
@@ -223,17 +219,6 @@ details[open] > summary::after { content: "Hide"; }
   vertical-align: middle;
 }
 
-.caution {
-  display: inline-block;
-  width: 1.4em;
-  height: 1.4em;
-  margin-right: 0.35em;
-  vertical-align: -0.25em;
-  flex: none;
-}
-.caution-field { fill: var(--yellow); stroke: var(--red); stroke-width: 2.5; stroke-linejoin: round; }
-.caution-mark { fill: var(--black); }
-
 .stop { display: inline-block; width: 4.4em; height: 4.4em; vertical-align: middle; }
 .stop-field { fill: var(--red); }
 .stop-text {
@@ -289,8 +274,6 @@ details[open] > summary::after { content: "Hide"; }
 }
 .site-footer h2 { margin-top: 0; }
 
-.caveat { display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 2rem; }
-
 /* Sign list: no bullets, a solid square marker in the ink colour. */
 .sign-list { list-style: none; margin: 0 0 1em; padding: 0; }
 .sign-list > li { position: relative; padding-left: 1.25em; margin: 0 0 0.75em; max-width: var(--measure); }
@@ -302,11 +285,6 @@ details[open] > summary::after { content: "Hide"; }
   width: 0.55em;
   height: 0.55em;
   background: currentColor;
-}
-/* On the yellow caution plate the list is a warning: body size on phones, a little larger on desktop. */
-.plate--yellow .sign-list > li { font-size: 1em; }
-@media (min-width: 900px) {
-  .plate--yellow .sign-list > li { font-size: 1.1em; }
 }
 
 /* Scroll wrapper for a wide table. Give it tabindex, role and aria-label in markup. */

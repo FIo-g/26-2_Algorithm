@@ -10,27 +10,26 @@ function copyOf(id: MethodId): string {
   return id === "alt4" || id === "alt8" || id === "alt16" ? METHOD_COPY.alt : METHOD_COPY[id];
 }
 
-// SearchMap reads data-intro, data-stage, data-avoid, data-card and data-step: it measures the text and the resting
-// cards that sit over the map on a wide screen, and the steps pick the method as the page scrolls.
+// SearchMap reads data-step: the steps pick the method as the page scrolls.
 export function MapSection() {
   const { graphs, order } = loadHeroFile();
   return (
     <section id="map" aria-labelledby="map-title" className={styles.root}>
-      <div className={styles.intro} data-intro>
+      <div className={styles.intro}>
         <h1 id="map-title" className={`display ${styles.title}`}>
-          <span className={styles.legend} data-avoid="above">
+          <span className={styles.legend}>
             Seoul shortest paths
           </span>{" "}
-          <span className={styles.legend} data-avoid="above">
+          <span className={styles.legend}>
             The same answer for less
           </span>
         </h1>
-        <p className={styles.lede} data-avoid="above">
+        <p className={styles.lede}>
           Four exact methods on one road network. Every road that turns white is one our Python code settled, in the
           order it settled it.
         </p>
       </div>
-      <div className={styles.stage} data-stage>
+      <div className={styles.stage}>
         <SearchMap />
         <p className={`credit ${styles.credit}`}>
           Road data ©{" "}
@@ -42,7 +41,7 @@ export function MapSection() {
       <ol className={styles.steps} role="list">
         {order.map((id) => (
           <li key={id} className={styles.step} data-step={id}>
-            <div className={styles.card} data-card>
+            <div className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <MethodGlyph method={id} />
                 {METHODS[id].label}

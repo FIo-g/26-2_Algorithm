@@ -13,13 +13,8 @@ import { createPlayer, type Player, type PlayerState } from "./player";
 const PLAY_SECONDS = 7; // Dijkstra from 0 to the end
 const MIN_SECONDS = 1.6; // so a search of a few dozen intersections is still watchable
 const LIVE_DELAY_MS = 400; // the spoken readout waits for the clock to settle, so scrubbing does not flood it
-const WIDE_ZOOM = 1.3; // wide screens: the network is this much larger than a fit to the sign height
-const MIN_ZOOM = 0.6; // wide screens: the smallest zoom that is used to make the route fit between the text and the controls
-const ROUTE_AT = 0.58; // wide screens: where the middle of the route sits, as a share of the map height
-const MARKER_R = 15; // CSS px from a marker's centre to the edge of its outline
-const CLEAR = 4; // CSS px of clear space between a marker and the text above it or the controls below it
+const FIT_MARGIN = 0.03; // wide screens: margin round the whole network, as a share of its size
 const STEP_LINE = 0.65; // a card's step is active once the top edge of the step is above this share of the viewport height
-const STEP_LINE_WIDE = 0.4; // wide screens: the new card is then just under the resting one, not over the controls
 const VIEW_MARGIN = 0.08; // narrow screens: margin round the area the search covered
 const DIM_WIDE: [number, number] = [0.16, 0.42]; // alpha of unlit roads and of the previous method's roads
 const DIM_NARROW: [number, number] = [0.3, 0.55];
@@ -49,9 +44,8 @@ function Names({ ko, en }: { ko: string; en: string }) {
 type Corner = "ar" | "br" | "al" | "bl"; // above or below, right or left of the marker
 type Rect = { x0: number; y0: number; x1: number; y1: number };
 // Where the network sits in the map area. w and h are the network's size in CSS px, tx and ty shift it from the
-// centre of the area. view is the part of the network that shows, and avoid lists text that covers the map. Both
-// are in the network's own pixels.
-type Layout = { w: number; h: number; tx: number; ty: number; view: Rect; avoid: Rect[] };
+// centre of the area. view is the part of the network that shows, in the network's own pixels.
+type Layout = { w: number; h: number; tx: number; ty: number; view: Rect };
 
 const LABEL_H = 46; // label size in CSS px, estimated from the text so no measuring pass is needed
 const LABEL_GAP = 20;
@@ -78,85 +72,23 @@ function labelWidth(label: { ko: string; en: string }): number {
   return Math.max(label.en.length * 8.2, label.ko.length * 14.5) + 24;
 }
 
-// Fits the network into the map area. A phone zooms to the area Dijkstra searched, so the lit roads fill the area. A
-// wide screen sizes the network by the height of the sign, then keeps the route and its markers in the band between the
-// text above (data-avoid="above") and the controls below (data-avoid="below"): it prefers the middle of the route a
-// bit below the middle of the sign, moves down if the text is in the way, and zooms out if the band is too short.
+// Fits the network into the map area. A wide screen shows all of it with a small margin. A phone zooms to the area
+// Dijkstra searched, so the lit roads fill the small area.
 function computeLayout(data: HeroData, slot: HTMLElement): Layout | null {
   const sw = slot.clientWidth;
   const sh = slot.clientHeight;
   if (sw === 0 || sh === 0) return null;
   const aspect = data.graph.aspect;
-  const wide = window.matchMedia(WIDE).matches;
-  const pos = data.positions;
-  const stage = slot.closest("[data-stage]");
-  // The text is measured against the box it lies in, minus where the slot sits in the stage. The intro lies exactly
-  // over the stage at scroll position zero, so both boxes scroll together with their text and the page's scroll
-  // offset drops out: a resize at any scroll position gives the same layout.
-  const texts: { rect: Rect; below: boolean }[] = [];
-  const section = stage?.closest("section");
-  if (wide && stage && section) {
-    const stageBox = stage.getBoundingClientRect();
-    const slotBox = slot.getBoundingClientRect();
-    const inX = slotBox.left - stageBox.left; // where the slot sits in the stage
-    const inY = slotBox.top - stageBox.top;
-    section.querySelectorAll<HTMLElement>("[data-avoid]").forEach((el) => {
-      const o = (el.closest("[data-intro]") ?? stage).getBoundingClientRect();
-      const r = el.getBoundingClientRect();
-      const rect = { x0: r.left - o.left - inX, y0: r.top - o.top - inY, x1: r.right - o.left - inX, y1: r.bottom - o.top - inY };
-      texts.push({ rect, below: el.dataset.avoid === "below" });
-    });
-    // A card rests at the top left of the stage, as far in from the stage edge (its margin) on both sides.
-    section.querySelectorAll<HTMLElement>("[data-card]").forEach((card) => {
-      const rest = parseFloat(getComputedStyle(card).marginLeft);
-      const x0 = rest - inX;
-      const y0 = rest - inY;
-      texts.push({ rect: { x0, y0, x1: x0 + card.offsetWidth, y1: y0 + card.offsetHeight }, below: false });
-    });
-  }
-  let above = 0;
-  let below = sh;
-  for (const t of texts) {
-    if (t.below) below = Math.min(below, t.rect.y0);
-    else above = Math.max(above, t.rect.y1);
-  }
-  let w: number;
-  let h: number;
-  let tx = 0;
-  let ty = 0;
-  if (wide) {
-    let lo = 1;
-    let hi = 0;
-    for (const v of data.algos.dijkstra.path) {
-      lo = Math.min(lo, pos[2 * v + 1]);
-      hi = Math.max(hi, pos[2 * v + 1]);
-    }
-    const room = 2 * (CLEAR + MARKER_R);
-    const fit = (Math.max(0, below - above - room) * aspect) / Math.max(hi - lo, 1e-6); // width at which the route fills the band
-    // The labels hang outward from the route's two ends (the text is above and the route leaves inward), so each end
-    // keeps a label's width of room to the edge of the area: the network is nudged sideways, or made smaller if it is too wide.
-    const { s, t, sLabel, tLabel } = data.graph.query;
-    const sFirst = pos[2 * s] <= pos[2 * t];
-    const [lx, rx] = sFirst ? [pos[2 * s], pos[2 * t]] : [pos[2 * t], pos[2 * s]];
-    const needL = labelWidth(sFirst ? sLabel : tLabel);
-    const needR = labelWidth(sFirst ? tLabel : sLabel);
-    w = Math.min(sw, sh * aspect * WIDE_ZOOM, Math.max(fit, sh * aspect * MIN_ZOOM), (sw - needL - needR) / Math.max(rx - lx, 1e-6));
-    h = w / aspect;
-    const left = (sw - w) / 2;
-    tx = Math.min(Math.max(0, needL - (left + lx * w)), sw - needR - (left + rx * w));
-    const top = (sh - h) / 2 + lo * h; // top of the route in the slot when ty is 0
-    const bottom = (sh - h) / 2 + hi * h;
-    const prefer = (ROUTE_AT - 0.5) * sh - ((lo + hi) / 2 - 0.5) * h;
-    const lowest = above + CLEAR + MARKER_R - top; // the least ty that keeps the route under the text
-    const highest = below - CLEAR - MARKER_R - bottom; // the most ty that keeps it over the controls
-    const wanted = lowest <= highest ? Math.min(Math.max(prefer, lowest), highest) : (lowest + highest) / 2;
-    const reach = Math.abs(h - sh) / 2; // never shift far enough to show an empty edge, or off the area
-    ty = Math.min(reach, Math.max(-reach, wanted));
-  } else {
-    let x0 = 1;
-    let x1 = 0;
-    let y0 = 1;
-    let y1 = 0;
+  let x0 = -FIT_MARGIN;
+  let x1 = 1 + FIT_MARGIN;
+  let y0 = -FIT_MARGIN;
+  let y1 = 1 + FIT_MARGIN;
+  if (!window.matchMedia(WIDE).matches) {
+    const pos = data.positions;
+    x0 = 1;
+    x1 = 0;
+    y0 = 1;
+    y1 = 0;
     for (const v of data.traces.dijkstra) {
       x0 = Math.min(x0, pos[2 * v]);
       x1 = Math.max(x1, pos[2 * v]);
@@ -169,22 +101,21 @@ function computeLayout(data: HeroData, slot: HTMLElement): Layout | null {
     x1 = Math.min(1, x1 + mx);
     y0 = Math.max(0, y0 - my);
     y1 = Math.min(1, y1 + my);
-    w = Math.min(sw / (x1 - x0), (sh * aspect) / (y1 - y0));
-    h = w / aspect;
-    tx = -((x0 + x1) / 2 - 0.5) * w;
-    ty = -((y0 + y1) / 2 - 0.5) * h;
   }
+  const w = Math.min(sw / (x1 - x0), (sh * aspect) / (y1 - y0));
+  const h = w / aspect;
+  const tx = -((x0 + x1) / 2 - 0.5) * w;
+  const ty = -((y0 + y1) / 2 - 0.5) * h;
   const ox = (sw - w) / 2 + tx; // where the network's top left corner is, in the map area
   const oy = (sh - h) / 2 + ty;
-  const avoid = texts.map(({ rect: r }) => ({ x0: r.x0 - ox, y0: r.y0 - oy, x1: r.x1 - ox, y1: r.y1 - oy }));
-  return { w, h, tx, ty, view: { x0: -ox, y0: -oy, x1: sw - ox, y1: sh - oy }, avoid };
+  return { w, h, tx, ty, view: { x0: -ox, y0: -oy, x1: sw - ox, y1: sh - oy } };
 }
 
-// Picks a corner for each label so that it covers neither the route nor the other marker nor the other label nor
-// the heading, and stays inside the part of the map that shows. Ties keep the first corner in CORNERS.
+// Picks a corner for each label so that it covers neither the route nor the other marker nor the other label, and
+// stays inside the part of the map that shows. Ties keep the first corner in CORNERS.
 function placeLabels(data: HeroData, layout: Layout | null): [Corner, Corner] {
   if (!layout) return ["ar", "ar"];
-  const { view, avoid } = layout;
+  const { view } = layout;
   const { s, t, sLabel, tLabel } = data.graph.query;
   const at = (v: number): [number, number] => [data.positions[2 * v] * layout.w, data.positions[2 * v + 1] * layout.h];
   const route: [number, number][] = [];
@@ -204,7 +135,6 @@ function placeLabels(data: HeroData, layout: Layout | null): [Corner, Corner] {
       for (const [x, y] of route) if (inside(r, x, y)) score += 1;
       if (inside(r, other[0], other[1])) score += 50;
       if (taken && overlaps(r, taken)) score += 100;
-      for (const a of avoid) if (overlaps(r, a)) score += 100;
       score += Math.max(0, view.x0 - r.x0) + Math.max(0, r.x1 - view.x1) + Math.max(0, view.y0 - r.y0) + Math.max(0, r.y1 - view.y1);
       if (score < bestScore) {
         best = corner;
@@ -310,18 +240,17 @@ export function SearchMap() {
     return () => abort.abort();
   }, []);
 
-  // Size and place the network in the map area, again whenever the area or the text over it changes size. The section
-  // also learns which graph is on the map, so its cards show that graph's numbers.
+  // Size and place the network in the map area, again whenever the area changes size. The section also learns which
+  // graph is on the map, so its cards show that graph's numbers.
   useEffect(() => {
     const slot = slotRef.current;
     if (!data || !slot) return;
     const root = slot.closest("section");
-    if (root) root.dataset.graph = data.key; // before the first measure: the cards' height depends on the graph
+    if (root) root.dataset.graph = data.key;
     const update = () => setLayout(computeLayout(data, slot));
     update();
     const observer = new ResizeObserver(update);
     observer.observe(slot);
-    root?.querySelectorAll("[data-avoid], [data-card]").forEach((el) => observer.observe(el));
     return () => {
       observer.disconnect();
       if (root) delete root.dataset.graph;
@@ -396,7 +325,7 @@ export function SearchMap() {
     let frame = 0;
     const pickStep = () => {
       frame = 0;
-      const line = window.innerHeight * (wideQuery.matches ? STEP_LINE_WIDE : STEP_LINE);
+      const line = window.innerHeight * STEP_LINE;
       let at = -1;
       for (let i = 0; i < steps.length; i++) {
         if (steps[i].getBoundingClientRect().top <= line) at = i;
@@ -499,7 +428,7 @@ export function SearchMap() {
         )}
       </div>
 
-      <div className={styles.controls} data-avoid="below">
+      <div className={styles.controls}>
         <div className={styles.row}>
           <div className={styles.methods} role="radiogroup" aria-label="Search method" onKeyDown={onMethodKeys}>
             {order.map((id) => (

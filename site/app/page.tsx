@@ -1,5 +1,4 @@
 import { CongestionSection } from "@/components/sections/CongestionSection";
-import { LimitsSection } from "@/components/sections/LimitsSection";
 import { MapSection } from "@/components/sections/MapSection";
 import { MethodsSection } from "@/components/sections/MethodsSection";
 import { ResultsSection } from "@/components/sections/ResultsSection";
@@ -20,7 +19,6 @@ export default function Page() {
           <MethodsSection />
           <ResultsSection />
           <CongestionSection />
-          <LimitsSection />
         </div>
       </main>
       <TeamSection />

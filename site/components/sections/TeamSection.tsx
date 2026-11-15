@@ -19,10 +19,7 @@ export function TeamSection() {
           Repository: <a href="https://github.com/FIo-g/26-2_Algorithm">github.com/FIo-g/26-2_Algorithm</a>
         </p>
         <p className="small">
-          Data sources: OpenStreetMap road network (© OpenStreetMap contributors, ODbL). ITS national traffic
-          information API, Ministry of Land, Infrastructure and Transport (collected, not used in the results).
-          Seoul Open Data Plaza real-time road traffic (registered as a backup source, not used in the results).
-          Non-commercial coursework.
+          Road data: OpenStreetMap (© OpenStreetMap contributors, ODbL). Non-commercial coursework.
         </p>
         <p className="small">Results frozen on 2026-11-09 (git tag results-frozen).</p>
         <p className="small">

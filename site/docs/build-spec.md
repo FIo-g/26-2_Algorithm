@@ -8,10 +8,10 @@ Why: the first build read as a slide deck. Every section was a viewport-sized fr
 
 ### 0.1 Page shell
 
-- Page ground is `--white`. `--steel` is only the nav bar, the ground behind the pinned map sign, and the footer.
+- Page ground is `--white`. `--steel` is only the nav bar and the footer. The map sign sits on the white page at every width.
 - Everything after the map is one article column: `<div class="flow">` (max-width 72rem, centred, inline padding `clamp(1.25rem, 5vw, 4rem)`). Sections inside it are plain `<section class="flow-section">`: no border, no background, no min-height. Space between sections is `clamp(4rem, 9vw, 7.5rem)`. The column has the same space above its first section and below its last. Inside a section or a picker panel, blocks (a chart with its source line, a table, a plate, a sub-heading group) are 2rem to 2.5rem apart; a source line belongs to the block above it and never touches the next paragraph. Headings and text sit directly on the page.
-- A plate is now an inline sign inside the column, sized by its content: `<Plate inline ...>` (no outer margin, padding `clamp(1.25rem, 3vw, 2.5rem)` plus the keyline gap, keyline kept). Only four things are plates: the pinned map sign (blue), the step-demo widget (blue), "slower than Dijkstra" (yellow), "What this does not show" (yellow). Nothing else gets a frame or a coloured field. No section other than the map stage may be sized to the viewport.
-- `--nav-h: 3.75rem` is defined on `:root`. Nav: `position: sticky; top: 0; z-index: 20` from 900px, not sticky below 900px. It marks the section in view with `aria-current="true"` (inverted plate, the look of a selected SubPlate), found with an IntersectionObserver. Links and ids are unchanged: Map, Same answer, Methods, Results, Congestion, Limits, Team. `html` gets a `scroll-padding-top` that clears the sticky nav and a sticky picker.
+- A plate is now an inline sign inside the column, sized by its content: `<Plate inline ...>` (no outer margin, padding `clamp(1.25rem, 3vw, 2.5rem)` plus the keyline gap, keyline kept). Only two things are plates: the map sign (blue) and the step-demo widget (blue). Nothing else gets a frame or a coloured field. No section other than the map stage may be sized to the viewport.
+- `--nav-h: 3.75rem` is defined on `:root`. Nav: `position: sticky; top: 0; z-index: 20` from 900px, not sticky below 900px. It marks the section in view with `aria-current="true"` (inverted plate, the look of a selected SubPlate), found with an IntersectionObserver. Links: Map, Same answer, Methods, Results, Congestion, Team. `html` gets a `scroll-padding-top` that clears the sticky nav and a sticky picker.
 - `#team` is a `<footer>` on a full-width steel band, same copy as before.
 - `<details>`: the summary looks like a SubPlate button. Native element, no JavaScript.
 - `lib/method-copy.ts` holds the one-line description of each method (moved out of `StepDemo`), keyed `dijkstra`, `astar`, `bidir`, `alt`. The step demo and the map cards both read it.
@@ -34,13 +34,17 @@ Why: the first build read as a slide deck. Every section was a viewport-sized fr
 
 ### 0.2 Map scrolly (`MapSection` + `components/hero/`)
 
-The map is pinned while the reader scrolls through the four methods. Section `#map`, ground `--steel`. DOM order: `intro` (h1 in two lines, the lede), `stage` (map, markers, controls, source line, OSM credit), `steps` (an `<ol>` of four cards, one per method in `hero.json` order).
+The map is pinned while the reader scrolls through the four methods. Section `#map`. DOM order: `intro` (h1 in two lines, the lede), `stage` (map, markers, controls, source line, OSM credit), `steps` (an `<ol>` of four cards, one per method in `hero.json` order).
 
-From 900px:
-- `stage` is the blue sign (rounded, keyline). `position: sticky; top: calc(var(--nav-h) + var(--gap)); height: calc(100svh - var(--nav-h) - 2 * var(--gap))`. It is never taller than that: everything in it fits at 1024x700 and up, with no scrolling inside the sign.
-- `intro` lies over the first screen of the stage in the same top-left place as before (title over the map) and scrolls away with the page while the stage stays. `steps` follow and scroll over the stage. `intro` and `steps` take no pointer events except on the cards, so the controls under them stay clickable.
-- One step is 110svh of scroll, so that while one card rests the next one is still below the sign and does not sit on the controls. Its card is a white plate (white, 2px black border, 6px radius, max-width 28rem, padding 1rem 1.25rem), `position: sticky` inside its step: it comes up from below, rests at the top left of the sign (1.5rem inside the keyline, where the title was), and leaves upward when the next step arrives. While it rests it does not cover the route, the two markers or their labels at 1440x900 and 1280x720. Both marker labels stay fully inside the sign at every width from 900px (at 1024x700 the first build cut the start label at the left edge).
-- Controls along the bottom of the stage: one row (method radio group, Play or Pause, scrub) and one row of readouts (settled count, and the estimated travel time once finished). The "Same route, same travel time" sentence is no longer a plate in the stage. It is in the cards, and still in the `aria-live` text.
+From 900px (revision 3, 2026-11-15: the cards used to lie over the map and covered the search they describe; text is now beside the map, never on it):
+- The section is one tall blue sign with its keyline, the same structure as below 900px, laid out in two columns: text on the left (about 38% of the width, at least 22rem, at most 34rem), the map on the right.
+- Left column, in normal flow: `intro` (h1 and lede), then the four cards. Nothing in the left column ever overlaps the map.
+- Right column: `stage`, `position: sticky` under the nav, as tall as the viewport minus the nav and the sign's insets. It holds the map area and, under the map (not over it), the controls, the source line and the OSM credit. The only things drawn on the map are the two markers, their labels and the route.
+- The network is fitted whole into the map area with a small margin. Marker labels choose the corner that clears the route and the other marker and stays inside the map area. The old logic that steered the route and labels round the title, the lede and a resting card is deleted.
+- Controls: the method radio group is shown only when it fits on one row (stage 46rem wide or more); otherwise it is hidden as on a phone and scrolling picks the method. Play or Pause and the scrub, then the readouts.
+- The title is sized so that "Seoul shortest paths" stays on one line in the left column. `intro` is tall enough that the first card starts in the lower part of the first screen.
+- Each card's step is at least 80svh, so one card is read at a time. Cards are white plates (white, 2px black border, 6px radius, padding 1rem 1.25rem) and are not sticky.
+- Everything in the stage is visible at 1024x700 and up, with no scrolling inside the sign.
 
 Below 900px:
 - The whole section is one tall blue sign with its keyline. Order: `intro`, `stage`, `steps`.
@@ -55,31 +59,31 @@ Card content, numbers from `hero.json` for the graph on the map:
 - These numbers are in the server-rendered HTML: `MapSection` reads `public/data/hero.json` at build (as `lib/demos.ts` reads `demos.json`). Both graphs are rendered and the one matching the map is shown: Seoul from 900px, Gangnam-gu below, and once the map has loaded, the graph that was loaded.
 
 Scroll picks the method:
-- The active step is the last one whose top edge has passed a line in the viewport: 40% of its height from 900px (so the map changes when the new card is about to take the resting place, not while the old card still rests alone), 65% below 900px. Before the first step it is Dijkstra.
+- The active step is the last one whose top edge has passed 65% of the viewport height, at every width. Before the first step it is Dijkstra.
 - When the active step changes, call `player.select(method, animate)`. With `prefers-reduced-motion` show the finished state. Scrolling back up selects the previous method.
 - The radio group, Play and the scrub stay manual controls. A manual choice holds until the next step change.
 - Load is unchanged: Dijkstra plays once over about 7 seconds; reduced motion shows the finished state.
 - Native scroll only: no wheel or touch listeners, no scroll snapping, no `preventDefault` on scroll.
-- Marker labels must not jump while the page scrolls. Choose their corners from the layout at scroll position zero (title and lede resting over the map), not from live scrolled positions.
+- Marker labels must not jump while the page scrolls: their corners depend only on the size of the map area.
 - The cards are ordinary content in DOM order and read correctly with no map. With no WebGL2 or a failed load, the fallback table shows as before and the cards still render.
 
 ### 0.3 Sections after the map
 
 All inside `.flow`, in this order.
 
-- `#same-answer`: h2 "Every method had to match Dijkstra before we timed it", the paragraph, the query-count source line, the caveat line. The three-graph table is gone from here; its facts are in the Results picker.
-- `#methods`: h2 "How each method picks the next intersection" and one sentence on the page ("Step through the real heap pushes and pops on graphs small enough to check by hand."), then the step demo inside an inline blue plate. `StepDemo` is unchanged apart from reading its copy from `lib/method-copy.ts`.
-- `#results`: h2 unchanged. Under it one sentence built from data that says which graphs have slower-than-Dijkstra cases, so the reader has a reason to switch. Then a `GraphPicker` (seoul, gss, gangnam; initial `seoul`). The panel for graph g, top to bottom:
-  1. Facts from `graph_table.csv`: intersections, road segments, top speed as a `Roundel`, share of roads with no posted speed. Name the source file.
-  2. Lead sentence for g, band `>10km`, `alt16`: "On trips over 10 km across {graph}, ALT (16) settled {p} of what Dijkstra settled and ran {s} as fast."
-  3. Chart A and Chart B for g only: side by side from 900px, stacked below. Each y scale is still computed over all three graphs, so heights compare when the reader switches. The method key appears once, above the two charts.
-  4. Slower cases for g from `e2Slowdowns()`: if there are any, an inline yellow plate with the `CautionTriangle` and h3 "Slower than Dijkstra here" listing method, trip length and speed (two digits), plus the A* reason sentence when A* is listed. If there are none, the plain sentence "No method ran slower than Dijkstra on this graph."
-  5. h3 "Why the A* bound is loose": the sentence, Chart C for g only, and the `Roundel` with "top speed in the graph".
-  6. h3 "ALT is not free": the `e2_alt_prep.csv` rows for g only. From 900px, blocks 5 and 6 sit side by side in two columns.
-  After the picker, not tied to a graph: `StopOctagon` beside h3 "Why not just try every path?", the sentence, Chart D and its source. The grid-count table goes inside `<details>` with the summary "Simple paths in a k by k grid".
-- `#congestion`: h2, paragraph and caveat unchanged. Then a `GraphPicker` (seoul, gss; initial `seoul`). The panel for g: h3 "Wrong answers out of {n} queries", the control explanation and the accuracy grid for g; h3 "Does re-routing help one driver?", the two notes and the re-routing table for g. The SUMO block, if `e4_summary.csv` exists, comes after the picker as an unframed h3.
-- `#limits`: an inline yellow plate holding the h2 and the list. Copy unchanged.
-- `#team`: the footer.
+Content rule (revision 3, the user's decision on 2026-11-15): the page shows what the team did. It has no limits section, no caution plates and no caveat lines, and it does not single out the cases that went against us. Two things stay, because without them the page would say something false: every measured value stays in its chart (nothing below 1x is hidden), and synthetic or estimated data keeps one plain label where it appears ("synthetic congestion", "estimated travel time"), written as a description, not as a warning.
+
+- `#same-answer`: h2 "Every method had to match Dijkstra before we timed it", the paragraph and the query-count source line. No caveat line.
+- `#methods`: h2 "How each method picks the next intersection" and one sentence on the page ("Step through the real heap pushes and pops on graphs small enough to check by hand."), then the step demo inside an inline blue plate.
+- `#results`: h2 "ALT looks at the fewest roads and runs fastest". The claim is checked at build: if on any graph and trip length a method other than ALT is faster or settles fewer intersections, the build throws. Then a `GraphPicker` (seoul, gss, gangnam; initial `seoul`). The panel for graph g, top to bottom:
+  1. Facts from `graph_table.csv`: intersections, road segments, top speed as a `Roundel`. Name the source file.
+  2. Lead sentence for g, band `>10km`, `alt16`: "On trips over 10 km in {graph}, ALT (16) settled {p} of what Dijkstra settled and ran {s} as fast."
+  3. Chart A and Chart B for g only: side by side from 900px, stacked below. Each y scale is still computed over all three graphs. The method key appears once, above the two charts. All measured values are drawn.
+  4. h3 "How close each bound gets to the true time": the sentence "The straight-line bound assumes the whole trip at the graph top speed.", Chart C for g only, and the `Roundel` with "top speed in the graph".
+  5. h3 "What ALT's preprocessing costs": the `e2_alt_prep.csv` rows for g only. From 900px, blocks 4 and 5 sit side by side in two columns.
+  After the picker, not tied to a graph: `StopOctagon` beside h3 "Why not just try every path?", the sentence from data ("At {n} intersections, {k} of {m} queries hit the {limit} second limit.": this is the result of experiment E1 about brute force, not a caveat, and it stays), Chart D and its source. The grid-count table goes inside `<details>` with the summary "Simple paths in a k by k grid".
+- `#congestion`: h2 "Slower roads never break the answer. Faster roads do." and the paragraph. Then one plain sentence, no caution mark: "The congestion scenarios are synthetic: multipliers by road class for 03, 08 and 18 h, and a random 30% of edges slowed." Then a `GraphPicker` (seoul, gss; initial `seoul`). The panel for g: h3 "Wrong answers out of {n} queries", the control explanation and the accuracy grid for g; h3 "Does re-routing help one driver?", the two notes and the re-routing table for g. The SUMO block, if `e4_summary.csv` exists, comes after the picker as an unframed h3.
+- `#team`: the footer. Data line: "Road data: OpenStreetMap (© OpenStreetMap contributors, ODbL). Non-commercial coursework." The lines about sources that were collected and not used are gone.
 
 ### 0.4 Motion
 
@@ -87,7 +91,7 @@ The search spreading on the map is still the only thing that moves on its own. S
 
 ### 0.5 File ownership for this revision
 
-- foundation: `app/globals.css`, `app/page.tsx`, `components/sign/Plate.tsx`, `components/ui/GraphPicker.tsx` and its CSS module, `components/sections/{SiteNav,TeamSection,LimitsSection,SameAnswerSection,MethodsSection}.tsx` and `SameAnswerSection.module.css`, `components/demo/StepDemo.tsx` (copy import only), `lib/method-copy.ts`.
+- foundation: `app/globals.css`, `app/page.tsx`, `components/sign/Plate.tsx`, `components/ui/GraphPicker.tsx` and its CSS module, `components/sections/{SiteNav,TeamSection,SameAnswerSection,MethodsSection}.tsx`, `components/demo/StepDemo.tsx` (copy import only), `lib/method-copy.ts`.
 - map: `components/hero/*`, `components/sections/MapSection.tsx`.
 - results: `components/sections/ResultsSection.tsx` and its CSS module, `components/charts/{MethodPanels,SettledChart,SpeedupChart,TightnessChart,ExhaustiveChart}.tsx`, `charts.module.css`, `panel.module.css`, `lib/results-section.ts`, and `lib/results.ts` (add only).
 - congestion: `components/sections/CongestionSection.tsx`, `components/charts/{AccuracyGrid,RerouteGain,SumoTable}.tsx`, `congestion.module.css`.

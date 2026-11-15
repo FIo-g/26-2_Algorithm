@@ -1,6 +1,5 @@
 // Typed loaders for results/*.csv. Every number shown on the site comes through here.
-import fs from "node:fs";
-import { readResults, resultsExists, resultsPath } from "./csv";
+import { readResults, resultsExists } from "./csv";
 import { isMethodId, type MethodId } from "./methods";
 
 export const GRAPH_IDS = ["gangnam", "gss", "seoul"] as const;
@@ -55,7 +54,6 @@ export type GraphRow = {
   n: number; // intersections
   m: number; // road segments
   vmaxKph: number; // top speed, drawn as a Roundel
-  maxspeedMissingFraction: number; // share of roads with no posted limit, as a fraction
 };
 
 export function loadGraphTable(): GraphRow[] {
@@ -64,7 +62,6 @@ export function loadGraphTable(): GraphRow[] {
     n: num(r.n, "n"),
     m: num(r.m, "m"),
     vmaxKph: num(r.vmax_kph, "vmax_kph"),
-    maxspeedMissingFraction: num(r.maxspeed_missing_ratio, "maxspeed_missing_ratio"),
   }));
 }
 
@@ -72,12 +69,6 @@ export function graphRow(graph: GraphId): GraphRow {
   const row = loadGraphTable().find((r) => r.name === graph);
   if (!row) throw new Error(`No graph_table.csv row for ${graph}`);
   return row;
-}
-
-// Range of the missing-maxspeed share over the three graphs, in percent (for the caveat line).
-export function maxspeedMissingRangePercent(): { min: number; max: number } {
-  const pct = loadGraphTable().map((r) => r.maxspeedMissingFraction * 100);
-  return { min: Math.min(...pct), max: Math.max(...pct) };
 }
 
 // e2_summary.csv (one row per graph, band and method; scenario "free", kind "full" for the main results)
@@ -120,11 +111,6 @@ export function getE2(graph: GraphId, bin: Band, algo: MethodId): E2Row {
   const row = loadE2Summary().find((r) => isMainE2(r) && r.graph === graph && r.bin === bin && r.algo === algo);
   if (!row) throw new Error(`No e2_summary.csv row for ${graph} ${bin} ${algo}`);
   return row;
-}
-
-// Non-Dijkstra rows that were slower than Dijkstra (speedup below 1), for the caveat line.
-export function e2Slowdowns(): E2Row[] {
-  return loadE2Summary().filter((r) => isMainE2(r) && r.algo !== "dijkstra" && r.speedup < 1);
 }
 
 // e2_tightness.csv: ratio = lower bound / true distance per query (1.0 is perfect).
@@ -377,21 +363,5 @@ export function loadE4Summary(): E4Row[] | null {
     meanTtMaxS: num(r.mean_tt_max_s, "mean_tt_max_s"),
     changePct: optNum(r.change_pct),
   }));
-}
-
-// results/machine.txt: free-form lines, e.g. "Python 3.14.8 (...)" and the CPU name on its own line.
-
-export type MachineInfo = { cpu: string; python: string; start: string | null };
-
-export function loadMachine(): MachineInfo {
-  const lines = fs.readFileSync(resultsPath("machine.txt"), "utf8").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  const pyLine = lines.find((l) => l.startsWith("Python ")) ?? "";
-  const cpuLine = lines.find((l) => !l.includes(":") && !l.startsWith("Python ")) ?? "";
-  const startLine = lines.find((l) => l.startsWith("start:")) ?? null;
-  return {
-    cpu: cpuLine,
-    python: pyLine.split(" (")[0],
-    start: startLine ? startLine.slice("start:".length).trim() : null,
-  };
 }
 

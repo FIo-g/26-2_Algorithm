@@ -1,11 +1,10 @@
-/* The map scrolly. On a phone the section is one tall blue sign: the stage (map and controls) sticks to the top of the
-   screen and the cards scroll under it. From 900px the section is a steel ground, the stage is the blue sign pinned
-   under the nav, the intro lies over the first screen of the stage, and the cards scroll over it. Class selectors are
-   doubled up where they have to beat the single-class rules in globals.css. */
+/* The map scrolly. The section is one tall blue sign. On a phone the stage (map and controls) sticks to the top of the
+   screen and the cards scroll under it. From 900px the sign has two columns: the intro and the cards in the left one,
+   the stage pinned under the nav in the right one, so text never lies on the map. Class selectors are doubled up where
+   they have to beat the single-class rules in globals.css. */
 
 .root {
   --focus: var(--yellow);
-  --stage-bottom: calc(var(--gap) + clamp(0.5rem, 1.8svh, 1rem));
   position: relative;
   isolation: isolate;
   margin: var(--gap);
@@ -15,20 +14,15 @@
   color: var(--white);
 }
 
-/* The keyline: round the whole section on a phone, round the stage from 900px. */
-.root::before,
-.stage::before {
-  display: none;
+/* The keyline round the whole section. */
+.root::before {
   content: "";
   position: absolute;
   inset: var(--gap);
+  z-index: 4; /* above the opaque stage ground, which is as wide as the sign on a phone */
   border: var(--keyline) solid currentColor;
   border-radius: calc(var(--radius) - var(--gap));
   pointer-events: none;
-}
-.root::before {
-  display: block;
-  z-index: 4; /* above the opaque stage ground, which is as wide as the sign */
 }
 
 .intro {
@@ -72,12 +66,9 @@
   }
 }
 
-/* The map area. On a phone it is a block at the top of the stage. From 900px it fills the whole sign, inside the keyline,
-   with the controls on top of it. SearchMap sizes and shifts the network inside it, so whatever sticks out is clipped
-   here. */
+/* The map area. On a phone it is a block at the top of the stage. From 900px it takes the height the controls leave.
+   SearchMap sizes and shifts the network inside it, so whatever sticks out is clipped here. */
 .slot {
-  position: relative;
-  z-index: 0;
   flex: none;
   display: grid;
   grid-template: minmax(0, 1fr) / minmax(0, 1fr); /* a network wider than the slot overflows evenly on both sides */
@@ -173,8 +164,6 @@
 /* Controls. A phone gets one row (play, scrub) and one readout line; the method plates are not shown, because the
    cards pick the method as the page scrolls. */
 .controls {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -295,8 +284,6 @@
 }
 
 .stage .credit {
-  position: relative;
-  z-index: 1;
   width: fit-content;
   margin: 0.2rem 0 0;
   font-size: 0.75rem;
@@ -356,8 +343,6 @@
 
 /* No WebGL2, or the data did not load. */
 .fallback {
-  position: relative;
-  z-index: 1;
   margin-top: 0.75rem;
   padding: 1rem 1.25rem;
   border-radius: 12px;
@@ -374,106 +359,67 @@
   display: block;
   max-width: none;
   margin: 0.75rem 0 0;
-  padding: 0;
-  background: none;
   color: var(--steel-ink);
 }
 
 @media (min-width: 900px) {
   .root {
-    --stage-h: calc(100svh - var(--nav-h) - 2 * var(--gap));
-    --rest: calc(var(--gap) + var(--keyline) + 1.5rem); /* where a card rests, measured in from the stage edge */
+    --in: calc(var(--gap) + var(--keyline) + 1rem); /* where content starts, measured in from the edge of the sign */
+    --stage-h: calc(100svh - var(--nav-h) - var(--gap) - var(--in) - 0.75rem); /* the stage ends 0.75rem above the screen bottom at scroll 0 */
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    margin: 0;
-    padding: var(--gap);
-    border-radius: 0;
-    background: var(--steel);
-    color: var(--black);
-  }
-  .root::before {
-    display: none;
-  }
-  .stage::before {
-    display: block;
+    grid-template-columns: clamp(22rem, 38%, 34rem) minmax(0, 1fr);
+    column-gap: 2rem;
+    padding: var(--in);
   }
 
-  /* The intro is the height of the stage and lies over it, in the same grid cell. It scrolls away with the page while
-     the stage stays. SearchMap measures it as laid out at scroll position zero, so it is the same box as the stage. */
+  /* The intro is tall enough that the first card starts in the lower part of the first screen. Its width is the
+     column's, so the title is sized from it: "Seoul shortest paths" is 9.3em wide, so 1/9.4 of the width fits line one, and line two wraps. */
   .intro {
-    grid-area: 1 / 1;
-    position: relative;
-    z-index: 3;
-    height: var(--stage-h);
-    padding: calc(var(--gap) + clamp(1.5rem, 5.33svh, 3rem)) var(--pad) 0;
-    color: var(--white);
-    pointer-events: none;
-  }
-  /* The heading and the lede sit over the map. A flat blue outline keeps lit roads from running into the letters. The
-     lede is small, so its outline is wide enough to close the gaps between letters and lines. */
-  .title {
-    -webkit-text-stroke: 0.1em var(--blue);
-    paint-order: stroke fill;
+    min-height: calc(65svh - var(--nav-h) - var(--gap) - var(--in));
+    padding: 0 0 0.75rem;
+    container-type: inline-size;
   }
   .title:global(.display) {
-    font-size: clamp(2rem, min(6.7vw, 10.67svh), 6rem);
-  }
-  .lede {
-    max-width: min(44rem, 100%);
-    -webkit-text-stroke: 0.5em var(--blue);
-    paint-order: stroke fill;
-    margin-top: clamp(0.5rem, 1.8svh, 1rem);
-    padding-bottom: 0; /* SearchMap measures this box as the space the start marker keeps clear */
-    font-size: clamp(1rem, 2.23svh, 1.25rem);
+    font-size: calc(100cqw / 9.4);
+    line-height: 1.02;
   }
 
-  /* The stage spans the intro row and the steps, so it stays pinned until the last card has gone. */
+  /* The stage spans both grid rows, so it stays pinned until the last card has gone. */
   .stage {
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 1 / span 2;
     align-self: start;
-    top: calc(var(--nav-h) + var(--gap));
-    z-index: 2;
+    top: calc(var(--nav-h) + 0.75rem);
     display: flex;
     flex-direction: column;
     height: var(--stage-h);
-    padding: var(--gap) var(--pad) var(--stage-bottom);
-    border-radius: var(--radius);
-    color: var(--white);
+    padding: 0;
+    container-type: inline-size; /* the method plates and the long readouts show only if the row has room */
   }
   .slot {
-    position: absolute;
-    inset: calc(var(--gap) + var(--keyline));
+    flex: 1 1 0;
+    min-height: 0;
     height: auto;
     margin: 0;
-    border-radius: calc(var(--radius) - var(--gap) - var(--keyline));
   }
 
   .controls {
-    margin-top: auto;
-    padding-top: 0.75rem;
+    margin-top: 0.75rem;
     gap: 0.5rem;
-    font-size: clamp(1rem, 2.2svh, 1.25rem);
-  }
-  .methods {
-    display: flex;
+    font-size: 1rem;
   }
   .readouts {
     font-size: inherit;
   }
   .controls .scrub {
-    flex-basis: 12rem;
+    flex-basis: 6rem;
   }
   .scrub input {
     height: 1.75rem;
   }
   .stage .source {
     display: block;
-    width: fit-content;
-    max-width: calc(100% - 24rem);
     margin: 0.5rem 0 0;
-    padding-right: 0.75rem;
-    background: var(--blue); /* keeps unlit roads from running through the small text */
   }
   .root .notes {
     display: none;
@@ -481,41 +427,34 @@
   .root:not([data-graph]) .facts[data-for="seoul"] {
     display: block;
   }
-  /* The credit shares the bottom line with the source line. */
-  .stage .credit {
-    position: absolute;
-    right: var(--pad);
-    bottom: var(--stage-bottom);
-    margin: 0;
-    padding-left: 0.75rem;
-    background: var(--blue);
-    font-size: 0.875rem;
-    line-height: 1.55;
+  .methods {
+    display: flex;
+    flex-basis: 100%; /* its own row inside .row when the stage is narrow */
   }
-  .fallback {
-    margin-top: auto;
+  @container (min-width: 46rem) {
+    .methods {
+      display: flex;
+      flex-basis: auto;
+    }
+  }
+  @container (max-width: 39.99rem) {
+    .long {
+      display: none;
+    }
+    .short {
+      display: inline;
+    }
   }
 
-  /* The cards are laid over the stage. Only they take pointer events, so the controls under the steps stay clickable.
-     The last step keeps a stage-high tail: the last card is pushed out before the stage starts to leave. */
+  /* The cards are in the left column's flow, one step of at least 80svh each. */
   .steps {
-    grid-area: 2 / 1;
-    position: relative;
-    z-index: 3;
-    padding: var(--gap) 0 var(--stage-h);
-    pointer-events: none;
+    padding: 0;
   }
-  /* Taller than the stage, so while a card rests the next one is still below the sign and not over the controls. */
   .step {
-    min-height: 110svh;
+    min-height: 80svh;
   }
   .card {
-    position: sticky;
-    top: calc(var(--nav-h) + var(--gap) + var(--rest));
-    width: min(28rem, calc(100% - 2 * var(--rest)));
-    margin-left: var(--rest);
     font-size: 1rem;
     line-height: 1.45;
-    pointer-events: auto;
   }
 }

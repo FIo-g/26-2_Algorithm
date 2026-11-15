@@ -1,7 +1,6 @@
 import { AccuracyGrid } from "@/components/charts/AccuracyGrid";
 import { RerouteGain } from "@/components/charts/RerouteGain";
 import { SumoTable } from "@/components/charts/SumoTable";
-import { CautionTriangle } from "@/components/sign/CautionTriangle";
 import { GraphPicker } from "@/components/ui/GraphPicker";
 import { formatInt } from "@/lib/format";
 import { GRAPH_LABELS, loadAccuracy, loadE4Summary, loadReroute, type ExperimentGraph } from "@/lib/results";
@@ -48,12 +47,9 @@ export function CongestionSection() {
         The bounds were built on free-flow travel times. When congestion only makes edges slower, a lower bound stays a
         lower bound, so no preprocessing is redone.
       </p>
-      <p className="caveat">
-        <CautionTriangle />
-        <span>
-          Caveat: congestion here is synthetic. Multipliers by road class for 03, 08 and 18 h, and a random 30% of edges
-          slowed.
-        </span>
+      <p>
+        The congestion scenarios are synthetic: multipliers by road class for 03, 08 and 18 h, and a random 30% of edges
+        slowed.
       </p>
 
       <GraphPicker
@@ -68,8 +64,7 @@ export function CongestionSection() {
         <>
           <h3>What happens when many drivers re-route (SUMO)</h3>
           <p>
-            Simulated in SUMO, not measured traffic. Where Arrived is below 100%, the mean still counts every departed
-            vehicle, so it is a lower bound.
+            Simulated in SUMO, not measured traffic.
           </p>
           <SumoTable rows={sumo} />
         </>

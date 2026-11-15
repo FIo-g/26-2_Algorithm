@@ -1,6 +1,6 @@
-// Helpers for the results section: distance band wording, the main E2 rows and the slower-graph sentence.
+// Helpers for the results section: distance band wording, the main E2 rows and the ALT claim check.
 // Numbers still come from lib/results.ts. Band ids are parsed here, never retyped.
-import { GRAPH_IDS, GRAPH_LABELS, e2Slowdowns, loadE2Summary, type E2Row } from "./results";
+import { BANDS, GRAPH_IDS, loadE2Summary, type E2Row } from "./results";
 
 // Main results only: scenario "free", kind "full".
 export function mainE2Rows(): E2Row[] {
@@ -28,11 +28,22 @@ export function bandPhrase(bin: string): string {
   return `${lo} to ${hi} km`;
 }
 
-// One sentence under the results heading: which graphs have a slower-than-Dijkstra case.
-export function slowGraphsSentence(): string {
-  const slowIds = new Set(e2Slowdowns().map((r) => r.graph));
-  const names = GRAPH_IDS.filter((g) => slowIds.has(g)).map((g) => GRAPH_LABELS[g]);
-  if (names.length === 0) return "No method ran slower than Dijkstra on any graph.";
-  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
-  return `Some methods ran slower than Dijkstra on ${list}. Pick a graph below to see each case.`;
+// The results heading says ALT looks at the fewest roads and runs fastest. Throws, so the build fails,
+// if any non-ALT method beats the best ALT variant on speed or on settled share in some graph and band.
+export function checkAltClaim(): void {
+  const rows = mainE2Rows();
+  for (const graph of GRAPH_IDS) {
+    for (const bin of BANDS) {
+      const here = rows.filter((r) => r.graph === graph && r.bin === bin);
+      const alt = here.filter((r) => r.algo.startsWith("alt"));
+      if (alt.length === 0) throw new Error(`No ALT rows for ${graph} ${bin} in e2_summary.csv`);
+      const bestSpeedup = Math.max(...alt.map((r) => r.speedup));
+      const fewestSettled = Math.min(...alt.map((r) => r.settledRatio));
+      for (const r of here.filter((x) => !x.algo.startsWith("alt"))) {
+        if (r.speedup > bestSpeedup || r.settledRatio < fewestSettled) {
+          throw new Error(`ALT claim fails: ${r.algo} beats ALT on ${graph} ${bin}`);
+        }
+      }
+    }
+  }
 }

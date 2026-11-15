@@ -1,6 +1,4 @@
-import { CautionTriangle } from "@/components/sign/CautionTriangle";
 import { MethodGlyph } from "@/components/sign/MethodGlyph";
-import { Plate } from "@/components/sign/Plate";
 import { Roundel } from "@/components/sign/Roundel";
 import { StopOctagon } from "@/components/sign/StopOctagon";
 import { ExhaustiveChart } from "@/components/charts/ExhaustiveChart";
@@ -16,7 +14,6 @@ import {
   GRAPH_LABELS,
   e1FirstTimeout,
   e1TimeLimitS,
-  e2Slowdowns,
   getE2,
   graphRow,
   loadAltPrep,
@@ -28,11 +25,8 @@ import {
   type GraphId,
   type MedianTightness,
 } from "@/lib/results";
-import { bandPhrase, mainE2Rows, slowGraphsSentence } from "@/lib/results-section";
+import { bandPhrase, checkAltClaim, mainE2Rows } from "@/lib/results-section";
 import styles from "./ResultsSection.module.css";
-
-// Two digits below 1×, so 0.69× is not read or shown as 0.7×.
-const speedText = (v: number) => formatMultiplier(v, v < 1 ? 2 : 1);
 
 // Everything the reader sees for one graph. Only the picker shows one at a time.
 function GraphPanel({
@@ -49,8 +43,6 @@ function GraphPanel({
   const name = GRAPH_LABELS[graph];
   const row = graphRow(graph);
   const lead = getE2(graph, ">10km", "alt16");
-  const slow = e2Slowdowns().filter((r) => r.graph === graph);
-  const slowId = `${graph}-slow-title`;
 
   return (
     <div>
@@ -68,10 +60,6 @@ function GraphPanel({
           <dd>
             <Roundel kph={row.vmaxKph} />
           </dd>
-        </div>
-        <div>
-          <dt>Roads with no posted speed</dt>
-          <dd>{formatPercent(row.maxspeedMissingFraction, 0)}</dd>
         </div>
       </dl>
       <p className={styles.source}>Source: results/graph_table.csv.</p>
@@ -101,44 +89,9 @@ function GraphPanel({
         </div>
       </div>
 
-      {slow.length > 0 ? (
-        <Plate tone="yellow" inline labelledBy={slowId} className={styles.slowPlate}>
-          <div className={styles.signHead}>
-            <CautionTriangle className={styles.bigCaution} />
-            <h3 id={slowId}>Slower than Dijkstra here</h3>
-          </div>
-          <div className="table-scroll" tabIndex={0} role="region" aria-label={`Cases slower than Dijkstra, ${name}`}>
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Method</th>
-                  <th scope="col">Trip length</th>
-                  <th scope="col" className="num">Speed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {slow.map((r) => (
-                  <tr key={`${r.algo}-${r.bin}`}>
-                    <td>{METHODS[r.algo].label}</td>
-                    <td>{bandPhrase(r.bin)}</td>
-                    <td className="num">{speedText(r.speedup)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className={styles.source}>Source: results/e2_summary.csv, column speedup.</p>
-          {slow.some((r) => r.algo === "astar") && (
-            <p>For A*, the bound removes few intersections on those trips, and computing it costs time at every one.</p>
-          )}
-        </Plate>
-      ) : (
-        <p>No method ran slower than Dijkstra on this graph.</p>
-      )}
-
       <div className={styles.pair}>
         <div>
-        <h3>Why the A* bound is loose</h3>
+        <h3>How close each bound gets to the true time</h3>
         <p>The straight-line bound assumes the whole trip at the graph top speed.</p>
         <TightnessChart rows={tightness} graph={graph} />
         <p className={styles.source}>
@@ -147,7 +100,7 @@ function GraphPanel({
 
         </div>
         <div>
-        <h3>ALT is not free</h3>
+        <h3>What ALT&apos;s preprocessing costs</h3>
         <div className="table-scroll" tabIndex={0} role="region" aria-label={`Preprocessing cost of ALT landmarks, ${name}`}>
           <table>
             <thead>
@@ -180,6 +133,7 @@ function GraphPanel({
 }
 
 export function ResultsSection() {
+  checkAltClaim();
   const e2 = mainE2Rows();
   const altPrep = loadAltPrep();
   const tightness = medianTightness();
@@ -193,8 +147,7 @@ export function ResultsSection() {
 
   return (
     <section id="results" className="flow-section" aria-labelledby="results-title">
-      <h2 id="results-title">ALT looks at the fewest roads. A* can lose to Dijkstra on long trips in small maps.</h2>
-      <p className={styles.lead}>{slowGraphsSentence()}</p>
+      <h2 id="results-title">ALT looks at the fewest roads and runs fastest</h2>
 
       <GraphPicker
         name="results"
@@ -209,9 +162,7 @@ export function ResultsSection() {
         <h3>Why not just try every path?</h3>
       </div>
       {firstTimeout && limit !== null && (
-        <div className={styles.caveat}>
-          <p>{`At ${formatInt(firstTimeout.n)} intersections, ${firstTimeout.timedOut} of ${firstTimeout.total} queries hit the ${formatDecimal(limit, 0)} second limit.`}</p>
-        </div>
+        <p>{`At ${formatInt(firstTimeout.n)} intersections, ${firstTimeout.timedOut} of ${firstTimeout.total} queries hit the ${formatDecimal(limit, 0)} second limit.`}</p>
       )}
       {limit !== null && <ExhaustiveChart rows={e1} limitS={limit} />}
       <p className={styles.source}>
