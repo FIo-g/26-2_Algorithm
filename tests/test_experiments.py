@@ -16,6 +16,7 @@ from routing.experiments.e2 import run_e2
 from routing.graph import save_graph
 from routing.queries import make_queries, save_queries
 from routing.synthetic import grid_graph
+from test_bench import BASH  # Git Bash on Windows; bare "bash" there is WSL, which can't read the CRLF checkout
 
 REPO = Path(__file__).resolve().parents[1]
 PNG = b"\x89PNG\r\n\x1a\n"
@@ -230,7 +231,9 @@ def test_run_e2_cli_missing_inputs_stop_before_loading(tmp_path, capsys):
 
 
 def test_run_all_passes_overwrite_to_e2(tmp_path):
-    r = subprocess.run(["bash", "scripts/run_all.sh", "--dry-run", "--allow-collector"], cwd=REPO, capture_output=True,
+    if BASH is None:
+        pytest.skip("no bash outside WSL (install Git for Windows)")
+    r = subprocess.run([BASH, "scripts/run_all.sh", "--dry-run", "--allow-collector"], cwd=REPO, capture_output=True,
                        text=True, env={**os.environ, "RESULTS_DIR": str(tmp_path)})
     assert r.returncode == 0 and "run_e2.py gangnam gss seoul --overwrite" in r.stdout
 

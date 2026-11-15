@@ -1,0 +1,45 @@
+{
+ "sumo": "Eclipse SUMO sumo 1.27.1",
+ "cases": [
+  [
+   "W",
+   "medium"
+  ],
+  [
+   "W",
+   "high"
+  ],
+  [
+   "A",
+   "medium"
+  ],
+  [
+   "B",
+   "medium"
+  ]
+ ],
+ "plans": {
+  "W": "Webster",
+  "A": "queue-responsive",
+  "B": "offset coordination"
+ },
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "probs": {
+  "fixed": 0.0,
+  "reroute30": 0.3,
+  "reroute100": 1.0
+ },
+ "period_s": 60,
+ "adaptation_steps": 60,
+ "routing_algorithm": "dijkstra",
+ "baseline": "fixed: same harness, demand, signals and seed, no rerouting device",
+ "end_s": 18000,
+ "teleport": "off (--time-to-teleport -1)",
+ "note_plan_A": "A infers turning movements from each OD's original route, so re-routed vehicles are miscounted; A rows are kept but excluded from figure (e) and conclusions"
+}
