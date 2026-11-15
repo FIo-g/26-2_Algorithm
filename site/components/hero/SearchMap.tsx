@@ -13,7 +13,8 @@ import { createPlayer, type Player, type PlayerState } from "./player";
 const PLAY_SECONDS = 7; // Dijkstra from 0 to the end
 const MIN_SECONDS = 1.6; // so a search of a few dozen intersections is still watchable
 const LIVE_DELAY_MS = 400; // the spoken readout waits for the clock to settle, so scrubbing does not flood it
-const FIT_MARGIN = 0.03; // wide screens: margin round the whole network, as a share of its size
+const WIDE_ZOOM = 1.25; // wide screens: how far past the whole-network fit the map may grow (the slot clips the rest)
+const WIDE_CENTRE = 0.55; // wide screens: share of the network's height held at the middle of the area, the route sits just below it
 const VIEW_MARGIN = 0.08; // narrow screens: margin round the area the search covered
 const DIM_WIDE: [number, number] = [0.16, 0.42]; // alpha of unlit roads and of the previous method's roads
 const DIM_NARROW: [number, number] = [0.3, 0.55];
@@ -71,23 +72,29 @@ function labelWidth(label: { ko: string; en: string }): number {
   return Math.max(label.en.length * 8.2, label.ko.length * 14.5) + 24;
 }
 
-// Fits the network into the map area. A wide screen shows all of it with a small margin. A phone zooms to the area
+// Fits the network into the map area. A wide screen fills the area's width, up to WIDE_ZOOM times the size that shows
+// all of it; if that is taller than the area, the north and south edges are clipped. A phone zooms to the area
 // Dijkstra searched, so the lit roads fill the small area.
 function computeLayout(data: HeroData, slot: HTMLElement): Layout | null {
   const sw = slot.clientWidth;
   const sh = slot.clientHeight;
   if (sw === 0 || sh === 0) return null;
   const aspect = data.graph.aspect;
-  let x0 = -FIT_MARGIN;
-  let x1 = 1 + FIT_MARGIN;
-  let y0 = -FIT_MARGIN;
-  let y1 = 1 + FIT_MARGIN;
-  if (!window.matchMedia(WIDE).matches) {
+  let w: number;
+  let h: number;
+  let tx = 0;
+  let ty: number;
+  if (window.matchMedia(WIDE).matches) {
+    w = Math.min(sw, sh * aspect * WIDE_ZOOM);
+    h = w / aspect;
+    const reach = Math.max(0, (h - sh) / 2); // further than this and an empty band would show
+    ty = Math.max(-reach, Math.min(reach, (0.5 - WIDE_CENTRE) * h));
+  } else {
     const pos = data.positions;
-    x0 = 1;
-    x1 = 0;
-    y0 = 1;
-    y1 = 0;
+    let x0 = 1;
+    let x1 = 0;
+    let y0 = 1;
+    let y1 = 0;
     for (const v of data.traces.dijkstra) {
       x0 = Math.min(x0, pos[2 * v]);
       x1 = Math.max(x1, pos[2 * v]);
@@ -100,11 +107,11 @@ function computeLayout(data: HeroData, slot: HTMLElement): Layout | null {
     x1 = Math.min(1, x1 + mx);
     y0 = Math.max(0, y0 - my);
     y1 = Math.min(1, y1 + my);
+    w = Math.min(sw / (x1 - x0), (sh * aspect) / (y1 - y0));
+    h = w / aspect;
+    tx = -((x0 + x1) / 2 - 0.5) * w;
+    ty = -((y0 + y1) / 2 - 0.5) * h;
   }
-  const w = Math.min(sw / (x1 - x0), (sh * aspect) / (y1 - y0));
-  const h = w / aspect;
-  const tx = -((x0 + x1) / 2 - 0.5) * w;
-  const ty = -((y0 + y1) / 2 - 0.5) * h;
   const ox = (sw - w) / 2 + tx; // where the network's top left corner is, in the map area
   const oy = (sh - h) / 2 + ty;
   return { w, h, tx, ty, view: { x0: -ox, y0: -oy, x1: sw - ox, y1: sh - oy } };

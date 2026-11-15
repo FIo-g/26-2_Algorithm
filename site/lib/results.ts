@@ -174,7 +174,7 @@ export type AltPrepRow = {
   nbytes: number;
   memoryMb: number; // nbytes in decimal MB (10^6 bytes)
   breakeven: number; // queries until ALT's preprocessing pays off
-  breakevenQueries: number; // breakeven rounded up
+  breakevenQueries: number; // breakeven rounded to the nearest whole query
 };
 
 export function loadAltPrep(): AltPrepRow[] {
@@ -189,7 +189,7 @@ export function loadAltPrep(): AltPrepRow[] {
       nbytes,
       memoryMb: nbytes / 1e6,
       breakeven,
-      breakevenQueries: Math.ceil(breakeven),
+      breakevenQueries: Math.round(breakeven),
     };
   });
 }

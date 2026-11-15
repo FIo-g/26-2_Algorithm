@@ -127,7 +127,7 @@ function GraphPanel({
             </tbody>
           </table>
         </div>
-        <p className={styles.source}>Source: results/e2_alt_prep.csv. Break-even is rounded up to whole queries.</p>
+        <p className={styles.source}>Source: results/e2_alt_prep.csv. Break-even is rounded to the nearest whole query.</p>
         </div>
       </div>
     </div>

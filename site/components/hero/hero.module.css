@@ -1,5 +1,6 @@
-/* The map section: one blue sign as wide as the article column, with everything in one column: title, lede, map,
-   controls, the explanation of the selected method, the source line. Nothing sticks and nothing listens to scroll.
+/* The map section: one blue sign (the article column's width below 900px, edge to edge from 900px), with everything in
+   one column: title, lede, map, controls, the explanation of the selected method, the source line. Nothing sticks and
+   nothing listens to scroll.
    Class selectors are doubled up where they have to beat the single-class rules in globals.css. */
 
 .root {
@@ -337,12 +338,16 @@
 }
 
 @media (min-width: 900px) {
+  .root {
+    width: auto;
+    margin: var(--gap) var(--gap) 0;
+  }
   .slot {
+    width: 100%; /* explicit, so the height cap cuts the height and does not narrow the box */
     height: auto;
     aspect-ratio: var(--map-aspect, 1.2);
-    max-height: calc(100svh - var(--nav-h) - 6rem);
+    max-height: calc(100svh - var(--nav-h) - 2rem);
     min-height: 20rem;
-    margin-inline: auto; /* the height cap narrows the box, so centre it */
   }
   .controls {
     font-size: 1rem;
@@ -357,6 +362,7 @@
     height: 1.75rem;
   }
   .explain {
+    max-width: 60rem; /* the sign is very wide here; keep the text lines readable */
     font-size: 1rem;
     line-height: 1.45;
   }
