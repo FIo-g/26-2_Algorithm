@@ -1,6 +1,6 @@
 ---
 name: "Seoul shortest paths: the same answer for less"
-description: "One pinned blue traffic sign that replays the team's real shortest-path searches, then one white page of results."
+description: "One tall blue traffic sign whose map stays pinned and replays the team's real shortest-path searches, then one white page of results."
 colors:
   sign-blue: "#0F4C9C"
   sign-blue-deep: "#0A3572"
@@ -74,7 +74,7 @@ components:
     backgroundColor: "{colors.sign-blue}"
     textColor: "{colors.sheeting-white}"
     rounded: "{rounded.plate}"
-    height: "calc(100svh - 3.75rem - 2 * clamp(8px, 1.6vw, 16px))"
+    padding: "calc(clamp(8px, 1.6vw, 16px) + clamp(3px, 0.5vw, 5px) + 1rem)"
   plate-blue-inline:
     backgroundColor: "{colors.sign-blue}"
     textColor: "{colors.sheeting-white}"
@@ -97,7 +97,6 @@ components:
     textColor: "{colors.legend-black}"
     rounded: "{rounded.subplate}"
     padding: "1rem 1.25rem"
-    width: "min(28rem, 100%)"
   site-nav:
     backgroundColor: "{colors.steel}"
     textColor: "{colors.legend-black}"
@@ -123,14 +122,14 @@ components:
 
 **Creative North Star: "The Pinned Sign"**
 
-One Korean traffic safety sign (교통안전표지) stays pinned while the reader scrolls through four methods, and the road network on it replays the team's real searches. Below it the page is one white article column: headings, paragraphs, charts and tables with no frame round them. A sign appears again only where a sign is meant: a blue instruction sign round the step-by-step demo, and nothing else gets a sign. The page ends on a band of bare steel, the back of the sign.
+One Korean traffic safety sign (교통안전표지) opens the page: a tall blue sign with the text and four method cards down one side and the road network pinned beside them, replaying the team's real searches as the reader scrolls. Text never lies on the map. Below the sign the page is one white article column: headings, paragraphs, charts and tables with no frame round them. A sign appears once more, a blue instruction sign round the step-by-step demo. The page ends on a band of bare steel, the back of the sign.
 
 Everything is flat sheeting. The build has no gradient, no shadow, no blur and no translucent panel; depth comes only from one opaque thing sitting on another. Type is one highway grotesque in heavy weights with tabular numerals. Shapes (disc, triangle, diamond, square, octagon, red-ringed roundel) carry meaning every time they appear and are never ornament.
 
 Density is open between sections (a large gap, one finding per heading) and compact inside them (charts, tables and control plates sit 2rem apart or closer). The system is light scheme only.
 
 **Key Characteristics:**
-- One pinned sign, then one white column. Sections are not framed.
+- One tall sign with a pinned map, then one white column. Sections are not framed.
 - A sign (colour field, inset keyline, rounded corners) is used only for instruction (blue).
 - Five sign colours plus steel, all flat and opaque.
 - White supplementary plates with a black border carry controls, navigation and readouts; the selected one is inverted.
@@ -143,27 +142,27 @@ Density is open between sections (a large gap, one finding per heading) and comp
 The palette is the traffic sign palette at full strength, on a white page.
 
 ### Primary
-- **Sign Blue** (`sign-blue`): the instruction field. The pinned map sign and the step-demo sign. Also the focus ring on light fields, the A* method colour, the scrollbar thumb and the scrub thumb.
-- **Deep Sign Blue** (`sign-blue-deep`): link text on white, yellow and steel only.
+- **Sign Blue** (`sign-blue`): the instruction field. The map sign and the step-demo sign. Also the focus ring on light fields, the A* method colour, the scrollbar thumb and the scrub thumb.
+- **Deep Sign Blue** (`sign-blue-deep`): link text on white and steel only.
 
 ### Secondary
-- **Caution Yellow** (`caution-yellow`): no sign field any more. The route line on the map, the path and settled vertices in the step demos, the ALT method colour, the hover state of a supplementary plate, the focus ring on blue fields, the step-demo slider, and text selection.
+- **Caution Yellow** (`caution-yellow`): a mark, never a field. The route line on the map, the path and settled vertices in the step demos, the ALT method colour, the hover state of a supplementary plate, the focus ring on blue fields, the step-demo slider, and text selection.
 
 ### Tertiary
 - **Regulation Red** (`regulation-red`): rings and limits only. The roundel ring, the stop octagon, the destination marker ring, limit lines in charts, the Bidirectional method colour, and the background of a table cell that reports wrong answers. Never a field colour for a sign.
 
 ### Neutral
 - **Sheeting White** (`sheeting-white`): the page ground and article column; the supplementary plate and step card; the sticky graph picker row; legends and keylines on blue.
-- **Legend Black** (`legend-black`): text on white, yellow and steel; keylines on yellow; plate borders; chart axes; the Dijkstra method colour; the selected plate.
-- **Steel** (`steel`): the navigation strip, the ground round the pinned sign from 900px, the footer band, the scrollbar track.
-- **Steel Ink** (`steel-ink`): secondary text on white, yellow and steel (source lines, notes, readout labels, zero cells).
+- **Legend Black** (`legend-black`): text on white and steel; plate borders; chart axes; the Dijkstra method colour; the selected plate.
+- **Steel** (`steel`): the navigation strip, the footer band, the scrollbar track.
+- **Steel Ink** (`steel-ink`): secondary text on white and steel (source lines, notes, readout labels, zero cells).
 - **Pale Blue** (`on-blue-secondary`): secondary text on blue, where Steel Ink would not read. Also the fill of a disabled plate on blue.
 - **Hairline** (`hairline`): 1px table row rules, chart gridlines and the rule under the graph picker row.
 
 ### Named Rules
 **The Field Means Something Rule.** A colour field is used only where the content is that kind of statement: blue instructs, steel is the back of the sign. Reported results sit on the plain white page, not on a sign.
 
-**The Paired Ink Rule.** Secondary text follows its field: Steel Ink on white, yellow and steel; Pale Blue on blue. Links are Deep Sign Blue on light fields and white on blue. The focus ring is Sign Blue on light fields and Caution Yellow on blue.
+**The Paired Ink Rule.** Secondary text follows its field: Steel Ink on white and steel; Pale Blue on blue. Links are Deep Sign Blue on light fields and white on blue. The focus ring is Sign Blue on light fields and Caution Yellow on blue.
 
 **The Shape And Colour Rule.** A method is identified by shape and colour together, with its name beside it: Dijkstra black disc, A* blue triangle, Bidirectional red diamond, ALT yellow square (small, medium, large for 4, 8, 16 landmarks). Every glyph has a 2px outline in the current text colour so it reads on any field. A yellow line on white is drawn over a black casing; the yellow route on blue is drawn over a blue casing.
 
@@ -176,7 +175,7 @@ The palette is the traffic sign palette at full strength, on a white page.
 **Character:** One highway-signage grotesque does everything, in three weights: 400 for running text, 700 for labels and leads, 800 for legends. Hangul appears only for place and team names and is always heavy.
 
 ### Hierarchy
-- **Display** (800, line-height 0.95, -0.02em): the map sign legend only, two stacked lines. The map sign sets its own size: below 900px clamp(1.5rem, 8.7vw - 5.5px, 3.25rem) so the longer line stays on one line; from 900px clamp(2rem, min(6.7vw, 10.67svh), 6rem), so it also shrinks on a short window. Over the map it carries a 0.1em outline in Sign Blue so roads do not run into the letters.
+- **Display** (800, -0.02em): the map sign legend only, two stacked lines. The map sign sets its own size: below 900px clamp(1.5rem, 8.7vw - 5.5px, 3.25rem) at line-height 0.95, so the longer line stays on one line; from 900px it is sized from its text column (column width / 9.4, line-height 1.02), so the first line fills the column and the second wraps.
 - **Headline** (800, clamp(1.8rem, 3.6vw, 3.1rem), line-height 1.02, -0.02em): one per section. It states the finding as a sentence, balanced across lines.
 - **Title** (800, clamp(1.3rem, 0.9vw + 1.1rem, 1.75rem), line-height 1.2): sub-blocks inside a section. Step card titles and readout figures are 1.5rem at 800. Chart titles and table captions are body size at 700.
 - **Lead** (700, clamp(1.25rem, 0.8vw + 1.05rem, 1.6rem), line-height 1.35): the one-sentence conclusion that opens the results section and each graph panel.
@@ -198,19 +197,21 @@ The page has four parts in order: the navigation strip, the map section, the art
 
 **Spacing rhythm.** Three steps. Between sections, and above the footer: clamp(4rem, 9vw, 7.5rem). Above a heading inside a section: 2.5rem (0.75rem below a headline, 0.5rem below a title); the first child of a section has no top margin. Between blocks inside a section (after a source line, round a chart pair, a method key or a collapsed table): 2rem. A source line sits 0.5rem under the thing it names.
 
-**The pinned sign.** From 900px the map section is a steel ground with `gap` of padding. The blue sign is as tall as the viewport minus the navigation strip and two gaps, and sticks under the strip. The title and lede lie over its first screen and scroll away. Each method is one scroll step 110svh tall; its card sticks 1.5rem inside the keyline at the top left of the sign, at most 28rem wide, and leaves when its step ends. The last step leaves a tail one sign high, so the last card has gone before the sign starts to leave. A step takes over the map when its top edge passes 40% of the viewport height.
+**The map sign.** At every width the map section is one tall blue sign with `gap` of margin and a white keyline round the whole of it. From 900px it has two columns, 2rem apart, starting 1rem inside the keyline. The left column (38% of the sign, between 22rem and 34rem) holds the title and lede, then the four step cards in normal flow, each step at least 80svh; nothing in it is sticky. The intro is tall enough that the first card starts in the lower part of the first screen. The right column is the stage: it sticks 0.75rem under the navigation strip and ends 0.75rem above the bottom of the first screen. The map takes the height the controls leave; under it come the control rows, the source line and the road-data credit. Only the markers, their place labels and the route are drawn on the map.
 
-Below 900px the whole map section is one blue sign with the keyline round it. Title and lede come first; then the stage (map 42svh or 77vw high, whichever is less; one row of play and scrub; one readout line; credit) sticks to the top of the screen on an opaque blue ground, and the cards scroll under it, one per 55svh step. A step takes over when its top edge passes 65% of the viewport height. The method plates are not shown on the map at this width; scrolling to a card is how the method changes. The source line closes the sign.
+Below 900px the sign is one column. Title and lede come first; then the stage (map 42svh or 77vw high, whichever is less; one row of play and scrub; one readout line; credit) sticks to the top of the screen on an opaque blue ground, and the cards scroll under it, one per 55svh step. The method plates are not shown at this width; scrolling to a card is how the method changes. The source line closes the sign.
 
-**Breakpoints.** 900px is the only layout breakpoint: sticky navigation, the pinned-sign layout, two-column chart pairs, the two-column step demo (figure up to 40rem on the left, controls and narration on the right), wide chart drawings. Two narrower switches exist: readouts on the map use short wording below 640px, and reflow tables stack below 36rem (the header row is hidden and each cell becomes a labelled row). Other wide tables sit in a focusable scroll region. The navigation strip and the graph picker row scroll sideways inside themselves. The page itself never scrolls sideways at 375px.
+At every width a step takes over the map when its top edge passes 65% of the viewport height.
 
-**Sticky offsets.** Navigation strip: top 0, from 900px only (3.75rem high). Graph picker row: top 0 below 900px, under the strip from 900px. Anchor jumps leave 4.75rem clear at the top (plus the strip height from 900px) so a heading does not land under the picker row.
+**Breakpoints.** 900px is the only layout breakpoint: sticky navigation, the two-column map sign, two-column chart pairs, the two-column step demo (figure up to 40rem on the left, controls and narration on the right), wide chart drawings. Narrower switches exist: readouts on the map use short wording below 640px, and from 900px whenever the stage is under 40rem wide; the method plates on the map share a row with play and scrub when the stage is at least 46rem wide and take their own row when it is narrower; reflow tables stack below 36rem (the header row is hidden and each cell becomes a labelled row). Other wide tables sit in a focusable scroll region. The navigation strip and the graph picker row scroll sideways inside themselves. The page itself never scrolls sideways at 375px.
+
+**Sticky offsets.** Navigation strip: top 0, from 900px only (3.75rem high). Map stage: top 0 below 900px, 0.75rem under the strip from 900px. Graph picker row: top 0 below 900px, under the strip from 900px. Anchor jumps leave 4.75rem clear at the top (plus the strip height from 900px) so a heading does not land under the picker row.
 
 **Touch targets.** Below 900px navigation links and every radio-group plate are at least 2.75rem high.
 
 ## Elevation & Depth
 
-There are no shadows. The system is flat: depth is stacking order only, with opaque fields on opaque fields (page, then sign, then plate or card). Sticky layers are opaque too: the navigation strip is steel, the picker row is white with a hairline under it, the pinned stage is blue. Where text must sit over the live map, it gets an opaque patch or outline in the field colour, never a scrim or blur.
+There are no shadows. The system is flat: depth is stacking order only, with opaque fields on opaque fields (page, then sign, then plate or card). Sticky layers are opaque too: the navigation strip is steel, the picker row is white with a hairline under it, the map stage is blue. Running text is never laid over the map; the place labels on it are opaque supplementary plates and the markers carry a 3px Sign Blue outline.
 
 ### Named Rules
 **The Flat Sheeting Rule.** No shadow, gradient, blur or translucent surface. If something needs separating, give it a border, a keyline, a hairline or an opaque field. The one use of transparency is the road network itself: roads not yet settled and the previous method's roads are drawn as fainter white.
@@ -229,11 +230,11 @@ There are no shadows. The system is flat: depth is stacking order only, with opa
 ### Navigation strip
 A steel strip 3.75rem high at the top of the page: a row of supplementary plate links 0.25rem apart, scrolling sideways inside itself on narrow screens. From 900px it sticks to the top. The link for the section at the reading line (a band 40% down the viewport) is marked `aria-current` and drawn inverted, black with white text.
 
-### Pinned map sign
-A WebGL road network on a blue sign with a white keyline. Unsettled roads are faint white, settled roads solid white, the previous method's roads stay as a ghost, the route is a 4px yellow line over a 9px blue casing. The scrub position is the number of intersections settled and every readout follows it. Controls sit along the bottom as supplementary plates: method radio plates (from 900px), Play/Pause, a scrub track, settled count and travel time. Scrolling through the step cards picks the method; a choice made with the plates holds until the active step changes. It autoplays unless reduced motion is requested. Without WebGL2 a white panel shows the same figures as a table and nothing is pinned.
+### Map sign
+A WebGL road network on the blue sign, pinned beside the text from 900px and above the cards below it. Unsettled roads are faint white, settled roads solid white, the previous method's roads stay as a ghost, the route is a 4px yellow line over a 9px blue casing. The scrub position is the number of intersections settled and every readout follows it. Controls sit under the map as supplementary plates: method radio plates (always shown from 900px), Play/Pause, a scrub track, settled count and travel time. Scrolling through the step cards picks the method; a choice made with the plates holds until the active step changes. It autoplays unless reduced motion is requested. Without WebGL2 a white panel shows the same figures as a table; below 900px nothing is pinned then.
 
 ### Step card
-One per method, laid over the pinned sign. White, 2px black border, 6px radius, padding 1rem 1.25rem. Method glyph and name as a 1.5rem title, one sentence on how the method works, one sentence with its real counts for the graph on the map.
+One per method, in the text column of the map sign (scrolling under the stage below 900px). White, 2px black border, 6px radius, padding 1rem 1.25rem, as wide as its column. Method glyph and name as a 1.5rem title, one sentence on how the method works, one sentence with its real counts for the graph on the map.
 
 ### Scrub track
 Inside a supplementary plate: a 4px black track with a 1.25rem Sign Blue thumb and a 3px black border. The plate shows the focus ring when the input inside has focus.
@@ -280,7 +281,7 @@ Small Steel Ink text under every chart, table and demo, naming the result file i
 No bullets; a solid square marker in the text colour.
 
 ### Footer band
-Full-width steel, no keyline and no rounded corners, padding clamp(2.5rem, 6vw, 4rem) top and bottom. Team names (the only Hangul besides place names), repository link, data sources and credits in small text.
+Full-width steel, no keyline and no rounded corners, padding clamp(2.5rem, 6vw, 4rem) top and bottom. Team names (the only Hangul besides place names), repository link, road-data credit and other credits in small text.
 
 ## Do's and Don'ts
 
@@ -291,11 +292,11 @@ Full-width steel, no keyline and no rounded corners, padding clamp(2.5rem, 6vw, 
 - **Do** show a method as its shape, its colour and its name together.
 - **Do** use tabular numerals for every figure and reserve the width of anything that counts.
 - **Do** switch secondary text, link and focus colours with the field (Steel Ink and Sign Blue on light; Pale Blue, white and Caution Yellow on blue).
-- **Do** put a source line under every chart, table and demo, and one plain label next to anything estimated or synthetic, written as a description, not a warning.
+- **Do** put a source line under every chart, table and demo, and say in plain running text, where it applies, that a figure is synthetic or simulated.
 - **Do** keep text to 66ch and let charts, tables and signs take the full column.
 - **Do** keep the three spacing steps: section gap, 2.5rem above a heading, 2rem between blocks.
 - **Do** make every sticky layer opaque and set the anchor offset to clear it.
-- **Do** give text over the map an opaque patch or outline in the field colour.
+- **Do** keep running text beside or under the map, never on it; only markers, place-label plates and the route are drawn on the map.
 
 ### Don't:
 - **Don't** frame each section as its own full-height sign; the page read as a slide deck when it did.

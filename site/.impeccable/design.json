@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-15T06:59:31+00:00",
+  "generatedAt": "2026-11-15T09:30:00+00:00",
   "title": "Design System: Seoul shortest paths",
   "extensions": {
     "colorMeta": {
@@ -158,7 +158,7 @@
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Map sign legend only, two stacked lines; the sign sets its own size per breakpoint."
+        "purpose": "Map sign legend only, two stacked lines; sized from the viewport below 900px and from its text column from 900px."
       },
       "headline": {
         "displayName": "Headline",
@@ -203,8 +203,8 @@
       },
       {
         "name": "scroll-step",
-        "value": "step top edge above 40% of viewport height from 900px, 65% below; step height 110svh from 900px, 55svh below",
-        "purpose": "Scrolling through the step cards picks the method on the pinned sign. A choice made with the plates holds until the active step changes."
+        "value": "step top edge above 65% of viewport height at every width; step min-height 80svh from 900px, 55svh below",
+        "purpose": "Scrolling through the step cards picks the method on the pinned map. A choice made with the plates holds until the active step changes."
       },
       {
         "name": "smooth-anchor",
@@ -229,6 +229,14 @@
       {
         "name": "table-reflow",
         "value": "36rem"
+      },
+      {
+        "name": "stage-methods-inline (container)",
+        "value": "46rem"
+      },
+      {
+        "name": "stage-short-readouts (container)",
+        "value": "39.99rem"
       }
     ],
     "stickyLayers": [
@@ -242,11 +250,7 @@
       },
       {
         "name": "map-stage",
-        "value": "top 0 below 900px; top 3.75rem + gap from 900px, height 100svh - 3.75rem - 2 gap"
-      },
-      {
-        "name": "step-card",
-        "value": "from 900px: top 3.75rem + 2 gap + keyline + 1.5rem"
+        "value": "top 0 below 900px; top 3.75rem + 0.75rem from 900px, height 100svh - 3.75rem - 2 gap - keyline - 1.75rem"
       }
     ]
   },
@@ -255,23 +259,15 @@
       "name": "Blue inline sign",
       "kind": "card",
       "refersTo": "plate-blue-inline",
-      "description": "Instruction sign sized by its content inside the article column; holds the step demo.",
+      "description": "Instruction sign sized by its content inside the article column; holds the step demo. The only inline sign tone in use.",
       "html": "<section class=\"ds-plate-blue\"><h3>Dijkstra, step 3 of 12</h3><p>White legend and keyline on a sign-blue field.</p></section>",
       "css": ".ds-plate-blue{position:relative;border-radius:24px;padding:36px;background:var(--blue,#0F4C9C);color:var(--white,#fff);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif} .ds-plate-blue::before{content:'';position:absolute;inset:12px;border:4px solid currentColor;border-radius:12px;pointer-events:none} .ds-plate-blue h3{margin:0 0 .5rem;font-size:1.5rem;font-weight:800;line-height:1.2} .ds-plate-blue p{margin:0}"
-    },
-    {
-      "name": "Yellow inline sign",
-      "kind": "card",
-      "refersTo": "plate-yellow-inline",
-      "description": "Caution sign inside the article column: cases slower than Dijkstra, and limits.",
-      "html": "<section class=\"ds-plate-yellow\"><h3>Slower than Dijkstra here</h3><p>Black ink and keyline on caution yellow.</p></section>",
-      "css": ".ds-plate-yellow{position:relative;border-radius:24px;padding:36px;background:var(--yellow,#FFC400);color:var(--black,#000);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif} .ds-plate-yellow::before{content:'';position:absolute;inset:12px;border:4px solid currentColor;border-radius:12px;pointer-events:none} .ds-plate-yellow h3{margin:0 0 .5rem;font-size:1.5rem;font-weight:800;line-height:1.2} .ds-plate-yellow p{margin:0}"
     },
     {
       "name": "Step card",
       "kind": "card",
       "refersTo": "step-card",
-      "description": "One per method, laid over the pinned map sign: glyph and name, how it works, its real counts.",
+      "description": "One per method, in the text column of the map sign beside the pinned map: glyph and name, how it works, its real counts.",
       "html": "<div class=\"ds-step-card\"><h2><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"var(--black,#000)\"/></g></svg>Dijkstra</h2><p>Settles the closest intersection first, in every direction.</p><p>Counts for the graph on the map go here.</p></div>",
       "css": ".ds-step-card{max-width:28rem;padding:1rem 1.25rem;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:400 1rem/1.45 Overpass,system-ui,sans-serif} .ds-step-card h2{display:flex;align-items:center;gap:.5rem;margin:0 0 .5rem;font-size:1.5rem;font-weight:800;line-height:1.15} .ds-step-card p{margin:0 0 .4rem} .ds-step-card p:last-child{margin:0}"
     },
@@ -296,7 +292,7 @@
       "kind": "nav",
       "refersTo": "site-nav",
       "description": "Steel strip of supplementary plate links, sticky from 900px; the section in view is marked aria-current and inverted.",
-      "html": "<nav class=\"ds-nav\" aria-label=\"Sections\"><a href=\"#\" class=\"ds-subplate\">Map</a><a href=\"#\" class=\"ds-subplate\" aria-current=\"true\">Methods</a><a href=\"#\" class=\"ds-subplate\">Results</a><a href=\"#\" class=\"ds-subplate\">Limits</a></nav>",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Sections\"><a href=\"#\" class=\"ds-subplate\">Map</a><a href=\"#\" class=\"ds-subplate\" aria-current=\"true\">Methods</a><a href=\"#\" class=\"ds-subplate\">Results</a><a href=\"#\" class=\"ds-subplate\">Team</a></nav>",
       "css": ".ds-nav{display:flex;align-items:center;gap:.25rem;height:3.75rem;overflow-x:auto;padding:0 12px;background:var(--steel,#D5D9DE)} .ds-nav a{white-space:nowrap;margin:.2em .35em .2em 0} .ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400);color:var(--black,#000)} .ds-subplate[aria-checked=true],.ds-subplate[aria-current=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
     },
     {
@@ -324,13 +320,6 @@
       "css": ".ds-roundel{display:inline-grid;place-items:center;width:3.2em;height:3.2em;border-radius:50%;border:.384em solid var(--red,#D3222A);background:var(--white,#fff);color:var(--black,#000);font:800 1.25rem/1 Overpass,system-ui,sans-serif;font-variant-numeric:tabular-nums}"
     },
     {
-      "name": "Caveat",
-      "kind": "custom",
-      "description": "Caution triangle with one sentence, next to anything estimated or synthetic.",
-      "html": "<p class=\"ds-caveat\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3.5 L21.5 20 H2.5 Z\" fill=\"var(--yellow,#FFC400)\" stroke=\"var(--red,#D3222A)\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><rect x=\"11\" y=\"8.5\" width=\"2\" height=\"7\" rx=\"1\"/><circle cx=\"12\" cy=\"17.6\" r=\"1.2\"/></svg><span>Caveat: congestion here is synthetic.</span></p>",
-      "css": ".ds-caveat{display:flex;gap:.5rem;align-items:flex-start;margin:0;color:var(--black,#000);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif}"
-    },
-    {
       "name": "Scrub track",
       "kind": "input",
       "description": "Range input framed by a supplementary plate; position is intersections settled.",
@@ -348,10 +337,10 @@
   ],
   "narrative": {
     "northStar": "The Pinned Sign",
-    "overview": "\n**Creative North Star: \"The Pinned Sign\"**\n\nOne Korean traffic safety sign (교통안전표지) stays pinned while the reader scrolls through four methods, and the road network on it replays the team's real searches. Below it the page is one white article column: headings, paragraphs, charts and tables with no frame round them. A sign appears again only where a sign is meant: a blue instruction sign round the step-by-step demo, and a yellow caution sign round results that went against the team and round the limits. The page ends on a band of bare steel, the back of the sign.\n\nEverything is flat sheeting. The build has no gradient, no shadow, no blur and no translucent panel; depth comes only from one opaque thing sitting on another. Type is one highway grotesque in heavy weights with tabular numerals. Shapes (disc, triangle, diamond, square, octagon, red-ringed roundel) carry meaning every time they appear and are never ornament.\n\nDensity is open between sections (a large gap, one finding per heading) and compact inside them (charts, tables and control plates sit 2rem apart or closer). The system is light scheme only.",
+    "overview": "\n**Creative North Star: \"The Pinned Sign\"**\n\nOne Korean traffic safety sign (교통안전표지) opens the page: a tall blue sign with the text and four method cards down one side and the road network pinned beside them, replaying the team's real searches as the reader scrolls. Text never lies on the map. Below the sign the page is one white article column: headings, paragraphs, charts and tables with no frame round them. A sign appears once more, a blue instruction sign round the step-by-step demo. The page ends on a band of bare steel, the back of the sign.\n\nEverything is flat sheeting. The build has no gradient, no shadow, no blur and no translucent panel; depth comes only from one opaque thing sitting on another. Type is one highway grotesque in heavy weights with tabular numerals. Shapes (disc, triangle, diamond, square, octagon, red-ringed roundel) carry meaning every time they appear and are never ornament.\n\nDensity is open between sections (a large gap, one finding per heading) and compact inside them (charts, tables and control plates sit 2rem apart or closer). The system is light scheme only.",
     "keyCharacteristics": [
-      "One pinned sign, then one white column. Sections are not framed.",
-      "A sign (colour field, inset keyline, rounded corners) is used only for instruction (blue) and caution (yellow).",
+      "One tall sign with a pinned map, then one white column. Sections are not framed.",
+      "A sign (colour field, inset keyline, rounded corners) is used only for instruction (blue).",
       "Five sign colours plus steel, all flat and opaque.",
       "White supplementary plates with a black border carry controls, navigation and readouts; the selected one is inverted.",
       "A method is always its shape and colour together: black disc, blue triangle, red diamond, yellow square.",
@@ -361,12 +350,12 @@
     "rules": [
       {
         "name": "The Field Means Something Rule",
-        "body": "A colour field is used only where the content is that kind of statement: blue instructs, yellow warns, steel is the back of the sign. Reported results sit on the plain white page, not on a sign.",
+        "body": "A colour field is used only where the content is that kind of statement: blue instructs, steel is the back of the sign. Reported results sit on the plain white page, not on a sign.",
         "section": "colors"
       },
       {
         "name": "The Paired Ink Rule",
-        "body": "Secondary text follows its field: Steel Ink on white, yellow and steel; Pale Blue on blue. Links are Deep Sign Blue on light fields and white on blue. The focus ring is Sign Blue on light fields and Caution Yellow on blue.",
+        "body": "Secondary text follows its field: Steel Ink on white and steel; Pale Blue on blue. Links are Deep Sign Blue on light fields and white on blue. The focus ring is Sign Blue on light fields and Caution Yellow on blue.",
         "section": "colors"
       },
       {
@@ -392,16 +381,16 @@
     ],
     "dos": [
       "Do write a new section as plain content in the white column: a headline that states the finding, then text, charts and tables with no frame.",
-      "Do use a sign only where the content is an instruction (blue) or a caution (yellow), sized by its content inside the column.",
+      "Do use a sign only where the content is an instruction (blue), sized by its content inside the column.",
       "Do put every control, navigation link and readout on a white supplementary plate with a 2px black border, and invert the selected or current one.",
       "Do show a method as its shape, its colour and its name together.",
       "Do use tabular numerals for every figure and reserve the width of anything that counts.",
       "Do switch secondary text, link and focus colours with the field (Steel Ink and Sign Blue on light; Pale Blue, white and Caution Yellow on blue).",
-      "Do put a source line under every chart, table and demo, and a caution triangle with a sentence next to anything estimated or synthetic.",
+      "Do put a source line under every chart, table and demo, and say in plain running text, where it applies, that a figure is synthetic or simulated.",
       "Do keep text to 66ch and let charts, tables and signs take the full column.",
       "Do keep the three spacing steps: section gap, 2.5rem above a heading, 2rem between blocks.",
       "Do make every sticky layer opaque and set the anchor offset to clear it.",
-      "Do give text over the map an opaque patch or outline in the field colour."
+      "Do keep running text beside or under the map, never on it; only markers, place-label plates and the route are drawn on the map."
     ],
     "donts": [
       "Don't frame each section as its own full-height sign; the page read as a slide deck when it did.",
