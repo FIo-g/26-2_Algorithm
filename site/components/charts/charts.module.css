@@ -1,0 +1,16 @@
+.figure {
+  margin: 0;
+}
+
+/* Top speed beside the tightness chart: a Roundel and a short note. */
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0 0 0.5rem;
+}
+
+.groupNote {
+  font-size: 0.875rem;
+  color: var(--steel-ink);
+}

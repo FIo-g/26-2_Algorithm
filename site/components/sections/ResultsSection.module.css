@@ -1,0 +1,111 @@
+/* Panel lead: the conclusion for this graph. The 2rem below it is the gap to the method key or the charts. */
+.lead {
+  font-size: clamp(1.25rem, 0.8vw + 1.05rem, 1.6rem);
+  font-weight: 700;
+  line-height: 1.35;
+  max-width: var(--measure);
+  margin: 0 0 2rem;
+}
+
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  list-style: none;
+  margin: 2rem 0;
+  padding: 0;
+  font-size: 0.9375rem;
+}
+
+.key li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.key svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.chartTitle {
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.source {
+  font-size: 0.875rem;
+  color: var(--steel-ink);
+  margin: 0.5rem 0 2rem;
+}
+
+.source:last-child {
+  margin-bottom: 0;
+}
+
+/* Two columns from 900px: charts A and B, and the A* bound beside ALT. One column below. */
+.pair {
+  display: grid;
+  gap: 2rem 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 2rem 0;
+}
+
+@media (min-width: 900px) {
+  .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* A heading at the top of a column starts level with the heading in the other column. */
+.pair > div > h3:first-child {
+  margin-top: 0;
+}
+
+/* Graph facts as readouts: a label above each number. */
+.facts {
+  display: grid;
+  gap: 1rem 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  margin: 2rem 0 0;
+}
+
+.facts dt {
+  font-size: 0.9375rem;
+  color: var(--steel-ink);
+}
+
+.facts dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Heading row for a sign: the sign shape sits beside the heading, not above it. */
+.signHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0 0.5rem;
+}
+
+/* Beats the global .flow h3 margin on specificity, not on stylesheet order. */
+.signHead > h3:last-child {
+  margin: 0;
+}
+
+.bigStop {
+  width: 6rem;
+  height: 6rem;
+  flex: none;
+}
+
+.details {
+  margin-top: 2rem;
+}
+
+.details summary {
+  margin-bottom: 1rem;
+}

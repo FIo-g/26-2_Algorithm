@@ -1,0 +1,390 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-15T12:00:00+00:00",
+  "title": "Design System: Seoul shortest paths",
+  "extensions": {
+    "colorMeta": {
+      "sign-blue": {
+        "role": "primary",
+        "displayName": "Sign Blue",
+        "canonical": "#0F4C9C",
+        "tonalRamp": [
+          "#132439",
+          "#0C3B79",
+          "#1156B1",
+          "#1671E9",
+          "#4E93EE",
+          "#86B5F3",
+          "#B9D4F8",
+          "#ECF1F9"
+        ]
+      },
+      "sign-blue-deep": {
+        "role": "primary",
+        "displayName": "Deep Sign Blue",
+        "canonical": "#0A3572",
+        "tonalRamp": [
+          "#132339",
+          "#0B397A",
+          "#1053B2",
+          "#156DEA",
+          "#4D90EF",
+          "#85B3F4",
+          "#B9D3F9",
+          "#ECF1F9"
+        ]
+      },
+      "on-blue-secondary": {
+        "role": "neutral",
+        "displayName": "Pale Blue",
+        "canonical": "#C9D8EE",
+        "tonalRamp": [
+          "#1A2432",
+          "#203C65",
+          "#2E5793",
+          "#3D73C2",
+          "#6C95D1",
+          "#9AB6DF",
+          "#C5D5ED",
+          "#EEF1F6"
+        ]
+      },
+      "sheeting-white": {
+        "role": "neutral",
+        "displayName": "Sheeting White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#616161",
+          "#808080",
+          "#9E9E9E",
+          "#BDBDBD",
+          "#D9D9D9",
+          "#F2F2F2"
+        ]
+      },
+      "regulation-red": {
+        "role": "tertiary",
+        "displayName": "Regulation Red",
+        "canonical": "#D3222A",
+        "tonalRamp": [
+          "#371617",
+          "#721217",
+          "#A71B21",
+          "#DC232C",
+          "#E4585E",
+          "#ED8D91",
+          "#F4BDC0",
+          "#F8EDED"
+        ]
+      },
+      "caution-yellow": {
+        "role": "secondary",
+        "displayName": "Caution Yellow",
+        "canonical": "#FFC400",
+        "tonalRamp": [
+          "#3D330F",
+          "#856600",
+          "#C29500",
+          "#FFC400",
+          "#FFD23D",
+          "#FFE07A",
+          "#FFEDB2",
+          "#FAF6EB"
+        ]
+      },
+      "legend-black": {
+        "role": "neutral",
+        "displayName": "Legend Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#616161",
+          "#808080",
+          "#9E9E9E",
+          "#BDBDBD",
+          "#D9D9D9",
+          "#F2F2F2"
+        ]
+      },
+      "steel": {
+        "role": "neutral",
+        "displayName": "Steel",
+        "canonical": "#D5D9DE",
+        "tonalRamp": [
+          "#232629",
+          "#3A414A",
+          "#55606D",
+          "#707E8F",
+          "#929DAA",
+          "#B5BCC5",
+          "#D4D8DD",
+          "#F1F2F3"
+        ]
+      },
+      "steel-ink": {
+        "role": "neutral",
+        "displayName": "Steel Ink",
+        "canonical": "#4A535D",
+        "tonalRamp": [
+          "#242629",
+          "#3B424A",
+          "#56606C",
+          "#717F8E",
+          "#939EA9",
+          "#B5BCC4",
+          "#D4D9DD",
+          "#F1F2F3"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#C2C8CF",
+        "tonalRamp": [
+          "#242629",
+          "#3A424A",
+          "#55606C",
+          "#707E8F",
+          "#939DAA",
+          "#B5BCC5",
+          "#D4D8DD",
+          "#F1F2F3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Map sign legend only, two stacked lines; the sign sets clamp(1.4rem, 5vw, 4.5rem)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "One per section; states the finding as a sentence."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sub-blocks inside a section."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The one-sentence conclusion that opens the results section and each graph panel."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraphs and list items, held to 66ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Text on supplementary plates."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Source lines, credits, notes and map place labels."
+      },
+      "hangul": {
+        "displayName": "Hangul",
+        "purpose": "Place and team names only, always weight 800."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "plate-state",
+        "value": "background-color 120ms, color 120ms",
+        "purpose": "Hover and selected colour change on supplementary plates and summaries. The only CSS transition."
+      },
+      {
+        "name": "search-replay",
+        "value": "requestAnimationFrame, clock = intersections settled",
+        "purpose": "Map replay. Autoplays unless prefers-reduced-motion: reduce; scrubbable; restarts when a method plate is chosen."
+      },
+      {
+        "name": "smooth-anchor",
+        "value": "scroll-behavior: smooth; scroll-padding-top 4.75rem (+3.75rem nav from 900px)",
+        "purpose": "Anchor jumps, only under prefers-reduced-motion: no-preference."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition-duration and animation-duration 0.01ms, scroll-behavior auto",
+        "purpose": "Applied globally under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "900px"
+      },
+      {
+        "name": "short-readouts",
+        "value": "639px"
+      },
+      {
+        "name": "table-reflow",
+        "value": "36rem"
+      }
+    ],
+    "stickyLayers": [
+      {
+        "name": "site-nav",
+        "value": "top 0, z-index 20, from 900px only, height 3.75rem"
+      },
+      {
+        "name": "graph-picker",
+        "value": "top 0 below 900px, top 3.75rem from 900px, z-index 10"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Blue inline sign",
+      "kind": "card",
+      "refersTo": "plate-blue-inline",
+      "description": "Instruction sign sized by its content inside the article column; holds the step demo. The only inline sign tone in use.",
+      "html": "<section class=\"ds-plate-blue\"><h3>Dijkstra, step 3 of 12</h3><p>White legend and keyline on a sign-blue field.</p></section>",
+      "css": ".ds-plate-blue{position:relative;border-radius:24px;padding:36px;background:var(--blue,#0F4C9C);color:var(--white,#fff);font:400 1.125rem/1.55 Overpass,system-ui,sans-serif} .ds-plate-blue::before{content:'';position:absolute;inset:12px;border:4px solid currentColor;border-radius:12px;pointer-events:none} .ds-plate-blue h3{margin:0 0 .5rem;font-size:1.5rem;font-weight:800;line-height:1.2} .ds-plate-blue p{margin:0}"
+    },
+    {
+      "name": "Explanation plate",
+      "kind": "card",
+      "refersTo": "explanation-plate",
+      "description": "Under the map controls: the selected method's glyph and name, how it works, its real counts. All variants are stacked in one grid cell so the plate keeps the tallest height.",
+      "html": "<div class=\"ds-explain\"><p class=\"ds-explain-name\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"var(--black,#000)\"/></g></svg>Dijkstra</p><p>Settles the closest intersection first, in every direction.</p><p>Counts for the graph on the map go here.</p></div>",
+      "css": ".ds-explain{padding:1rem 1.25rem;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:400 1rem/1.45 Overpass,system-ui,sans-serif} .ds-explain p{margin:0 0 .4rem} .ds-explain p:last-child{margin:0} .ds-explain .ds-explain-name{display:flex;align-items:center;gap:.5rem;margin:0 0 .5rem;font-size:1.5rem;font-weight:800;line-height:1.15}"
+    },
+    {
+      "name": "Supplementary plate button",
+      "kind": "button",
+      "refersTo": "subplate",
+      "description": "The one control shape: link, button or static label.",
+      "html": "<button type=\"button\" class=\"ds-subplate\">Replay</button>",
+      "css": ".ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400);color:var(--black,#000)} .ds-subplate[aria-checked=true],.ds-subplate[aria-current=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Method chooser",
+      "kind": "chip",
+      "refersTo": "subplate-selected",
+      "description": "Radio group of supplementary plates; the selected plate is inverted. Each method keeps its shape and colour.",
+      "html": "<div class=\"ds-methods\" role=\"radiogroup\" aria-label=\"Search method\"><button type=\"button\" role=\"radio\" aria-checked=\"true\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"var(--black,#000)\"/></g></svg>Dijkstra</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><polygon points=\"12,3 22,20 2,20\" fill=\"var(--blue,#0F4C9C)\"/></g></svg>A*</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><polygon points=\"12,2 22,12 12,22 2,12\" fill=\"var(--red,#D3222A)\"/></g></svg>Bidirectional</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" class=\"ds-subplate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" fill=\"var(--yellow,#FFC400)\"/></g></svg>ALT (16)</button></div>",
+      "css": ".ds-methods{display:flex;flex-wrap:wrap;gap:.5rem} .ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400);color:var(--black,#000)} .ds-subplate[aria-checked=true],.ds-subplate[aria-current=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Navigation strip",
+      "kind": "nav",
+      "refersTo": "site-nav",
+      "description": "Steel strip of supplementary plate links, sticky from 900px; the section in view is marked aria-current and inverted.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Sections\"><a href=\"#\" class=\"ds-subplate\">Map</a><a href=\"#\" class=\"ds-subplate\" aria-current=\"true\">Methods</a><a href=\"#\" class=\"ds-subplate\">Results</a><a href=\"#\" class=\"ds-subplate\">Limits</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:.25rem;height:3.75rem;overflow-x:auto;padding:0 12px;background:var(--steel,#D5D9DE)} .ds-nav a{white-space:nowrap;margin:.2em .35em .2em 0} .ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400);color:var(--black,#000)} .ds-subplate[aria-checked=true],.ds-subplate[aria-current=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Graph picker",
+      "kind": "chip",
+      "refersTo": "graph-picker-bar",
+      "description": "Sticky white row with a hairline under it: a radio group of supplementary plates that switches server-rendered panels by road graph.",
+      "html": "<div class=\"ds-picker\" role=\"radiogroup\" aria-label=\"Road graph\"><button type=\"button\" role=\"radio\" aria-checked=\"true\" class=\"ds-subplate\">All of Seoul</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" tabindex=\"-1\" class=\"ds-subplate\">Gangnam + Seocho + Songpa</button></div>",
+      "css": ".ds-picker{display:flex;flex-wrap:wrap;gap:.25rem;padding:.75rem 0;background:var(--white,#fff);border-bottom:1px solid var(--hairline,#C2C8CF)} .ds-picker .ds-subplate{margin:.2em .35em .2em 0} .ds-subplate{display:inline-flex;align-items:center;gap:.4em;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font:700 1.125rem/1.2 Overpass,system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background-color 120ms,color 120ms} a.ds-subplate:hover,button.ds-subplate:hover:not(:disabled){background:var(--yellow,#FFC400);color:var(--black,#000)} .ds-subplate[aria-checked=true],.ds-subplate[aria-current=true]{background:var(--black,#000);color:var(--white,#fff)} .ds-subplate:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-subplate:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Disclosure",
+      "kind": "button",
+      "refersTo": "subplate",
+      "description": "A details summary drawn as a supplementary plate with its state written out: Show when closed, Hide when open (inverted).",
+      "html": "<details class=\"ds-details\"><summary>Simple paths in a k by k grid</summary><p>Supporting table goes here.</p></details>",
+      "css": ".ds-details{font:400 1.125rem/1.55 Overpass,system-ui,sans-serif;color:var(--black,#000)} .ds-details>summary{display:inline-flex;align-items:center;gap:.4em;margin-bottom:1rem;padding:.35em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff);color:var(--black,#000);font-weight:700;line-height:1.2;cursor:pointer;list-style:none;transition:background-color 120ms,color 120ms} .ds-details>summary::-webkit-details-marker{display:none} .ds-details>summary::after{content:'Show';margin-left:.7em;padding-left:.7em;border-left:2px solid currentColor} .ds-details[open]>summary::after{content:'Hide'} .ds-details>summary:hover{background:var(--yellow,#FFC400);color:var(--black,#000)} .ds-details[open]>summary{background:var(--black,#000);color:var(--white,#fff)} .ds-details>summary:focus-visible{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-details p{margin:0}"
+    },
+    {
+      "name": "Roundel",
+      "kind": "custom",
+      "refersTo": "roundel",
+      "description": "Top speed of a graph as a speed-limit sign.",
+      "html": "<span class=\"ds-roundel\" role=\"img\" aria-label=\"Top speed 80 km/h\">80</span>",
+      "css": ".ds-roundel{display:inline-grid;place-items:center;width:3.2em;height:3.2em;border-radius:50%;border:.384em solid var(--red,#D3222A);background:var(--white,#fff);color:var(--black,#000);font:800 1.25rem/1 Overpass,system-ui,sans-serif;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Scrub track",
+      "kind": "input",
+      "description": "Range input framed by a supplementary plate; position is intersections settled.",
+      "html": "<label class=\"ds-scrub\"><input type=\"range\" min=\"0\" max=\"100\" value=\"60\" aria-label=\"Intersections settled\"></label>",
+      "css": ".ds-scrub{display:flex;padding:.15em .7em;border:2px solid var(--black,#000);border-radius:6px;background:var(--white,#fff)} .ds-scrub:focus-within{outline:3px solid var(--blue,#0F4C9C);outline-offset:3px} .ds-scrub input{width:100%;height:1.75rem;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer} .ds-scrub input:focus{outline:none} .ds-scrub input::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--black,#000)} .ds-scrub input::-moz-range-track{height:4px;border-radius:2px;background:var(--black,#000)} .ds-scrub input::-webkit-slider-thumb{-webkit-appearance:none;width:1.25rem;height:1.25rem;margin-top:calc((4px - 1.25rem)/2);border:3px solid var(--black,#000);border-radius:50%;background:var(--blue,#0F4C9C)} .ds-scrub input::-moz-range-thumb{width:1.25rem;height:1.25rem;box-sizing:border-box;border:3px solid var(--black,#000);border-radius:50%;background:var(--blue,#0F4C9C)}"
+    },
+    {
+      "name": "Footer band",
+      "kind": "custom",
+      "refersTo": "footer-band",
+      "description": "Full-width steel band, the back of the sign: team names, repository, sources and credits.",
+      "html": "<footer class=\"ds-footer\"><h2>Team C2, DCCS309 Algorithms</h2><p>Results frozen on 2026-11-09.</p></footer>",
+      "css": ".ds-footer{padding:2.5rem 2rem;background:var(--steel,#D5D9DE);color:var(--black,#000);font:400 .875rem/1.55 Overpass,system-ui,sans-serif} .ds-footer h2{margin:0 0 .75rem;font-size:2rem;font-weight:800;line-height:1.02;letter-spacing:-.02em} .ds-footer p{margin:0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Instruction Sign",
+    "overview": "\n**Creative North Star: \"The Instruction Sign\"**\n\nOne Korean traffic safety sign (교통안전표지) opens the page: a blue instruction sign as wide as the article column, holding the title, the road network, its controls and a white plate that explains the selected method. The network replays the team's real searches. Nothing is pinned and nothing follows the scroll; the reader picks a method with a plate. Below the sign the page is one white article column: headings, paragraphs, charts and tables with no frame round them. A sign appears once more, a blue instruction sign round the step-by-step demo. The page ends on a band of bare steel, the back of the sign.\n\nEverything is flat sheeting. The build has no gradient, no shadow, no blur and no translucent panel; depth comes only from one opaque thing sitting on another. Type is one highway grotesque in heavy weights with tabular numerals. Shapes (disc, triangle, diamond, square, octagon, red-ringed roundel) carry meaning every time they appear and are never ornament.\n\nDensity is open between sections (a large gap, one finding per heading) and compact inside them (charts, tables and control plates sit 2rem apart or closer). The system is light scheme only.",
+    "keyCharacteristics": [
+      "One blue sign with the map, then one white column. Sections are not framed.",
+      "A sign (colour field, inset keyline, rounded corners) is used only for instruction (blue).",
+      "Five sign colours plus steel, all flat and opaque.",
+      "White supplementary plates with a black border carry controls, navigation and readouts; the selected one is inverted.",
+      "A method is always its shape and colour together: black disc, blue triangle, red diamond, yellow square.",
+      "Heavy grotesque Latin, heavy gothic Hangul for names, tabular numerals for every figure.",
+      "Nothing is told by colour alone; every source file is named under the thing it feeds."
+    ],
+    "rules": [
+      {
+        "name": "The Field Means Something Rule",
+        "body": "A colour field is used only where the content is that kind of statement: blue instructs, steel is the back of the sign. Reported results sit on the plain white page, not on a sign.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paired Ink Rule",
+        "body": "Secondary text follows its field: Steel Ink on white and steel; Pale Blue on blue. Links are Deep Sign Blue on light fields and white on blue. The focus ring is Sign Blue on light fields and Caution Yellow on blue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shape And Colour Rule",
+        "body": "A method is identified by shape and colour together, with its name beside it: Dijkstra black disc, A* blue triangle, Bidirectional red diamond, ALT yellow square (small, medium, large for 4, 8, 16 landmarks). Every glyph has a 2px outline in the current text colour so it reads on any field. A yellow line on white is drawn over a black casing; the yellow route on blue is drawn over a blue casing.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Every number that can change or be compared (tables, readouts, counters, roundels) uses tabular numerals. A live counter reserves its final width so plates do not move.",
+        "section": "typography"
+      },
+      {
+        "name": "The Heavy Hangul Rule",
+        "body": "Text marked as Korean is Gothic A1 at 800, whatever weight surrounds it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Sheeting Rule",
+        "body": "No shadow, gradient, blur or translucent surface. If something needs separating, give it a border, a keyline, a hairline or an opaque field. The one use of transparency is the road network itself: roads not yet settled and the previous method's roads are drawn as fainter white.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do write a new section as plain content in the white column: a headline that states the finding, then text, charts and tables with no frame.",
+      "Do use a sign only where the content is an instruction (blue), sized by its content inside the column.",
+      "Do put every control, navigation link and readout on a white supplementary plate with a 2px black border, and invert the selected or current one.",
+      "Do show a method as its shape, its colour and its name together.",
+      "Do use tabular numerals for every figure and reserve the width of anything that counts.",
+      "Do switch secondary text, link and focus colours with the field (Steel Ink and Sign Blue on light; Pale Blue, white and Caution Yellow on blue).",
+      "Do put a source line under every chart, table and demo, and say in plain text that a figure is estimated, synthetic or simulated: in the sentence beside it or in the plain assumptions list, with no warning styling.",
+      "Do keep text to 66ch and let charts, tables and signs take the full column.",
+      "Do keep the three spacing steps: section gap, 2.5rem above a heading, 2rem between blocks.",
+      "Do make every sticky layer opaque and set the anchor offset to clear it.",
+      "Do reserve the size of anything that swaps in place (stack the variants in one grid cell) so content below it does not move.",
+      "Do keep running text above or under the map, never on it; only markers, place-label plates and the route are drawn on the map."
+    ],
+    "donts": [
+      "Don't frame each section as its own full-height sign; the page read as a slide deck when it did.",
+      "Don't add shadows, gradients, blur or translucent panels.",
+      "Don't use red as a sign field; it is for rings, limits and wrong-answer cells.",
+      "Don't use a sign shape (roundel, triangle, octagon, disc, diamond, square) as decoration.",
+      "Don't distinguish anything by colour alone; a state that matters is also written or inverted.",
+      "Don't set Hangul lighter than 800, or use it for anything but names.",
+      "Don't let the page scroll sideways at 375px; reflow the table or scroll it inside its own region.",
+      "Don't add a dark scheme; the tokens are light only."
+    ]
+  }
+}
