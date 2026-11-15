@@ -1,3 +1,4 @@
+import { formatPercentPoints } from "@/lib/format";
 import { isMethodId, type MethodId } from "@/lib/methods";
 
 export type GraphKey = "gangnam" | "seoul";
@@ -22,6 +23,20 @@ export type HeroData = {
   traces: Record<string, Uint32Array>; // vertex indices in settle order, by method id
   algos: Record<string, HeroAlgo>;
 };
+
+export const HERO_SOURCE_LINE = "Replay of site/public/data/hero.json, written by scripts/export_site_data.py";
+
+// "Same route" is only claimed when the path and the travel time both equal Dijkstra's.
+export function samePath(a: HeroAlgo, b: HeroAlgo): boolean {
+  const sameTime = Math.abs(a.time_s - b.time_s) <= 1e-9 * Math.abs(b.time_s);
+  return sameTime && a.path.length === b.path.length && a.path.every((v, i) => v === b.path[i]);
+}
+
+// A share that can be well under one percent keeps enough digits to be non-zero.
+export function share(part: number, whole: number): string {
+  const percent = (100 * part) / whole;
+  return formatPercentPoints(percent, percent < 1 ? 2 : percent < 10 ? 1 : 0);
+}
 
 // Rank of a segment with an end that was never settled. Larger than any clock value.
 export const NEVER = 1e9;

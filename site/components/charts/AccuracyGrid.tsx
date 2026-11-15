@@ -41,7 +41,7 @@ export function AccuracyGrid({ title, rows, source }: { title: string; rows: Acc
 
   return (
     <>
-      <div className="table-scroll" role="region" aria-label={title} tabIndex={0}>
+      <div className="table-scroll" role="region" aria-label={`Wrong answers by scenario, ${title}`} tabIndex={0}>
         <table className={styles.table}>
           <caption style={{ textAlign: "left", fontWeight: 800, paddingBottom: "0.5rem" }}>{title}</caption>
           <thead>

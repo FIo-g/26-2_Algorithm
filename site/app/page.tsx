@@ -15,13 +15,15 @@ export default function Page() {
       <SiteNav />
       <main>
         <MapSection />
-        <SameAnswerSection />
-        <MethodsSection />
-        <ResultsSection />
-        <CongestionSection />
-        <LimitsSection />
-        <TeamSection />
+        <div className="flow">
+          <SameAnswerSection />
+          <MethodsSection />
+          <ResultsSection />
+          <CongestionSection />
+          <LimitsSection />
+        </div>
       </main>
+      <TeamSection />
     </>
   );
 }

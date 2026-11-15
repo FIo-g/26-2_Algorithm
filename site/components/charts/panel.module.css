@@ -7,9 +7,15 @@
   overflow: visible;
 }
 
-.w304 { max-width: 304px; }
-.w320 { max-width: 320px; }
-.w704 { max-width: 704px; }
+/* Two classes: the global `.chart svg` rule would otherwise override a one-class max-width and scale the text. */
+.svg.w304 { max-width: 304px; }
+.svg.w320 { max-width: 320px; }
+.svg.w704 { max-width: 704px; }
+
+@media (min-width: 900px) {
+  .svg.w304 { max-width: 432px; }
+  .svg.w320 { max-width: 448px; }
+}
 
 /* Chart A and B lines: method colour, ALT drawn over a black casing so yellow reads on white. */
 .line {
@@ -43,13 +49,6 @@
 .bar {
   stroke: var(--black);
   stroke-width: 2;
-}
-
-.card {
-  background: var(--white);
-  color: var(--black);
-  padding: 0.5rem;
-  min-width: 0;
 }
 
 .limit {

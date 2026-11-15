@@ -17,6 +17,7 @@
   --keyline: clamp(3px, 0.5vw, 5px);
   --pad: clamp(1.25rem, 5vw, 5rem);
   --measure: 66ch;
+  --nav-h: 3.75rem;
 
   --font-latin: var(--font-overpass), system-ui, sans-serif;
   --font-hangul: var(--font-gothic-a1), var(--font-overpass), system-ui, sans-serif;
@@ -33,6 +34,11 @@ html {
   scrollbar-color: var(--blue) var(--steel);
   scrollbar-width: thin;
   -webkit-text-size-adjust: 100%;
+  /* Clears the sticky graph picker row, one line (about 4.5rem) below 900px. */
+  scroll-padding-top: 4.75rem;
+}
+@media (min-width: 900px) {
+  html { scroll-padding-top: calc(var(--nav-h) + 4.75rem); }
 }
 
 ::-webkit-scrollbar { width: 12px; height: 12px; }
@@ -41,7 +47,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--steel);
+  background: var(--white);
   color: var(--black);
   font-family: var(--font-latin);
   font-size: clamp(1.0625rem, 0.5vw + 0.95rem, 1.25rem);
@@ -75,7 +81,7 @@ h2 {
 }
 
 h3 {
-  font-size: 1.3rem;
+  font-size: clamp(1.3rem, 0.9vw + 1.1rem, 1.75rem);
   font-weight: 800;
   line-height: 1.2;
   margin: 1.5rem 0 0.5rem;
@@ -99,7 +105,7 @@ a {
 }
 .plate--blue a:not(.subplate) { color: var(--white); }
 
-.num, table, .readout, .tabular { font-variant-numeric: tabular-nums; }
+.num, table, .readout { font-variant-numeric: tabular-nums; }
 
 table { border-collapse: collapse; width: 100%; font-size: 1rem; }
 caption { text-align: left; margin-bottom: 0.5rem; font-weight: 700; }
@@ -147,11 +153,18 @@ td.num, th.num { text-align: right; }
 .plate--steel  { background: var(--steel);  color: var(--black); }
 .plate--steel::before { display: none; }
 
+/* A sign sized by its content, inside the article column. */
+.plate--inline {
+  margin: 0;
+  padding: calc(clamp(1.25rem, 3vw, 2.5rem) + var(--gap));
+}
+
 .plate > :first-child { margin-top: 0; }
 
 /* Sign parts */
 
-.subplate {
+.subplate,
+details > summary {
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
@@ -169,11 +182,30 @@ td.num, th.num { text-align: right; }
   transition: background-color 120ms, color 120ms;
 }
 a.subplate:hover,
-button.subplate:hover:not(:disabled) { background: var(--yellow); color: var(--black); }
+button.subplate:hover:not(:disabled),
+details > summary:hover { background: var(--yellow); color: var(--black); }
 .subplate[aria-pressed="true"],
-.subplate[aria-checked="true"] { background: var(--black); color: var(--white); }
+.subplate[aria-checked="true"],
+.subplate[aria-current="true"],
+details[open] > summary { background: var(--black); color: var(--white); }
 .subplate:disabled { opacity: 0.45; cursor: not-allowed; }
-.subplate:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+/* Phone-sized targets for the nav and the graph picker. The stage controls keep their size. */
+@media (max-width: 899.98px) {
+  .site-nav .subplate,
+  [role="radiogroup"] .subplate { min-height: 2.75rem; }
+}
+.subplate:focus-visible,
+details > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+/* The state is written out: a white button alone does not say that it opens. */
+details > summary::after {
+  content: "Show";
+  margin-left: 0.7em;
+  padding-left: 0.7em;
+  border-left: 2px solid currentColor;
+}
+details[open] > summary::after { content: "Hide"; }
 
 .roundel {
   display: inline-grid;
@@ -223,16 +255,41 @@ button.subplate:hover:not(:disabled) { background: var(--yellow); color: var(--b
 
 .site-nav {
   display: flex;
+  align-items: center;
   gap: 0.25rem;
+  height: var(--nav-h);
   overflow-x: auto;
-  padding: 0.5rem var(--gap);
+  padding: 0 var(--gap);
   margin: 0;
   background: var(--steel);
   scrollbar-width: thin;
 }
 .site-nav a { white-space: nowrap; }
+@media (min-width: 900px) {
+  .site-nav { position: sticky; top: 0; z-index: 20; }
+}
 
-.caveat { display: flex; gap: 0.5rem; align-items: flex-start; }
+/* The article column under the map. Sections are plain, with space between them. */
+.flow {
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 4rem);
+}
+.flow > .flow-section { margin-top: clamp(4rem, 9vw, 7.5rem); }
+.flow h2 { margin: 2.5rem 0 0.75rem; }
+.flow h3 { margin: 2.5rem 0 0.5rem; }
+.flow > .flow-section > :first-child { margin-top: 0; }
+
+/* Full-width steel band for the team footer. Its content uses the .flow column. */
+.site-footer {
+  margin-top: clamp(4rem, 9vw, 7.5rem);
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  background: var(--steel);
+  color: var(--black);
+}
+.site-footer h2 { margin-top: 0; }
+
+.caveat { display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 2rem; }
 
 /* Sign list: no bullets, a solid square marker in the ink colour. */
 .sign-list { list-style: none; margin: 0 0 1em; padding: 0; }
@@ -246,30 +303,14 @@ button.subplate:hover:not(:disabled) { background: var(--yellow); color: var(--b
   height: 0.55em;
   background: currentColor;
 }
-/* On the yellow caution plate the list is a warning, so it is larger. */
-.plate--yellow .sign-list > li { font-size: 1.2rem; }
-
-/* Full-width block for charts, tables and demos inside a plate (text stays at the measure). */
-.plate-full { max-width: none; width: 100%; }
+/* On the yellow caution plate the list is a warning: body size on phones, a little larger on desktop. */
+.plate--yellow .sign-list > li { font-size: 1em; }
+@media (min-width: 900px) {
+  .plate--yellow .sign-list > li { font-size: 1.1em; }
+}
 
 /* Scroll wrapper for a wide table. Give it tabindex, role and aria-label in markup. */
 .table-scroll { overflow-x: auto; max-width: 100%; }
-
-/* Chart panels: three columns from 900px, one below, each at most 420px wide. */
-.panel-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
-.panel-grid > * { width: 100%; max-width: 420px; justify-self: center; }
-@media (min-width: 900px) {
-  .panel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .panel-grid > * { justify-self: stretch; }
-}
-
-/* Wide or narrow chart variant, switched at 700px. */
-.show-narrow { display: block; }
-.show-wide { display: none; }
-@media (min-width: 700px) {
-  .show-narrow { display: none; }
-  .show-wide { display: block; }
-}
 
 /* Two columns from 900px: figure left, controls and narration right. One column below. */
 .demo-split { display: grid; gap: 3rem; align-items: center; }
@@ -277,7 +318,8 @@ button.subplate:hover:not(:disabled) { background: var(--yellow); color: var(--b
   .demo-split { grid-template-columns: minmax(0, 40rem) minmax(0, 1fr); }
 }
 
-.source { font-size: 0.875rem; color: var(--steel-ink); margin: 0.5rem 0 0; }
+.source { font-size: 0.875rem; color: var(--steel-ink); margin: 0.5rem 0 2rem; }
+.source:last-child { margin-bottom: 0; }
 .plate--blue .source { color: var(--on-blue-2); }
 
 .credit { font-size: 0.875rem; margin: 2rem 0 0; }

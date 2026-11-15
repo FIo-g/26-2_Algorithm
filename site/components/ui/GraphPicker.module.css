@@ -1,0 +1,29 @@
+/* Stays under the nav from 900px so the graph can be switched while reading a chart below. */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.75rem 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.bar > * {
+  flex: none;
+}
+
+/* Below 900px one line that scrolls sideways inside itself, like the nav. padding-inline keeps the focus ring in view. */
+@media (max-width: 899.98px) {
+  .bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-inline: 6px;
+  }
+}
+
+@media (min-width: 900px) {
+  .bar { top: var(--nav-h); }
+}

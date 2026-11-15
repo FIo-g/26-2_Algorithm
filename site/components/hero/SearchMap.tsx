@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { MethodGlyph } from "@/components/sign/MethodGlyph";
 import { SubPlate } from "@/components/sign/SubPlate";
-import { formatInt, formatMinutesSeconds, formatPercentPoints } from "@/lib/format";
-import { METHODS, type MethodId } from "@/lib/methods";
-import { loadHero, segmentRanks, type GraphKey, type HeroAlgo, type HeroData } from "./data";
+import { formatInt, formatMinutesSeconds } from "@/lib/format";
+import { isMethodId, METHODS, type MethodId } from "@/lib/methods";
+import { HERO_SOURCE_LINE, loadHero, samePath, segmentRanks, share, type GraphKey, type HeroData } from "./data";
 import { createRenderer } from "./gl";
 import styles from "./hero.module.css";
 import { createPlayer, type Player, type PlayerState } from "./player";
@@ -14,30 +14,22 @@ const PLAY_SECONDS = 7; // Dijkstra from 0 to the end
 const MIN_SECONDS = 1.6; // so a search of a few dozen intersections is still watchable
 const LIVE_DELAY_MS = 400; // the spoken readout waits for the clock to settle, so scrubbing does not flood it
 const WIDE_ZOOM = 1.3; // wide screens: the network is this much larger than a fit to the sign height
+const MIN_ZOOM = 0.6; // wide screens: the smallest zoom that is used to make the route fit between the text and the controls
 const ROUTE_AT = 0.58; // wide screens: where the middle of the route sits, as a share of the map height
+const MARKER_R = 15; // CSS px from a marker's centre to the edge of its outline
+const CLEAR = 4; // CSS px of clear space between a marker and the text above it or the controls below it
+const STEP_LINE = 0.65; // a card's step is active once the top edge of the step is above this share of the viewport height
+const STEP_LINE_WIDE = 0.4; // wide screens: the new card is then just under the resting one, not over the controls
 const VIEW_MARGIN = 0.08; // narrow screens: margin round the area the search covered
 const DIM_WIDE: [number, number] = [0.16, 0.42]; // alpha of unlit roads and of the previous method's roads
 const DIM_NARROW: [number, number] = [0.3, 0.55];
-const SOURCE = "site/public/data/hero.json";
-const FOLLOW_SPACER = "Same route, same travel time. Bidirectional settled NN.N% of what Dijkstra did."; // sets the plate's width and height before the real sentence exists
 const WIDE = "(min-width: 900px)";
 const DEFAULT_ORDER: MethodId[] = ["dijkstra", "astar", "bidir", "alt16"]; // replaced by the file's order once loaded
 const GRAPH_NAME: Record<GraphKey, string> = { gangnam: "Gangnam-gu", seoul: "Seoul" };
 
 type Problem = "load" | "gl" | null;
 
-function samePath(a: HeroAlgo, b: HeroAlgo): boolean {
-  const sameTime = Math.abs(a.time_s - b.time_s) <= 1e-9 * Math.abs(b.time_s);
-  return sameTime && a.path.length === b.path.length && a.path.every((v, i) => v === b.path[i]);
-}
-
-// A share that can be well under one percent keeps enough digits to be non-zero.
-function share(part: number, whole: number): string {
-  const percent = (100 * part) / whole;
-  return formatPercentPoints(percent, percent < 1 ? 2 : percent < 10 ? 1 : 0);
-}
-
-// Shown, and spoken, once a second method has finished with the same route and travel time as Dijkstra.
+// Spoken once a second method has finished with the same route and travel time as Dijkstra. The cards say it in text.
 function followText(data: HeroData, method: MethodId, completed: MethodId[]): string {
   const current = data.algos[method];
   const baseline = data.algos.dijkstra;
@@ -87,30 +79,79 @@ function labelWidth(label: { ko: string; en: string }): number {
 }
 
 // Fits the network into the map area. A phone zooms to the area Dijkstra searched, so the lit roads fill the area. A
-// wide screen sizes the network by the width of the sign and puts the middle of the route a bit below the middle of
-// the sign, so the north and south of the city run off under the keyline and the route clears the text and the controls.
-function computeLayout(data: HeroData, slot: HTMLElement, root: HTMLElement | null): Layout | null {
+// wide screen sizes the network by the height of the sign, then keeps the route and its markers in the band between the
+// text above (data-avoid="above") and the controls below (data-avoid="below"): it prefers the middle of the route a
+// bit below the middle of the sign, moves down if the text is in the way, and zooms out if the band is too short.
+function computeLayout(data: HeroData, slot: HTMLElement): Layout | null {
   const sw = slot.clientWidth;
   const sh = slot.clientHeight;
   if (sw === 0 || sh === 0) return null;
   const aspect = data.graph.aspect;
   const wide = window.matchMedia(WIDE).matches;
   const pos = data.positions;
+  const stage = slot.closest("[data-stage]");
+  // The text is measured against the box it lies in, minus where the slot sits in the stage. The intro lies exactly
+  // over the stage at scroll position zero, so both boxes scroll together with their text and the page's scroll
+  // offset drops out: a resize at any scroll position gives the same layout.
+  const texts: { rect: Rect; below: boolean }[] = [];
+  const section = stage?.closest("section");
+  if (wide && stage && section) {
+    const stageBox = stage.getBoundingClientRect();
+    const slotBox = slot.getBoundingClientRect();
+    const inX = slotBox.left - stageBox.left; // where the slot sits in the stage
+    const inY = slotBox.top - stageBox.top;
+    section.querySelectorAll<HTMLElement>("[data-avoid]").forEach((el) => {
+      const o = (el.closest("[data-intro]") ?? stage).getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      const rect = { x0: r.left - o.left - inX, y0: r.top - o.top - inY, x1: r.right - o.left - inX, y1: r.bottom - o.top - inY };
+      texts.push({ rect, below: el.dataset.avoid === "below" });
+    });
+    // A card rests at the top left of the stage, as far in from the stage edge (its margin) on both sides.
+    section.querySelectorAll<HTMLElement>("[data-card]").forEach((card) => {
+      const rest = parseFloat(getComputedStyle(card).marginLeft);
+      const x0 = rest - inX;
+      const y0 = rest - inY;
+      texts.push({ rect: { x0, y0, x1: x0 + card.offsetWidth, y1: y0 + card.offsetHeight }, below: false });
+    });
+  }
+  let above = 0;
+  let below = sh;
+  for (const t of texts) {
+    if (t.below) below = Math.min(below, t.rect.y0);
+    else above = Math.max(above, t.rect.y1);
+  }
   let w: number;
   let h: number;
   let tx = 0;
   let ty = 0;
   if (wide) {
-    w = Math.min(sw, sh * aspect * WIDE_ZOOM);
-    h = w / aspect;
     let lo = 1;
     let hi = 0;
     for (const v of data.algos.dijkstra.path) {
       lo = Math.min(lo, pos[2 * v + 1]);
       hi = Math.max(hi, pos[2 * v + 1]);
     }
-    const reach = Math.max(0, (h - sh) / 2); // never shift far enough to show an empty edge
-    ty = Math.min(reach, Math.max(-reach, (ROUTE_AT - 0.5) * sh - ((lo + hi) / 2 - 0.5) * h));
+    const room = 2 * (CLEAR + MARKER_R);
+    const fit = (Math.max(0, below - above - room) * aspect) / Math.max(hi - lo, 1e-6); // width at which the route fills the band
+    // The labels hang outward from the route's two ends (the text is above and the route leaves inward), so each end
+    // keeps a label's width of room to the edge of the area: the network is nudged sideways, or made smaller if it is too wide.
+    const { s, t, sLabel, tLabel } = data.graph.query;
+    const sFirst = pos[2 * s] <= pos[2 * t];
+    const [lx, rx] = sFirst ? [pos[2 * s], pos[2 * t]] : [pos[2 * t], pos[2 * s]];
+    const needL = labelWidth(sFirst ? sLabel : tLabel);
+    const needR = labelWidth(sFirst ? tLabel : sLabel);
+    w = Math.min(sw, sh * aspect * WIDE_ZOOM, Math.max(fit, sh * aspect * MIN_ZOOM), (sw - needL - needR) / Math.max(rx - lx, 1e-6));
+    h = w / aspect;
+    const left = (sw - w) / 2;
+    tx = Math.min(Math.max(0, needL - (left + lx * w)), sw - needR - (left + rx * w));
+    const top = (sh - h) / 2 + lo * h; // top of the route in the slot when ty is 0
+    const bottom = (sh - h) / 2 + hi * h;
+    const prefer = (ROUTE_AT - 0.5) * sh - ((lo + hi) / 2 - 0.5) * h;
+    const lowest = above + CLEAR + MARKER_R - top; // the least ty that keeps the route under the text
+    const highest = below - CLEAR - MARKER_R - bottom; // the most ty that keeps it over the controls
+    const wanted = lowest <= highest ? Math.min(Math.max(prefer, lowest), highest) : (lowest + highest) / 2;
+    const reach = Math.abs(h - sh) / 2; // never shift far enough to show an empty edge, or off the area
+    ty = Math.min(reach, Math.max(-reach, wanted));
   } else {
     let x0 = 1;
     let x1 = 0;
@@ -135,14 +176,7 @@ function computeLayout(data: HeroData, slot: HTMLElement, root: HTMLElement | nu
   }
   const ox = (sw - w) / 2 + tx; // where the network's top left corner is, in the map area
   const oy = (sh - h) / 2 + ty;
-  const avoid: Rect[] = [];
-  if (wide && root) {
-    const at = slot.getBoundingClientRect();
-    root.querySelectorAll("[data-avoid]").forEach((el) => {
-      const r = el.getBoundingClientRect();
-      avoid.push({ x0: r.left - at.left - ox, y0: r.top - at.top - oy, x1: r.right - at.left - ox, y1: r.bottom - at.top - oy });
-    });
-  }
+  const avoid = texts.map(({ rect: r }) => ({ x0: r.x0 - ox, y0: r.y0 - oy, x1: r.x1 - ox, y1: r.y1 - oy }));
   return { w, h, tx, ty, view: { x0: -ox, y0: -oy, x1: sw - ox, y1: sh - oy }, avoid };
 }
 
@@ -240,9 +274,7 @@ function Fallback({ data }: { data: HeroData | null }) {
           ))}
         </tbody>
       </table>
-      <p className={`source ${styles.source}`}>
-        Replay of {SOURCE}, written by scripts/export_site_data.py
-      </p>
+      <p className={`source ${styles.source}`}>{HERO_SOURCE_LINE}</p>
     </div>
   );
 }
@@ -258,7 +290,6 @@ export function SearchMap() {
     finished: false,
   });
   const [live, setLive] = useState("");
-  const [completed, setCompleted] = useState<MethodId[]>([]);
   const [layout, setLayout] = useState<Layout | null>(null);
   const slotRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -279,17 +310,22 @@ export function SearchMap() {
     return () => abort.abort();
   }, []);
 
-  // Size and place the network in the map area, again whenever the area or the text over it changes size.
+  // Size and place the network in the map area, again whenever the area or the text over it changes size. The section
+  // also learns which graph is on the map, so its cards show that graph's numbers.
   useEffect(() => {
     const slot = slotRef.current;
     if (!data || !slot) return;
     const root = slot.closest("section");
-    const update = () => setLayout(computeLayout(data, slot, root));
+    if (root) root.dataset.graph = data.key; // before the first measure: the cards' height depends on the graph
+    const update = () => setLayout(computeLayout(data, slot));
     update();
     const observer = new ResizeObserver(update);
     observer.observe(slot);
-    root?.querySelectorAll("[data-avoid]").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    root?.querySelectorAll("[data-avoid], [data-card]").forEach((el) => observer.observe(el));
+    return () => {
+      observer.disconnect();
+      if (root) delete root.dataset.graph;
+    };
   }, [data]);
 
   // Renderer and clock live as long as the canvas does.
@@ -338,7 +374,6 @@ export function SearchMap() {
         if (state.finished && !finished.includes(state.method)) finished.push(state.method);
         window.clearTimeout(liveTimer);
         if (!state.playing) liveTimer = window.setTimeout(() => setLive(spoken(state)), LIVE_DELAY_MS);
-        if (state.finished) setCompleted((done) => (done.includes(state.method) ? done : [...done, state.method]));
       },
     });
     playerRef.current = player;
@@ -354,10 +389,37 @@ export function SearchMap() {
     });
     observer.observe(canvas);
 
+    // Scrolling picks the method: the last step whose top edge is above STEP_LINE of the viewport height, or Dijkstra
+    // before the first one. A choice made with the controls holds until the active step changes.
+    const steps = Array.from(canvas.closest("section")?.querySelectorAll<HTMLElement>("[data-step]") ?? []);
+    let applied = -1;
+    let frame = 0;
+    const pickStep = () => {
+      frame = 0;
+      const line = window.innerHeight * (wideQuery.matches ? STEP_LINE_WIDE : STEP_LINE);
+      let at = -1;
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].getBoundingClientRect().top <= line) at = i;
+      }
+      if (at === applied) return;
+      applied = at;
+      const id = at < 0 ? "dijkstra" : steps[at].dataset.step;
+      if (id && isMethodId(id) && data.order.includes(id)) player.select(id, !reducedRef.current);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(pickStep);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
     reducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     player.start(!reducedRef.current);
+    pickStep(); // a page restored part way down starts on the method of the card in view
 
     return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(frame);
       window.clearTimeout(liveTimer);
       observer.disconnect();
       player.dispose();
@@ -389,7 +451,12 @@ export function SearchMap() {
 
   const current = data?.algos[ui.method];
   const baseline = data?.algos.dijkstra;
-  const follow = data && ui.finished ? followText(data, ui.method, completed) : "";
+  const total = data ? formatInt(data.graph.n) : "";
+  const settledText = (count: ReactNode) => (
+    <>
+      {count} of {total} <span className={styles.long}>intersections </span>settled
+    </>
+  );
   const route =
     data && current && ui.finished
       ? current.path.map((v) => `${data.positions[2 * v]},${data.positions[2 * v + 1]}`).join(" ")
@@ -432,7 +499,7 @@ export function SearchMap() {
         )}
       </div>
 
-      <div className={styles.controls}>
+      <div className={styles.controls} data-avoid="below">
         <div className={styles.row}>
           <div className={styles.methods} role="radiogroup" aria-label="Search method" onKeyDown={onMethodKeys}>
             {order.map((id) => (
@@ -472,31 +539,28 @@ export function SearchMap() {
             />
           </SubPlate>
         </div>
-        <div className={styles.row}>
+        <div className={`${styles.row} ${styles.readouts}`}>
           <SubPlate className={`${styles.item} ${ready ? "" : styles.pending}`}>
-            <span aria-hidden="true">
-              <span
-                ref={counterRef}
-                className={`${styles.counter} num`}
-                style={{ minWidth: `${formatInt(baseline?.settled ?? 0).length}ch` }}
-              >
-                0
-              </span>{" "}
-              of {data ? formatInt(data.graph.n) : ""} intersections settled
+            <span aria-hidden="true" className={styles.stack}>
+              <span className={styles.widest}>{settledText(formatInt(baseline?.settled ?? 0))}</span>
+              <span>
+                {settledText(
+                  <span ref={counterRef} className="num">
+                    0
+                  </span>,
+                )}
+              </span>
             </span>
           </SubPlate>
           <SubPlate className={`${styles.item} ${ui.finished ? "" : styles.pending}`}>
             <span aria-hidden="true" className="num">
-              Estimated travel time {current ? formatMinutesSeconds(current.time_s) : ""}
+              <span className={styles.long}>Estimated travel time </span>
+              <span className={styles.short}>Est. </span>
+              {current ? formatMinutesSeconds(current.time_s) : ""}
             </span>
           </SubPlate>
         </div>
-        <SubPlate className={`${styles.item} ${styles.follow} ${follow ? "" : styles.followPending}`}>
-          <span aria-hidden="true">{follow || FOLLOW_SPACER}</span>
-        </SubPlate>
-        <p className={`source ${styles.source}`}>
-          Replay of {SOURCE}, written by scripts/export_site_data.py
-        </p>
+        <p className={`source ${styles.source}`}>{HERO_SOURCE_LINE}</p>
       </div>
 
       <p className="visually-hidden" aria-live="polite" aria-atomic="true">

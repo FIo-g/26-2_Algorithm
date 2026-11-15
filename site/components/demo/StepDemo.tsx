@@ -3,36 +3,17 @@
 import { useState, type KeyboardEvent } from "react";
 import { MethodGlyph } from "@/components/sign/MethodGlyph";
 import { SubPlate } from "@/components/sign/SubPlate";
+import { METHOD_COPY, type MethodCopyId } from "@/lib/method-copy";
 import type { MethodId } from "@/lib/methods";
 import { DemoView } from "./DemoView";
 import type { Demo } from "./types";
 import styles from "./StepDemo.module.css";
 
-const TABS: { id: string; method: MethodId; label: string; text: string }[] = [
-  {
-    id: "dijkstra",
-    method: "dijkstra",
-    label: "Dijkstra",
-    text: "Always settles the closest unsettled intersection. Never looks at a settled one again.",
-  },
-  {
-    id: "astar",
-    method: "astar",
-    label: "A*",
-    text: "Adds a lower bound on the remaining time (straight-line distance divided by the top speed), so it leans toward the destination.",
-  },
-  {
-    id: "bidir",
-    method: "bidir",
-    label: "Bidirectional",
-    text: "Searches from both ends and stops when the two frontiers together cannot beat the best route found.",
-  },
-  {
-    id: "alt",
-    method: "alt4",
-    label: "ALT",
-    text: "A* with a tighter bound built from precomputed distances to a few landmarks and the triangle inequality.",
-  },
+const TABS: { id: MethodCopyId; method: MethodId; label: string }[] = [
+  { id: "dijkstra", method: "dijkstra", label: "Dijkstra" },
+  { id: "astar", method: "astar", label: "A*" },
+  { id: "bidir", method: "bidir", label: "Bidirectional" },
+  { id: "alt", method: "alt4", label: "ALT" },
 ];
 
 const KEY_STEP: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
@@ -69,7 +50,7 @@ export function StepDemo({ demos }: { demos: Demo[] }) {
           </SubPlate>
         ))}
       </div>
-      <p>{tab.text}</p>
+      <p>{METHOD_COPY[tab.id]}</p>
       {demo && <DemoView key={demo.id} demo={demo} />}
     </div>
   );

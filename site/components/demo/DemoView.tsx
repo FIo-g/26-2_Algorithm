@@ -153,7 +153,7 @@ export function DemoView({ demo }: { demo: Demo }) {
       </div>
 
       <p className={styles.source}>
-        From <code>{demo.source_test}</code>
+        From <code>{demo.source_test.split("::").flatMap((part, i) => (i === 0 ? [part] : ["::", <wbr key={i} />, part]))}</code>
       </p>
     </div>
   );

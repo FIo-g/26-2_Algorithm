@@ -81,7 +81,7 @@ export function GridGraph({ demo, settled, current, path, landmarks, label }: Pr
               <text
                 x={p.x}
                 y={p.y}
-                fontSize={40}
+                fontSize={44}
                 fontWeight={800}
                 textAnchor="middle"
                 dominantBaseline="central"

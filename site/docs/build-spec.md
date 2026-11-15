@@ -2,6 +2,102 @@
 
 Single source of truth for everyone building `site/`. Product facts are in `site/PRODUCT.md`. If this file and your own taste disagree, this file wins. If this file and the repo's data disagree, the data wins and you report it.
 
+## 0. Revision 2 (2026-11-15): one scrolling page, not a stack of signs
+
+Why: the first build read as a slide deck. Every section was a viewport-sized framed plate with one claim, and only the first sign could be touched. Revision 2 keeps the sign language (tokens, type, SubPlate, glyphs, charts, data rules) and changes the page structure. Where this section disagrees with sections 4, 5 or 7, this section wins. Sections 2, 6, 8, 9, 10 are unchanged.
+
+### 0.1 Page shell
+
+- Page ground is `--white`. `--steel` is only the nav bar, the ground behind the pinned map sign, and the footer.
+- Everything after the map is one article column: `<div class="flow">` (max-width 72rem, centred, inline padding `clamp(1.25rem, 5vw, 4rem)`). Sections inside it are plain `<section class="flow-section">`: no border, no background, no min-height. Space between sections is `clamp(4rem, 9vw, 7.5rem)`. The column has the same space above its first section and below its last. Inside a section or a picker panel, blocks (a chart with its source line, a table, a plate, a sub-heading group) are 2rem to 2.5rem apart; a source line belongs to the block above it and never touches the next paragraph. Headings and text sit directly on the page.
+- A plate is now an inline sign inside the column, sized by its content: `<Plate inline ...>` (no outer margin, padding `clamp(1.25rem, 3vw, 2.5rem)` plus the keyline gap, keyline kept). Only four things are plates: the pinned map sign (blue), the step-demo widget (blue), "slower than Dijkstra" (yellow), "What this does not show" (yellow). Nothing else gets a frame or a coloured field. No section other than the map stage may be sized to the viewport.
+- `--nav-h: 3.75rem` is defined on `:root`. Nav: `position: sticky; top: 0; z-index: 20` from 900px, not sticky below 900px. It marks the section in view with `aria-current="true"` (inverted plate, the look of a selected SubPlate), found with an IntersectionObserver. Links and ids are unchanged: Map, Same answer, Methods, Results, Congestion, Limits, Team. `html` gets a `scroll-padding-top` that clears the sticky nav and a sticky picker.
+- `#team` is a `<footer>` on a full-width steel band, same copy as before.
+- `<details>`: the summary looks like a SubPlate button. Native element, no JavaScript.
+- `lib/method-copy.ts` holds the one-line description of each method (moved out of `StepDemo`), keyed `dijkstra`, `astar`, `bidir`, `alt`. The step demo and the map cards both read it.
+
+`GraphPicker` (client, `components/ui/GraphPicker.tsx`): switches server-rendered content by road graph.
+
+```tsx
+<GraphPicker
+  name="results"                 // unique per picker, prefixes element ids
+  label="Road graph"             // aria-label of the radio group
+  options={[{ id: "gangnam", label: "Gangnam-gu" }, { id: "gss", label: "..." }, { id: "seoul", label: "..." }]}
+  initial="seoul"
+  panels={{ gangnam: <A />, gss: <B />, seoul: <C /> }}   // rendered on the server, one per option id
+/>
+```
+
+- A radio group of SubPlate radios (arrow keys move and select, roving tabindex, the same pattern as the method group on the map). All panels are in the HTML; the ones not selected carry the `hidden` attribute. No animation on switch.
+- The radio row is `position: sticky` (top `var(--nav-h)` from 900px, `0` below; z-index 10), white background, hairline under it, so the graph can be changed while reading any chart below it. Below 900px the row is one line that scrolls sideways inside itself (like the nav) and keeps the selected plate in view by setting the row's own `scrollLeft` (never `scrollIntoView`, which would move the page). Options are listed largest graph first, so the initial one is visible without scrolling.
+- Selection is local to one picker and is not kept in the URL (say so in a `shortcut:` comment).
+
+### 0.2 Map scrolly (`MapSection` + `components/hero/`)
+
+The map is pinned while the reader scrolls through the four methods. Section `#map`, ground `--steel`. DOM order: `intro` (h1 in two lines, the lede), `stage` (map, markers, controls, source line, OSM credit), `steps` (an `<ol>` of four cards, one per method in `hero.json` order).
+
+From 900px:
+- `stage` is the blue sign (rounded, keyline). `position: sticky; top: calc(var(--nav-h) + var(--gap)); height: calc(100svh - var(--nav-h) - 2 * var(--gap))`. It is never taller than that: everything in it fits at 1024x700 and up, with no scrolling inside the sign.
+- `intro` lies over the first screen of the stage in the same top-left place as before (title over the map) and scrolls away with the page while the stage stays. `steps` follow and scroll over the stage. `intro` and `steps` take no pointer events except on the cards, so the controls under them stay clickable.
+- One step is 110svh of scroll, so that while one card rests the next one is still below the sign and does not sit on the controls. Its card is a white plate (white, 2px black border, 6px radius, max-width 28rem, padding 1rem 1.25rem), `position: sticky` inside its step: it comes up from below, rests at the top left of the sign (1.5rem inside the keyline, where the title was), and leaves upward when the next step arrives. While it rests it does not cover the route, the two markers or their labels at 1440x900 and 1280x720. Both marker labels stay fully inside the sign at every width from 900px (at 1024x700 the first build cut the start label at the left edge).
+- Controls along the bottom of the stage: one row (method radio group, Play or Pause, scrub) and one row of readouts (settled count, and the estimated travel time once finished). The "Same route, same travel time" sentence is no longer a plate in the stage. It is in the cards, and still in the `aria-live` text.
+
+Below 900px:
+- The whole section is one tall blue sign with its keyline. Order: `intro`, `stage`, `steps`.
+- `stage` is `position: sticky; top: 0` on an opaque blue ground and holds the map (height `min(77vw, 42svh)`), one row (Play or Pause, scrub) and one readout line. At 375x667 it is at most 58svh tall. The method radio group is not shown below 900px: scrolling picks the method.
+- The cards scroll under the stage, at least 55svh apart, so one is read at a time.
+
+Card content, numbers from `hero.json` for the graph on the map:
+- `MethodGlyph` and the label as an `h2` (about 1.5rem).
+- The one-liner from `lib/method-copy.ts`.
+- Dijkstra: "Here it settled {settled} of {n} intersections before it reached {tLabel.en}."
+- The others: "Here it settled {settled}: {share} of what Dijkstra settled. Same route, same {time}." Claim "same route" only if the path and travel time do equal Dijkstra's (keep the check).
+- These numbers are in the server-rendered HTML: `MapSection` reads `public/data/hero.json` at build (as `lib/demos.ts` reads `demos.json`). Both graphs are rendered and the one matching the map is shown: Seoul from 900px, Gangnam-gu below, and once the map has loaded, the graph that was loaded.
+
+Scroll picks the method:
+- The active step is the last one whose top edge has passed a line in the viewport: 40% of its height from 900px (so the map changes when the new card is about to take the resting place, not while the old card still rests alone), 65% below 900px. Before the first step it is Dijkstra.
+- When the active step changes, call `player.select(method, animate)`. With `prefers-reduced-motion` show the finished state. Scrolling back up selects the previous method.
+- The radio group, Play and the scrub stay manual controls. A manual choice holds until the next step change.
+- Load is unchanged: Dijkstra plays once over about 7 seconds; reduced motion shows the finished state.
+- Native scroll only: no wheel or touch listeners, no scroll snapping, no `preventDefault` on scroll.
+- Marker labels must not jump while the page scrolls. Choose their corners from the layout at scroll position zero (title and lede resting over the map), not from live scrolled positions.
+- The cards are ordinary content in DOM order and read correctly with no map. With no WebGL2 or a failed load, the fallback table shows as before and the cards still render.
+
+### 0.3 Sections after the map
+
+All inside `.flow`, in this order.
+
+- `#same-answer`: h2 "Every method had to match Dijkstra before we timed it", the paragraph, the query-count source line, the caveat line. The three-graph table is gone from here; its facts are in the Results picker.
+- `#methods`: h2 "How each method picks the next intersection" and one sentence on the page ("Step through the real heap pushes and pops on graphs small enough to check by hand."), then the step demo inside an inline blue plate. `StepDemo` is unchanged apart from reading its copy from `lib/method-copy.ts`.
+- `#results`: h2 unchanged. Under it one sentence built from data that says which graphs have slower-than-Dijkstra cases, so the reader has a reason to switch. Then a `GraphPicker` (seoul, gss, gangnam; initial `seoul`). The panel for graph g, top to bottom:
+  1. Facts from `graph_table.csv`: intersections, road segments, top speed as a `Roundel`, share of roads with no posted speed. Name the source file.
+  2. Lead sentence for g, band `>10km`, `alt16`: "On trips over 10 km across {graph}, ALT (16) settled {p} of what Dijkstra settled and ran {s} as fast."
+  3. Chart A and Chart B for g only: side by side from 900px, stacked below. Each y scale is still computed over all three graphs, so heights compare when the reader switches. The method key appears once, above the two charts.
+  4. Slower cases for g from `e2Slowdowns()`: if there are any, an inline yellow plate with the `CautionTriangle` and h3 "Slower than Dijkstra here" listing method, trip length and speed (two digits), plus the A* reason sentence when A* is listed. If there are none, the plain sentence "No method ran slower than Dijkstra on this graph."
+  5. h3 "Why the A* bound is loose": the sentence, Chart C for g only, and the `Roundel` with "top speed in the graph".
+  6. h3 "ALT is not free": the `e2_alt_prep.csv` rows for g only. From 900px, blocks 5 and 6 sit side by side in two columns.
+  After the picker, not tied to a graph: `StopOctagon` beside h3 "Why not just try every path?", the sentence, Chart D and its source. The grid-count table goes inside `<details>` with the summary "Simple paths in a k by k grid".
+- `#congestion`: h2, paragraph and caveat unchanged. Then a `GraphPicker` (seoul, gss; initial `seoul`). The panel for g: h3 "Wrong answers out of {n} queries", the control explanation and the accuracy grid for g; h3 "Does re-routing help one driver?", the two notes and the re-routing table for g. The SUMO block, if `e4_summary.csv` exists, comes after the picker as an unframed h3.
+- `#limits`: an inline yellow plate holding the h2 and the list. Copy unchanged.
+- `#team`: the footer.
+
+### 0.4 Motion
+
+The search spreading on the map is still the only thing that moves on its own. Scrolling decides which method is shown, and the cards move only because the page scrolls. No fade-in, no slide-in, no parallax, no scroll snapping.
+
+### 0.5 File ownership for this revision
+
+- foundation: `app/globals.css`, `app/page.tsx`, `components/sign/Plate.tsx`, `components/ui/GraphPicker.tsx` and its CSS module, `components/sections/{SiteNav,TeamSection,LimitsSection,SameAnswerSection,MethodsSection}.tsx` and `SameAnswerSection.module.css`, `components/demo/StepDemo.tsx` (copy import only), `lib/method-copy.ts`.
+- map: `components/hero/*`, `components/sections/MapSection.tsx`.
+- results: `components/sections/ResultsSection.tsx` and its CSS module, `components/charts/{MethodPanels,SettledChart,SpeedupChart,TightnessChart,ExhaustiveChart}.tsx`, `charts.module.css`, `panel.module.css`, `lib/results-section.ts`, and `lib/results.ts` (add only).
+- congestion: `components/sections/CongestionSection.tsx`, `components/charts/{AccuracyGrid,RerouteGain,SumoTable}.tsx`, `congestion.module.css`.
+
+### 0.6 Done means, in addition to section 11
+
+- At 1440x900, 1280x720, 390x844 and 375x667: no horizontal page scroll; in the map section nothing covers the route, the markers or their labels while a card rests; every stage control is visible while the stage is pinned.
+- Tab order: nav, map controls, cards, picker radios, demo controls, details.
+- `npx eslint .` reports nothing.
+
 ## 1. What we are building
 
 One static page that shows classmates what Team C2 did: four exact shortest-path methods (Dijkstra, A*, Bidirectional Dijkstra, ALT) compared on the real Seoul road network. The thesis is the README title: the same answer for less.
@@ -54,7 +150,7 @@ Each section file is owned by exactly one agent. Do not edit files you do not ow
 
 ## 4. Visual system
 
-The page is a stack of Korean traffic safety signs. Flat colour, thick strokes, rounded plates. No gradients, no box-shadows, no blur, no glass, no decorative icons, no emoji.
+(Page structure is superseded by section 0. Tokens, type, sign parts and methods below still apply.) The page speaks in Korean traffic safety signs. Flat colour, thick strokes, rounded plates. No gradients, no box-shadows, no blur, no glass, no decorative icons, no emoji.
 
 ### Tokens (put in `:root`)
 
@@ -127,9 +223,11 @@ ALT variants are told apart by their text label and by square size (small, mediu
 
 ### Motion
 
-One authored moment: the search spreading on the first sign. Nothing else animates on its own. No scroll-triggered fades. Transitions on controls are 120ms colour changes only.
+One authored moment: the search spreading on the map. Nothing else animates on its own (see 0.4 for scrolling). No scroll-triggered fades. Transitions on controls are 120ms colour changes only.
 
 ## 5. Sections, in page order
+
+(Layout and order are superseded by 0.2 and 0.3. The copy and data sources below still apply.)
 
 Headings below are final copy. Body copy may be tightened but not inflated; plain verbs, no marketing words. `{…}` means a value from the data.
 
@@ -220,6 +318,8 @@ e4_summary.csv (may be absent)  plan,level,strategy,group,seeds,arrived_pct,mean
 Graph ids are `gangnam`, `gss`, `seoul`. Distance bands are `<3km`, `3-10km`, `>10km`. Check the real files for exact spellings before coding against them.
 
 ## 7. Hero map (`components/hero/SearchMap.tsx`, client)
+
+(Placement, pinning and the controls row are superseded by 0.2. Data formats, drawing, the clock and the fallback below still apply.)
 
 Data (written by the exporter into `public/data/`):
 

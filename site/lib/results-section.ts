@@ -1,6 +1,6 @@
-// Helpers for the results section: distance band wording and the main E2 rows.
+// Helpers for the results section: distance band wording, the main E2 rows and the slower-graph sentence.
 // Numbers still come from lib/results.ts. Band ids are parsed here, never retyped.
-import { loadE2Summary, type E2Row } from "./results";
+import { GRAPH_IDS, GRAPH_LABELS, e2Slowdowns, loadE2Summary, type E2Row } from "./results";
 
 // Main results only: scenario "free", kind "full".
 export function mainE2Rows(): E2Row[] {
@@ -26,4 +26,13 @@ export function bandPhrase(bin: string): string {
   if (op === "<") return `under ${lo} km`;
   if (op === ">") return `over ${lo} km`;
   return `${lo} to ${hi} km`;
+}
+
+// One sentence under the results heading: which graphs have a slower-than-Dijkstra case.
+export function slowGraphsSentence(): string {
+  const slowIds = new Set(e2Slowdowns().map((r) => r.graph));
+  const names = GRAPH_IDS.filter((g) => slowIds.has(g)).map((g) => GRAPH_LABELS[g]);
+  if (names.length === 0) return "No method ran slower than Dijkstra on any graph.";
+  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  return `Some methods ran slower than Dijkstra on ${list}. Pick a graph below to see each case.`;
 }
