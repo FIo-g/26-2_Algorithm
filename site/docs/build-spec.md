@@ -78,7 +78,7 @@ Content rule (revision 3, the user's decision on 2026-11-15): the page shows wha
   - One plain note: "Webster timing is computed from the original routes, which may favour fixed routes. The queue-responsive plan is in the file but left out here, because it miscounts re-routed vehicles."
   - Source line: results/e4_summary.csv, results/e4_manifest.json.
 - `#limits`: h2 "Assumptions and limits", an unframed section with a plain list of three items, numbers from data: (1) travel times are estimates: OpenStreetMap has no posted speed on {min}% to {max}% of these roads (`graph_table.csv`), so each road gets a representative speed for its road class; (2) congestion is synthetic: real speeds from the national ITS API were collected but not used in these results (`results/match_decision.md`); (3) on the Seoul graphs re-routing is modelled for one vehicle on a fixed congestion snapshot, so it does not change the traffic around it; the SUMO test is a separate 3 x 3 network with assumed signals and demand. Then a source line. No plate, no caution mark.
-- `#team`: the footer. Data line: "Road data: OpenStreetMap (© OpenStreetMap contributors, ODbL). Non-commercial coursework." The lines about sources that were collected and not used are gone.
+- `#team`: the footer. No repository link (removed at the user's request, 2026-11-16). Data line: "Road data: OpenStreetMap (© OpenStreetMap contributors, ODbL). Non-commercial coursework." The lines about sources that were collected and not used are gone.
 
 ### 0.4 Motion
 
