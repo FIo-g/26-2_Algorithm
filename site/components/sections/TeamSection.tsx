@@ -16,9 +16,6 @@ export function TeamSection() {
           </li>
         </ul>
         <p className="small">
-          Repository: <a href="https://github.com/FIo-g/26-2_Algorithm">github.com/FIo-g/26-2_Algorithm</a>
-        </p>
-        <p className="small">
           Road data: OpenStreetMap (© OpenStreetMap contributors, ODbL). Non-commercial coursework.
         </p>
         <p className="small">Results frozen on 2026-11-09 (git tag results-frozen).</p>
